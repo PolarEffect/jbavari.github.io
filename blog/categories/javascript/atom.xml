@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: javascript | Josh Bavari's Ramblings]]></title>
+  <link href="http://jbavari.github.io/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://jbavari.github.io/"/>
+  <updated>2015-11-22T16:31:39-07:00</updated>
+  <id>http://jbavari.github.io/</id>
+  <author>
+    <name><![CDATA[Josh Bavari]]></name>
+    <email><![CDATA[jbavari@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ionic 2.0 Generators - Services]]></title>
+    <link href="http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services/"/>
+    <updated>2015-11-06T01:23:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services</id>
+    <content type="html"><![CDATA[<p>This is the second post in a series covering the new Ionic Generators in Ionic 2.0. In the <a href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/">first post</a>, we discussed generating pages, let&rsquo;s focus now on generating some services to consume some JSON data via an http request.</p>
+
+<h2>Get the tools</h2>
+
+<p>Run this to get started:</p>
+
+<p><code>bash Install Ionic CLI and start an Ionic application
+npm install -g ionic@alpha
+ionic start MyIonic2App tabs --v2
+cd MyIonic2App
+</code></p>
+
+<h2>Generate the service</h2>
+
+<p><code>ionic g injectable MyDataService</code></p>
+
+<p>You should see the service:</p>
+
+<p><code>bash Run generate command
+~/Development/testing/MyIonic2App$ ionic g injectable MyDataService
+√ Create www/app/my-data-service/my-data-service.js
+</code></p>
+
+<p>The basic blueprint of the generated service is as follows:</p>
+
+<p>``` javascript Generated Data Service
+import {Injectable} from &lsquo;angular2/angular2&rsquo;;
+import {Http} from &lsquo;angular2/http&rsquo;;</p>
+
+<p>@Injectable()
+export class MyDataService {
+  constructor(<a href="http:">http:</a> Http) {</p>
+
+<pre><code>this.http = http;
+this.data = null;
+</code></pre>
+
+<p>  }</p>
+
+<p>  retrieveData() {</p>
+
+<pre><code>//Here, we're going to get a JSON data file, use the `map` call to parse json
+// and finally subscribe to the observable and set our data
+//to the value it provides once the http request is complete.
+this.http.get('path/to/data.json')
+  .map(res =&gt; res.json())
+  .subscribe(data =&gt; {
+    this.data = data;
+  }, error =&gt; {
+    console.log('Error with http.get: ', error);
+  });
+</code></pre>
+
+<p>  }
+}</p>
+
+<p>```</p>
+
+<h2>Wiring it in to be used</h2>
+
+<p>Adjust <code>www/app/app.js</code> to import the data service, as well as provide it for all of its components:</p>
+
+<p>```js www/app/app.js
+import {MyDataService} from &lsquo;./my-data-service/my-data-service&rsquo;;</p>
+
+<p>@App({
+  template: &lsquo;&lt;ion-nav [root]=&ldquo;root&rdquo;>&lt;/ion-nav>&rsquo;,
+  providers: [Friends, MyDataService]
+})
+```</p>
+
+<h2>Use the service</h2>
+
+<p>We&rsquo;ll use the tabs starter dashboard page to pull data.</p>
+
+<p>Let&rsquo;s modify <code>www/app/dash/dash.ts</code> &ndash; adding an import for <code>MyDataService</code>, adding <code>MyDataService</code> to the constructore as an injected dependency, and finally adding the call to <code>retrieveData</code> in the constructore method.</p>
+
+<p>``` js www/app/dash/dash.ts
+import {Page, NavController, ViewController} from &lsquo;ionic/ionic&rsquo;;
+import {MyDataService} from &lsquo;../my-data-service/my-data-service&rsquo;;
+import {About} from &lsquo;../about/about&rsquo;;</p>
+
+<p>@Page({
+  templateUrl: &lsquo;app/dash/dash.html&rsquo;,
+})
+export class Dash {
+  constructor(nav: NavController, view: ViewController, data: MyDataService) {</p>
+
+<pre><code>this.nav = nav;
+this.view = view;
+data.retrieveData();
+</code></pre>
+
+<p>  }</p>
+
+<p>  goToAboutPage() {</p>
+
+<pre><code>this.nav.push(About);
+</code></pre>
+
+<p>  }</p>
+
+<p>}
+```</p>
+
+<h2>Additional information</h2>
+
+<p>If you&rsquo;ve used Angular 1, you&rsquo;re probably familiar with promises to return your data from http requests.</p>
+
+<p>Under the hood of Angular 2 lies <a href="https://github.com/Reactive-Extensions/RxJS">RxJs</a> that builds on promises, focusing on being repeatable.</p>
+
+<p>Enjoy!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using Ionic 2.0 Generators]]></title>
+    <link href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/"/>
+    <updated>2015-11-05T21:49:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators</id>
+    <content type="html"><![CDATA[<p>At the time of writing this, Ionic 2.0 is still in alpha.</p>
+
+<p>Ionic 2.0 builds on a ton of new technologies, such as Angular v2, TypeScript (with decorators), and ES6. If you&rsquo;ve never dabbled in these technologies, you can use the generators available in the <a href="http://npmjs.org/package/ionic"><code>ionic-cli</code></a> to get ramped up quickly!</p>
+
+<h2>Getting started</h2>
+
+<p>First, install the <code>alpha</code> version of the Ionic CLI: <code>npm install -g ionic@alpha</code>, currently version 2.0.0-alpha.19.</p>
+
+<p>Start an app with the tabs template: <code>ionic start MyIonic2App tabs --v2</code>.</p>
+
+<p>Change directories and serve the app in the browser: <code>cd MyIonic2App &amp;&amp; ionic serve</code>.</p>
+
+<p>You&rsquo;ll see, we&rsquo;ve got a basic tabs starter now avilable at <code>MyIonic2App</code> directory.</p>
+
+<h2>Generating a few pages</h2>
+
+<p>Let&rsquo;s say we want to link to a new page, &lsquo;About&rsquo;, from one of the tabs. First, let&rsquo;s generate our page with this command: <code>ionic generate page About</code>. NOTE: You can also use the generate alias, <code>ionic g</code>.</p>
+
+<p>You&rsquo;ll see a few files added:</p>
+
+<p><code>bash
+~/Development/testing/MyIonic2App$ ionic g page About
+√ Create www/app/about/about.html
+√ Create www/app/about/about.js
+√ Create www/app/about/about.scss
+</code></p>
+
+<h2>Adding link on view to the About page</h2>
+
+<p>Let&rsquo;s add the link to the main tab page in <code>www/app/dash/dash.html</code>, via the <code>(click)</code> handler on an anchor, like so:</p>
+
+<p>```
+&lt;ion-card>
+  &lt;ion-card-header></p>
+
+<pre><code>Go to about page
+</code></pre>
+
+<p>  &lt;/ion-card-header>
+  &lt;ion-card-content></p>
+
+<pre><code>&lt;button (click)="goToAboutPage()"&gt;About this&lt;/button&gt;
+</code></pre>
+
+<p>  &lt;/ion-card-content>
+&lt;/ion-card>
+```</p>
+
+<h2>Navigating to the page</h2>
+
+<p>Modify the Dashboard TypeScript file (<code>www/app/dash/dash.ts</code>) to import our new about page, add the click event handler, and push the page on the nav controller, all like so:</p>
+
+<p>```js
+import {Page, NavController} from &lsquo;ionic/ionic&rsquo;;
+import {About} from &lsquo;../about/about&rsquo;;</p>
+
+<p>@Page({
+  templateUrl: &lsquo;app/dash/dash.html&rsquo;,
+})
+export class Dash {
+  constructor(nav: NavController, view: ViewController) {</p>
+
+<pre><code>this.nav = nav;
+this.view = view;
+</code></pre>
+
+<p>  }</p>
+
+<p>  goToAboutPage() {</p>
+
+<pre><code>this.nav.push(About);
+</code></pre>
+
+<p>  }</p>
+
+<p>}
+```</p>
+
+<h2>Try it out!</h2>
+
+<p>Look in your browser, you should have an anchor available to click/tap that will then navigate you to the About page, fresh for you to get working!</p>
+
+<p>Here&rsquo;s a GIF of what it looks like:</p>
+
+<p><img class="[pic]" src="/images/IonicV2Generators.gif" title="[250] [250] [Ionic 2.0- Page generator example]" ></p>
+
+<p>I&rsquo;d like to also note, Ionic 2 is much smoother than a GIF would allow.</p>
+
+<h2>Wiring up sass</h2>
+
+<p>If you want to use the custom sass styles on the about page, first wire in the <code>about.scss</code> page in your <code>www/app/app.scss</code> sass file, like so: <code>@import 'about/about';</code>.</p>
+
+<h2>A quick note on naming conventions</h2>
+
+<p>For Ionic 2.0, we&rsquo;ve contributed to a <a href="https://en.wikipedia.org/wiki/Naming_convention_%28programming%29#Multiple-word_identifiers">naming convention</a> of kabob-casing for file names (my-about-page.html) and css classes (.my-about-page), and using PascalCasing for JavaScript classes in ES6 / TypeScript (MyAboutPage).</p>
+
+<h2>Other generators</h2>
+
+<p>Check out all the generators available: <code>ionic g --list</code></p>
+
+<p><code>bash
+~/Development/testing/MyIonic2App$ ionic g --list
+Available generators:
+ * component
+ * directive
+ * injectable
+ * page
+ * page-login
+ * page-sidemenu
+ * page-signup
+ * pipe
+ * tabs
+</code></p>
+
+<h1>Final words</h1>
+
+<p>We hope you find the generators help you get started with ramping up quickly and building some awesome Ionic applications! Enjoy.</p>
+
+<p>We&rsquo;d love your feedback, drop us a line at <a href="https://github.com/driftyco/ionic2/issues">Ionic v2 Github Issues</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Angular 2 and ng-model]]></title>
+    <link href="http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model/"/>
+    <updated>2015-10-21T23:00:00-06:00</updated>
+    <id>http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model</id>
+    <content type="html"><![CDATA[<p>Angular 2 introduces <code>ng-model</code> from Angular 1 in a completely different manner. Due to this, I wanted to make a quick post on how to use Angular 2&rsquo;s <code>ng-model</code> to build components that alert its parents app/component of changes.</p>
+
+<p>I&rsquo;m going to use the <a href="https://github.com/driftyco/ionic-conference-app">Ionic 2 conference app</a> as an example.</p>
+
+<p>In this post, we&rsquo;ll look at the schedule page in the app and see how it uses the <code>ion-search-bar</code> to update its <code>searchQuery</code> to filter out sessions from the schedule when the user changes the search input.</p>
+
+<h2>The set up</h2>
+
+<p>On the <a href="https://github.com/driftyco/ionic-conference-app/blob/master/www/app/schedule/schedule.js#L24">schedule component</a>, we set up the search query as a simple string, as such: <code>this.searchQuery = '';</code>.</p>
+
+<p>Then in our <a href="https://github.com/driftyco/ionic-conference-app/blob/master/www/app/schedule/schedule.html#L21">schedule page template</a>, we tell the <code>ion-search-bar</code> to use the <code>ng-model</code> directive and tell it to two-way bind using the schedule component&rsquo;s <code>searchQuery</code> variable.</p>
+
+<p>The template is like this:</p>
+
+<p><code>html
+&lt;ion-search-bar [(ng-model)]="searchQuery" placeholder="Search"&gt;&lt;/ion-search-bar&gt;
+</code></p>
+
+<p>Now, in the search bar, we need to take that <code>searchQuery</code> as an ngModel, and ensure the search-bar has a <a href="https://github.com/angular/angular/blob/master/modules/angular2/src/core/forms/directives/ng_control.ts#L14">value accessor</a> implemented, so that we may tell the schedule component of when things change to update its shadow DOM if need be.</p>
+
+<p>The <a href="https://github.com/driftyco/ionic2/blob/master/ionic/components/search-bar/search-bar.ts#L46-L62">ion-search-bar</a> will take an <code>ngControl</code> as part of it&rsquo;s injection, and sets up the <a href="https://github.com/driftyco/ionic2/blob/master/ionic/components/search-bar/search-bar.ts#L61">value accessor</a> to itself, like so:</p>
+
+<p>```js
+constructor(
+  elementRef: ElementRef,
+  config: Config,
+  ngControl: NgControl,
+  renderer: Renderer
+) {
+  super(elementRef, config);
+  this.renderer = renderer;
+  this.elementRef = elementRef;
+  if(!ngControl) {</p>
+
+<pre><code>// They don't want to do anything that works, so we won't do anything that breaks
+return;
+</code></pre>
+
+<p>  }</p>
+
+<p>  this.ngControl = ngControl;
+  this.ngControl.valueAccessor = this;
+}
+```</p>
+
+<p>NOTE: <code>ngModel</code> extends the <code>ngControl</code> class in angular (<a href="https://github.com/angular/angular/blob/master/modules/angular2/src/core/forms/directives/ng_model.ts#L44">source code</a>). The <a href="https://github.com/angular/angular/blob/master/modules/angular2/src/core/forms/directives/ng_control.ts#L14"><code>valueAccessor</code></a> is a <a href="https://github.com/angular/angular/blob/master/modules/angular2/src/core/forms/directives/control_value_accessor.ts">ControlValueAccessor</a> is an interface that provides certain methods, like so:</p>
+
+<p><code>js
+export interface ControlValueAccessor {
+  writeValue(obj: any): void;
+  registerOnChange(fn: any): void;
+  registerOnTouched(fn: any): void;
+}
+</code></p>
+
+<p>The <code>ControlValueAccessor</code> gives us a method to write the new value, a method to register to listen to the changes, and the register on touched function to allow components to use.</p>
+
+<p>Those are implemented in the search-bar, as seen <a href="https://github.com/driftyco/ionic2/blob/master/ionic/components/search-bar/search-bar.ts#L82-L92">here</a>.</p>
+
+<p>You can see that the <code>writeValue</code> method on <code>search-bar</code> updates it&rsquo;s local <code>value</code>, so that it&rsquo;s internal <code>&lt;input&gt;</code> element can update its value it shows. When that internal input is changed, it calls the <a href="https://github.com/driftyco/ionic2/blob/master/ionic/components/search-bar/search-bar.ts#L94-L98">inputChanged</a> event on the <code>search-bar</code>, which alerts other components that it has changed, as well as updating its current value.</p>
+
+<p>```js
+  inputChanged(event) {</p>
+
+<pre><code>this.writeValue(event.target.value);
+this.onChange(event.target.value);
+</code></pre>
+
+<p>  }
+```</p>
+
+<h3>Filtering out sessions</h3>
+
+<p>Since the <code>onChange</code> event is called, the <code>schedule</code> component will see this and cause re-evaluation on its <code>searchQuery</code> variable, and filters the code.</p>
+
+<p>That makes our filtering method super easy, <a href="https://github.com/driftyco/ionic-conference-app/blob/master/www/app/schedule/schedule.js#L54">as seen here</a>, copied below for convenience:</p>
+
+<p>`&ldquo;js
+getSessionsForTheDay() {
+  if (!this.searchQuery || this.searchQuery.trim() == &rdquo;) {</p>
+
+<pre><code>return this.sessionsForTheDay;
+</code></pre>
+
+<p>  }
+  var talks = [];
+  this.sessionsForTheDay.forEach((session) => {</p>
+
+<pre><code>var matched = session.talks.filter((v) =&gt; {
+  if(v.name.toLowerCase().indexOf(this.searchQuery.toLowerCase()) &gt;= 0) {
+    return true;
+  }
+  return false;
+});
+if (matched.length &gt; 0) {
+  session.talks = matched;
+  talks.push(session);
+}
+</code></pre>
+
+<p>  });
+  return talks;
+}
+```</p>
+
+<p>When the schedule component&rsquo;s variable for <code>searchQuery</code> is updated, this method will be auto-magically re-evaluated, which causes the list to update.</p>
+
+<p>Hope this helps you understand Angular 2 and ng-models better! Enjoy!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[A field guide to Snap.svg]]></title>
+    <link href="http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg/"/>
+    <updated>2014-10-23T12:31:00-06:00</updated>
+    <id>http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg</id>
+    <content type="html"><![CDATA[<p>This last weekend I spent a little time on a fun little side project to learn how to use <a href="http://snapsvg.io/">Snap.svg</a>. I was trying to take my friend Rob&rsquo;s datachomp character and make it a little interactive.</p>
+
+<p>After trying to do what I thought was a few simple little hacks with his PNG image, it turned out to be a great way to fully learn and understand SVG and the Snap.svg library.</p>
+
+<p>I have to admit I did not fully understand what SVG was and what it was composed of. I wanted to compile a list of thoughts, links, blogs, and tutorials that helped me learn along the way.</p>
+
+<h2>What SVG is and what it isnt</h2>
+
+<p>First of all, I had to learn that there are two image types &ndash; ones that scale (vector), and ones that are defined with strict sizes (bitmaps). For the longest time, I admit I thought they were basically the same.</p>
+
+<p>Vectors are mainly svg, while bitmap types are jpeg, png, gif, to name a few.</p>
+
+<p>You&rsquo;d want to use an svg element when you need an image that can grow without looking skewed. You&rsquo;d want to use a bitmap type when the size can remain the same.</p>
+
+<p>One thing to note is, svg&rsquo;s can contain bitmap images as well, as in this example:</p>
+
+<p>``` html
+<html>
+  <body></p>
+
+<pre><code>&lt;svg id="svg-node"&gt;
+  &lt;circle id="svg-element"&gt;
+  &lt;image id="datachomp-arm" sketch:type="MSBitmapLayer" x="0" y="0" width="269" height="209" xlink:href="img/datachomp/arm.png"&gt;&lt;/image&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<p>  </body>
+</html>
+```</p>
+
+<h2>Svg editors vs bitmap editors</h2>
+
+<p>My undertanding is that most bitmap editors can&rsquo;t do svg. GIMP, photoshop, and other editors like these are bitmap editors. Although they can create paths and export them, for the most part, they cannot do svg type modifications.</p>
+
+<p>Some svg editors are illustrator, inkscape, and fireworks, to name a few.</p>
+
+<p>Most vector editors can import bitmap images and use them as an svg element. My understanding is, they cant really modify them other than stretch/skewing them. However, I could and probably am wrong about this. (I dont pretend to be an expert at this!)</p>
+
+<h2>Svg understanding</h2>
+
+<p>To start, Mozilla Developer Network had a great set of documents to help understand SVG: what it is, what elements it&rsquo;s composed of, and how to define shapes, paths, and transforms.</p>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Introduction">MDN SVG tutorial</a></p>
+
+<p>From the article:
+<code>
+Scalable Vector Graphics (SVG) is an XML markup language for describing two-dimensional vector graphics. SVG is essentially to graphics what XHTML is to text.
+</code></p>
+
+<p>That being said, you&rsquo;d be interested to know that inside of a root <code>svg</code> element, it contains other elements. Here&rsquo;s a <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element">list of those elements available</a>.</p>
+
+<h2>Using Snap.svg to make svg elements look alive</h2>
+
+<h3>Modifying svg element attributes</h3>
+
+<p>You can access and modify any attribute on any element from Snap.svg. Examples could be the stroke, the width of the stroke, the x/y coordinates of the element, and many other <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute">attributes</a>.</p>
+
+<p>First, select the element (using Snap), then do a call to <code>elem.attr({})</code>:</p>
+
+<p>Html:</p>
+
+<p>``` html
+<html>
+  <body></p>
+
+<pre><code>&lt;svg id="svg-node"&gt;
+  &lt;circle id="svg-element"&gt;
+&lt;/svg&gt;
+</code></pre>
+
+<p>  </body>
+</html>
+```</p>
+
+<p>JavaScript:</p>
+
+<p>``` js
+var svgNode = Snap.select(&lsquo;#svg-node&rsquo;),</p>
+
+<pre><code>svgElement = svgNode.select('#svg-element');
+</code></pre>
+
+<p>svgElement.attr({</p>
+
+<pre><code>fill: "#bada55",
+stroke: "#000",
+strokeWidth: 5,
+x: 50,
+y: 100
+</code></pre>
+
+<p>});
+```</p>
+
+<h3>Transforms</h3>
+
+<p><a href="http://snapsvg.io/docs/#Element.transform">Snap.svg</a> defines some methods to help you transform your svg elements. It looks like this:</p>
+
+<p>``` js
+var arm = datachomp = Snap.select(&ldquo;#datachomp&rdquo;),</p>
+
+<pre><code>  arm = datachomp.select("#datachomp-arm");
+</code></pre>
+
+<p>var elementTransform = &ldquo;t0,-80r360t-30,0r360t-30,30t-10,10&rdquo;;
+arm.animate({transform: tAmt}, 500, mina.elastic);
+```</p>
+
+<p>However, I was having some trouble understanding the transform string syntax. The author also created <a href="http://raphaeljs.com/">Raphael.js</a> and provides some additional documentation on how to <a href="http://raphaeljs.com/reference.html#Element.transform">understand transform strings here</a>.</p>
+
+<p>Taken from the Raphael reference:</p>
+
+<p>``
+Each letter is a command. There are four commands: t is for translate, r is for rotate, s is for scale and m is for matrix.</p>
+
+<p>There are also alternative &lsquo;absolute&rsquo; translation, rotation and scale: T, R and S. They will not take previous transformation into account. For example, &hellip;T100,0 will always move element 100 px horisontally, while &hellip;t100,0 could move it vertically if there is r90 before. Just compare results of r90t100,0 and r90T100,0.</p>
+
+<p>So, the example line above could be read like &lsquo;translate by 100, 100; rotate 30° around 100, 100; scale twice around 100, 100; rotate 45° around centre; scale 1.5 times relative to centre&rsquo;. As you can see rotate and scale commands have origin coordinates as optional parameters, the default is the centre point of the element. Matrix accepts six parameters.
+``</p>
+
+<h3>Paths</h3>
+
+<p>Again I admit I knew very little about how to define a path. <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths">This document</a> helped tremendously in the different types of paths and how to define them.</p>
+
+<p>One task I wanted to do was make an svg element follow along a path. <a href="http://codepen.io/mattsince87/pen/snqLy">This CodePen</a> helped tremendously with figuring out how to make an element follow along with a path.</p>
+
+<p>Out of <a href="https://groups.google.com/forum/#!topic/snapsvg/TOYtCQvLNHA">this google group thread</a>, a code snippit comes up that helps:</p>
+
+<p>``` js
+//Snap.svg helper method to make an element trace a defined path</p>
+
+<p>function animateAlongPath( path, element, start, dur ) {</p>
+
+<pre><code>var len = Snap.path.getTotalLength( path );
+Snap.animate( start, len, function( value ) {
+        var movePoint = Snap.path.getPointAtLength( path, value );
+        element.attr({ x: movePoint.x, y: movePoint.y });
+}, dur);
+</code></pre>
+
+<p>};
+```</p>
+
+<p>I found a blog post with a demo that helped show some additional paths and how to use tools to create them, <a href="http://dropthebit.com/592/pathanimator-moving-along-an-svg-path/">found here</a>.</p>
+
+<p>I found another little hack on how to create paths using <a href="http://www.gimp.org/">GIMP</a>. First, start to create your path with the path tool. When you&rsquo;re done, select your path you created from the toolbar (under the &lsquo;paths&rsquo; tab), right click it, and select <code>export path</code>. That should give you an svg file with the path inside of it.</p>
+
+<h2>Svg vs Canvas</h2>
+
+<p>A question came up, when would you want to use svg over something like the canvas?</p>
+
+<p>After reading <a href="http://www.htmlgoodies.com/html5/other/html5-canvas-vs.-svg-choose-the-best-tool-for-the-job.html#fbid=9b7MQgV-6i0">this article</a>, the author makes a point for which you&rsquo;d want to use:</p>
+
+<p><code>
+SVG Relies on Files, Canvas Uses Pure Scripting
+SVG images are defined in XML. As a result, every SVG element is appended to the Document Object Model (DOM) and can be manipulated using a combination of JavaScript and CSS. Moreover, you can attach an event handlers to a SVG element or update its properties based on another document event. Canvas, on the other hand, is a simple graphics API. It draws pixels (extremely well I might add) and nothing more. Hence, there's no way to alter existing drawings or react to events. If you want to update the Canvas image, you have to redraw it.
+</code></p>
+
+<p>I&rsquo;ll continue updating this post as I learn more. I hope this helps others learn these svg topics with ease.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AngularJS - testing HTTP Post Data]]></title>
+    <link href="http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data/"/>
+    <updated>2014-06-23T13:37:00-06:00</updated>
+    <id>http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of testing lately in AngularJS, as I&rsquo;m sure you can tell from my many posts as of late.</p>
+
+<p>One thing I&rsquo;m always curious about is whether or not I&rsquo;m doing things correctly. Testing always helps reinforce this, as does publishing blogs and getting feedback from my peers.</p>
+
+<h2>Problem</h2>
+
+<p>Many times I&rsquo;ll have my AngularJS service fire off an HTTP post request to the server for a message. I can&rsquo;t even begin to tell you how much I sometimes butcher my POST request data.</p>
+
+<p>I wrote a test to verify my post data was correct for the following function:</p>
+
+<p>``` js
+var sendPost = function sendPost(post) {</p>
+
+<pre><code>var deferred = $q.defer();
+var publishPostPath = 'http://example.com/post';
+var postData = { 
+    event_user_id: Auth.currentUser().id,
+    lat: location == null ? post.lat : 0,
+    lon: location == null ? post.lon : 0,
+    message: post.storyMessage,
+    post_fb: post.postToFB, 
+    post_twitter: post.postToTwitter,
+    post_team: post.postToTeam,
+    tag: selectedTagId == null ? 0 : selectedTagId
+};
+
+$http.post(publishPostPath, postData).success(function(data) {
+    if(data) {
+        deferred.resolve(data);
+    } else {
+        deferred.reject(data);
+    }
+}).error(function(error) {
+    deferred.reject(error);
+});
+
+return deferred.promise;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Pretty simple, nothing too fancy.</p>
+
+<p>I want to test this bad boy and make sure its passing the correct post data parameters. Luckily for us, AngularJS gives us our friendly <code>$httpBackend</code> tool to do things like this:</p>
+
+<p><code>js
+// Method declaration
+expect(method, url, [data], [headers]);
+</code></p>
+
+<p>One thing to note, is the function for <code>[data]</code> is a version of the POST data object after its been run through something like <code>JSON.stringify</code>.</p>
+
+<p>A full test looks like this:</p>
+
+<p>``` js
+it(&lsquo;should have true returned for proper sendPost&rsquo;, function() {</p>
+
+<pre><code>var post = {storyMessage: 'Hello', postToFB: true, postToTwitter: true, postToTeam: false};
+$httpBackend.when('POST', 'http://example.com/post',
+    function(postData) {
+        jsonData = JSON.parse(postData);
+        expect(jsonData.message).toBe(post.storyMessage);
+        expect(jsonData.post_fb).toBe(post.postToFB);
+        expect(jsonData.post_twitter).toBe(post.postToTwitter);
+        expect(jsonData.post_team).toBe(post.postToTeam);
+        return true;
+    }
+).respond(200, true );
+
+Feed.sendPost(post).then(function(d) {
+    expect(d).toBeTruthy();
+});
+
+$httpBackend.flush();
+</code></pre>
+
+<p>});
+```</p>
+
+<p>Going forward, there should be no excuses as to why my HTTP post requests fail due to parameters being passed or set incorrectly.</p>
+
+<p>I hope this helps any others looking to test their post data parameters.</p>
+]]></content>
+  </entry>
+  
+</feed>

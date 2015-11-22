@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: webpack | Josh Bavari's Ramblings]]></title>
+  <link href="http://jbavari.github.io/blog/categories/webpack/atom.xml" rel="self"/>
+  <link href="http://jbavari.github.io/"/>
+  <updated>2015-11-22T16:31:39-07:00</updated>
+  <id>http://jbavari.github.io/</id>
+  <author>
+    <name><![CDATA[Josh Bavari]]></name>
+    <email><![CDATA[jbavari@gmail.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Windows and Webpack with TypeScript and Babel]]></title>
+    <link href="http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/"/>
+    <updated>2015-10-20T21:46:00-06:00</updated>
+    <id>http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve recently been diving into the land of <a href="https://webpack.github.io">Webpack</a> to handle all the heavy lifting of using <a href="https://babeljs.io">Babel</a> to compile my <a href="www.typescriptlang.org">TypeScript</a> and <a href="http://es6-features.org">ES6</a> into ES5 JavaScript to be used in <a href="http://ionic.io/2">Ionic 2</a>.</p>
+
+<p>The current set up I&rsquo;m working with involves having Webpack use the <a href="https://github.com/s-panferov/awesome-typescript-loader">awesome-typescript-loader</a> to load up TypeScript and compile the TypeScript files, as well as load up Babel and compile the ES6 JavaScript using Babel.</p>
+
+<h2>The set up</h2>
+
+<p>The file structure looks like this:</p>
+
+<p>```
+./
+  ./www</p>
+
+<pre><code>./app
+  ./components
+    ./datepipe.js
+    ./app.ts
+</code></pre>
+
+<p>```</p>
+
+<p>This worked great on my Mac. However, one thing I ran into on my Windows machine was this particular error:</p>
+
+<p><code>Cannot find module "./www/app/app.js"</code></p>
+
+<p>Take a look at the <a href="https://github.com/driftyco/ionic-conference-app/blob/master/webpack.config.js">webpack.config.js</a> in the <a href="https://github.com/driftyco/ionic-conference-app/">ionic-conference-app</a>, with a portion of it below:</p>
+
+<p>```js
+/<em> snipped </em>/
+  module: {</p>
+
+<pre><code>loaders: [
+  {
+    test: /\.js$/,
+    loader: "awesome-typescript-loader?doTypeCheck=false&amp;useBabel=true&amp;useWebpackText=true",
+    include: /www\/app\//,
+    exclude: /node_modules/
+  },
+  {
+    test: /\.ts$/,
+    loader: "awesome-typescript-loader",
+    include: /www\/app\//,
+    exclude: /node_modules/
+   }
+]
+</code></pre>
+
+<p>  },
+/<em> snipped </em>/
+```</p>
+
+<p>Webpack uses loaders to take the files and add them to the final build output. It knows where to get these files from the webpack config module loaders array, where each loader specifies the <code>include</code> paths, as per the <a href="https://webpack.github.io/docs/configuration.html#module-loaders">webpack docs</a>:</p>
+
+<blockquote><p>include: A condition that must be met</p>
+
+<p>A condition may be a RegExp, a string containing the absolute path, a function(absPath): bool, or an array of one of these combined with “and”.</p></blockquote>
+
+<p>Take note of the include line we had at first: <code>include: /www\/app\//,</code>, line 7 and 13 in the pasted snipped above.</p>
+
+<p>Sure this will work in a Unix based runtime. If you&rsquo;re running on a Windows machine, these paths may be a problem. As it doesn&rsquo;t understand the <code>/</code>. This tip came from Edward McLeod-Jones, who pointed out <a href="https://github.com/RisingStack/react-way-getting-started/issues/8#issue-94592829">this issue</a>.</p>
+
+<p>You might want to try to make RegEx fun, by doing this:</p>
+
+<p><code>js
+include: /www(\/|\\)app(\/|\\)/,  // &lt;--- Change the regex to support either type of folder separator`
+</code></p>
+
+<p>However, since we&rsquo;re doing Node.js, it provides APIs to help us out with cross-platform changes like this with the <code>path</code> module.</p>
+
+<p>Do this instead:</p>
+
+<p>```js
+var path = require(&lsquo;path&rsquo;);
+var wwwPath = path.resolve(__dirname, &lsquo;www&rsquo;);
+var outputPath = path.join(wwwPath, &lsquo;build&rsquo;, &lsquo;js&rsquo;);
+var appPath = path.join(wwwPath, &lsquo;app&rsquo;);
+var appJsPath = path.join(appPath, &lsquo;app.js&rsquo;);</p>
+
+<p>/<em> snip </em>/
+  module: {</p>
+
+<pre><code>loaders: [
+  {
+    test: /\.js$/,
+    loader: "awesome-typescript-loader?doTypeCheck=false&amp;useBabel=true&amp;useWebpackText=true",
+    include: [wwwPath],
+    // include: /www(\/|\\)app(\/|\\)/,
+    exclude: /node_modules/
+  },
+  {
+    test: /\.ts$/,
+    loader: "awesome-typescript-loader",
+    // include: /www(\/|\\)app(\/|\\)/,
+    include: [wwwPath],
+    exclude: /node_modules/
+   }
+]
+</code></pre>
+
+<p>  },
+/<em> snip </em>/
+```</p>
+]]></content>
+  </entry>
+  
+</feed>
