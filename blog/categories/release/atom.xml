@@ -4,7 +4,7 @@
   <title><![CDATA[Category: release | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/release/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[npm Production Checklist]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/17/npm-production-checklist/"/>
-    <updated>2015-10-17T18:33:00-06:00</updated>
+    <updated>2015-10-17T18:33:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/17/npm-production-checklist</id>
     <content type="html"><![CDATA[<p>I recently read this post by RisingStack over the <a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a>.</p>
 
@@ -118,7 +118,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Releasing Electron for Windows]]></title>
     <link href="http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows/"/>
-    <updated>2015-09-09T18:50:00-06:00</updated>
+    <updated>2015-09-09T18:50:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows</id>
     <content type="html"><![CDATA[<p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
 
@@ -263,7 +263,7 @@ console.log(&lsquo;Built Setup.exe&rsquo;);
   <entry>
     <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-06:00</updated>
+    <updated>2015-08-14T11:30:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
 

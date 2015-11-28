@@ -4,7 +4,7 @@
   <title><![CDATA[Category: modules | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/modules/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Lazy loading your node modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules/"/>
-    <updated>2015-08-25T15:29:00-06:00</updated>
+    <updated>2015-08-25T15:29:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules</id>
     <content type="html"><![CDATA[<p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: sidekiq | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/sidekiq/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Pushing Jobs to Sidekiq From Another Server]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server/"/>
-    <updated>2014-06-21T00:35:00-06:00</updated>
+    <updated>2014-06-21T00:35:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server</id>
     <content type="html"><![CDATA[<p>We use <a href="http://sidekiq.org/">Sidekiq</a> for our background job processing for videos, social integrations, and other tasks. It works great for what it does.</p>
 

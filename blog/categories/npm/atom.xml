@@ -4,7 +4,7 @@
   <title><![CDATA[Category: npm | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/npm/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[npm Production Checklist]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/17/npm-production-checklist/"/>
-    <updated>2015-10-17T18:33:00-06:00</updated>
+    <updated>2015-10-17T18:33:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/17/npm-production-checklist</id>
     <content type="html"><![CDATA[<p>I recently read this post by RisingStack over the <a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a>.</p>
 
@@ -118,7 +118,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Using npm tags]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags/"/>
-    <updated>2015-10-16T15:16:00-06:00</updated>
+    <updated>2015-10-16T15:16:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/16/using-npm-tags</id>
     <content type="html"><![CDATA[<p>If you do any kind of deployments to npm, you&rsquo;ll probably find learning more about npm tags very helpful.</p>
 
@@ -183,7 +183,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Understanding Built Node Modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules/"/>
-    <updated>2015-10-15T08:32:00-06:00</updated>
+    <updated>2015-10-15T08:32:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
 
@@ -214,7 +214,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Lazy loading your node modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules/"/>
-    <updated>2015-08-25T15:29:00-06:00</updated>
+    <updated>2015-08-25T15:29:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules</id>
     <content type="html"><![CDATA[<p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
 
@@ -428,7 +428,7 @@ Lazy loading modules:       200ms
   <entry>
     <title type="html"><![CDATA[Using npm scripts for Cordova]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova/"/>
-    <updated>2014-06-19T00:25:00-06:00</updated>
+    <updated>2014-06-19T00:25:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova</id>
     <content type="html"><![CDATA[<p>For those of you that don&rsquo;t know, Cordova has <a href="https://github.com/apache/cordova-lib/blob/master/cordova-lib/templates/hooks-README.md">hooks</a> that can run on each of the specific build tasks that Cordova goes through. For example the task that happens after all the platform specific code is set up, the <code>after_prepare</code> hook is fired.</p>
 

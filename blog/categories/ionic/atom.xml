@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ionic | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/ionic/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Ionic 2.0 Generators - Services]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services/"/>
-    <updated>2015-11-06T01:23:00-07:00</updated>
+    <updated>2015-11-06T01:23:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services</id>
     <content type="html"><![CDATA[<p>This is the second post in a series covering the new Ionic Generators in Ionic 2.0. In the <a href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/">first post</a>, we discussed generating pages, let&rsquo;s focus now on generating some services to consume some JSON data via an http request.</p>
 
@@ -136,7 +136,7 @@ data.retrieveData();
   <entry>
     <title type="html"><![CDATA[Using Ionic 2.0 Generators]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/"/>
-    <updated>2015-11-05T21:49:00-07:00</updated>
+    <updated>2015-11-05T21:49:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators</id>
     <content type="html"><![CDATA[<p>At the time of writing this, Ionic 2.0 is still in alpha.</p>
 
@@ -263,7 +263,7 @@ Available generators:
   <entry>
     <title type="html"><![CDATA[Understanding Built Node Modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules/"/>
-    <updated>2015-10-15T08:32:00-06:00</updated>
+    <updated>2015-10-15T08:32:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
 
@@ -294,7 +294,7 @@ Available generators:
   <entry>
     <title type="html"><![CDATA[Managing Environment Variables for your Ionic Application]]></title>
     <link href="http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application/"/>
-    <updated>2014-08-23T20:43:00-06:00</updated>
+    <updated>2014-08-23T20:43:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been lucky enough to be developing with the Ionic framework lately. One issue I keep running into is &ndash; how do I manage some environment variables (base api url, debug enabled, upload url, etc) across my code, both tests and application.</p>
 
@@ -378,7 +378,7 @@ gulp.task(&lsquo;dev&rsquo;, function() {
   <entry>
     <title type="html"><![CDATA[Building a chat client with Ionic / Socket.io / Redis / Node.js]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic/"/>
-    <updated>2014-06-17T00:09:00-06:00</updated>
+    <updated>2014-06-17T00:09:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic</id>
     <content type="html"><![CDATA[<p>I wanted a fun challenge to push myself and cross a few things off my ever so growing <code>I want to play with this</code> type of lists. I love learning, and there are so many awesome tools / utilities / libraries out there to evaluate its hard to justify incorporating them into every project at work without having some knowledge of the tools.</p>
 

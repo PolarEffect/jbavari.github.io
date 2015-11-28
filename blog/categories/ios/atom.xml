@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ios | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/ios/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Cordova and the Safari Web Inspector]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/18/cordova-and-the-safari-web-inspector/"/>
-    <updated>2014-06-18T00:22:00-06:00</updated>
+    <updated>2014-06-18T00:22:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/18/cordova-and-the-safari-web-inspector</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve ever been doing some iOS development in Cordova, you may have used the Safari Web Inspector (SWI) once or twice. You&rsquo;ve also noticed that SWI closes when the app is put in the background or you switch apps.</p>
 
@@ -69,7 +69,7 @@
   <entry>
     <title type="html"><![CDATA[How to be a good imitator in PhoneGap/Cordova]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/11/how-to-be-a-good-imitator-in-phonegap-slash-cordova/"/>
-    <updated>2014-03-11T01:02:00-06:00</updated>
+    <updated>2014-03-11T01:02:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/11/how-to-be-a-good-imitator-in-phonegap-slash-cordova</id>
     <content type="html"><![CDATA[<p>If you found your way here, then you&rsquo;re probably seeking knowlege about Phonegap/Cordova. I want to first remind you what the purpose of the PhoneGap / Cordova project is:</p>
 

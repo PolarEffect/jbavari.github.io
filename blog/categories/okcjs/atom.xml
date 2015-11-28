@@ -4,7 +4,7 @@
   <title><![CDATA[Category: okcjs | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/okcjs/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[OKCjs - Javascript Debugging Techniques]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/20/okcjs-javascript-debugging-techniques/"/>
-    <updated>2014-05-20T11:39:00-06:00</updated>
+    <updated>2014-05-20T11:39:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/20/okcjs-javascript-debugging-techniques</id>
     <content type="html"><![CDATA[<p>I gave a lightning talk today at OKC.js about Javascript Debugging Techniques.</p>
 

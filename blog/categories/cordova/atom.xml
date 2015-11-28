@@ -4,7 +4,7 @@
   <title><![CDATA[Category: cordova | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/cordova/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Managing Cordova Plugins with package.json and hooks]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks/"/>
-    <updated>2014-06-24T17:52:00-06:00</updated>
+    <updated>2014-06-24T17:52:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks</id>
     <content type="html"><![CDATA[<p>In a previous post, I blogged about <a href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">how to manage plugins with variables</a>. I wanted to expand on that some more, and this time, talk about how to use your package.json to manage your plugins with versions as well as a way to reset your cordova set up.</p>
 
@@ -213,7 +213,7 @@ exec(pluginCommand, function(){
   <entry>
     <title type="html"><![CDATA[Using npm scripts for Cordova]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova/"/>
-    <updated>2014-06-19T00:25:00-06:00</updated>
+    <updated>2014-06-19T00:25:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova</id>
     <content type="html"><![CDATA[<p>For those of you that don&rsquo;t know, Cordova has <a href="https://github.com/apache/cordova-lib/blob/master/cordova-lib/templates/hooks-README.md">hooks</a> that can run on each of the specific build tasks that Cordova goes through. For example the task that happens after all the platform specific code is set up, the <code>after_prepare</code> hook is fired.</p>
 
@@ -381,7 +381,7 @@ console.log(&lsquo;Removed: &rsquo;, uglifyJsPath)
   <entry>
     <title type="html"><![CDATA[Cordova and the Safari Web Inspector]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/18/cordova-and-the-safari-web-inspector/"/>
-    <updated>2014-06-18T00:22:00-06:00</updated>
+    <updated>2014-06-18T00:22:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/18/cordova-and-the-safari-web-inspector</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve ever been doing some iOS development in Cordova, you may have used the Safari Web Inspector (SWI) once or twice. You&rsquo;ve also noticed that SWI closes when the app is put in the background or you switch apps.</p>
 
@@ -434,7 +434,7 @@ console.log(&lsquo;Removed: &rsquo;, uglifyJsPath)
   <entry>
     <title type="html"><![CDATA[Building a chat client with Ionic / Socket.io / Redis / Node.js]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic/"/>
-    <updated>2014-06-17T00:09:00-06:00</updated>
+    <updated>2014-06-17T00:09:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic</id>
     <content type="html"><![CDATA[<p>I wanted a fun challenge to push myself and cross a few things off my ever so growing <code>I want to play with this</code> type of lists. I love learning, and there are so many awesome tools / utilities / libraries out there to evaluate its hard to justify incorporating them into every project at work without having some knowledge of the tools.</p>
 
@@ -697,7 +697,7 @@ $scope.joinChannel('Lobby');
   <entry>
     <title type="html"><![CDATA[Moving Forward with Phonegap / Cordova Plugins]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins/"/>
-    <updated>2014-05-17T15:24:00-06:00</updated>
+    <updated>2014-05-17T15:24:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins</id>
     <content type="html"><![CDATA[<p>I spoke about how plugins work and how to create plugins in Cordova at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 

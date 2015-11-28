@@ -4,7 +4,7 @@
   <title><![CDATA[Category: webpack | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/webpack/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Windows and Webpack with TypeScript and Babel]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/"/>
-    <updated>2015-10-20T21:46:00-06:00</updated>
+    <updated>2015-10-20T21:46:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve recently been diving into the land of <a href="https://webpack.github.io">Webpack</a> to handle all the heavy lifting of using <a href="https://babeljs.io">Babel</a> to compile my <a href="www.typescriptlang.org">TypeScript</a> and <a href="http://es6-features.org">ES6</a> into ES5 JavaScript to be used in <a href="http://ionic.io/2">Ionic 2</a>.</p>
 

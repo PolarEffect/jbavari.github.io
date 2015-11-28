@@ -4,7 +4,7 @@
   <title><![CDATA[Category: json | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/json/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[RethinkDB the importing json process]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process/"/>
-    <updated>2014-03-19T00:51:00-06:00</updated>
+    <updated>2014-03-19T00:51:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process</id>
     <content type="html"><![CDATA[<p>I was playing around tonight with RethinkDB &ndash; and I wanted to import some data from a JSON file. It wasn&rsquo;t very well documented, so I wanted to make sure I high-light that for others. <a href="http://www.rethinkdb.com/docs/tutorials/elections/">The tutorial post to see RethinkDB&rsquo;s import</a> covers this command to fire off:</p>
 

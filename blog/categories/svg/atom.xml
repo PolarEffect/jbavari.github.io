@@ -4,7 +4,7 @@
   <title><![CDATA[Category: svg | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/svg/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[A field guide to Snap.svg]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg/"/>
-    <updated>2014-10-23T12:31:00-06:00</updated>
+    <updated>2014-10-23T12:31:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg</id>
     <content type="html"><![CDATA[<p>This last weekend I spent a little time on a fun little side project to learn how to use <a href="http://snapsvg.io/">Snap.svg</a>. I was trying to take my friend Rob&rsquo;s datachomp character and make it a little interactive.</p>
 

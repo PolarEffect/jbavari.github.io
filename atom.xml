@@ -4,7 +4,7 @@
   <title><![CDATA[Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -14,9 +14,101 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Respect yourself]]></title>
+    <link href="http://jbavari.github.io/blog/2015/11/27/respect-yourself/"/>
+    <updated>2015-11-27T21:58:00-06:00</updated>
+    <id>http://jbavari.github.io/blog/2015/11/27/respect-yourself</id>
+    <content type="html"><![CDATA[<p>I&rsquo;m writing this post as a memoir for myself, a retrospect of sorts. I read <a href="http://sethgodin.typepad.com/seths_blog/2015/11/unconscious-consumption.html">Seth Godins blog about Unconscious consumption</a> and that post inspired me to write this post.</p>
+
+<p>In the last 3 years, amazing events have unfolded. I helped create a start up, <a href="http://raisemore.com">RaiseMore</a>. I moved to Boulder, Colorado. I got a job at Ionic. I met a strong, amazing, beautiful woman who is my girlfriend.</p>
+
+<p>I&rsquo;d like to think what drove that was always reading books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow. I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same.</p>
+
+<p>All these new and exciting things kept happening to me. Many times before, I&rsquo;ve asked myself, &lsquo;how did I get so lucky?&rsquo;. Things just had a snowball effect and kept getting better and better!</p>
+
+<p>However, something happened during these last 4 months that really threw me in a rut. I developed a poor attitude. I started thinking I was a victim. I no longer work for the company that I had looked up to for so long.</p>
+
+<p>As I sit here now and reflect on the last few months, I know I&rsquo;ve made my fair share of mistakes. I take full responsibility for that. And due to some of those mistakes, I&rsquo;m unemployed (and looking for opportunities!) and I know it&rsquo;s my own fault.</p>
+
+<p>I&rsquo;d like to stop and take a minute to deep dive and retrospect on what happened. I know, deep in my heart, that it all changed when <em>I stopped respecting myself and making my personal growth a priority</em>.</p>
+
+<p>I&rsquo;m realizing that while all these good things were occurring, one thing remained constant &ndash; <em>I put myself and my personal growth first</em>.</p>
+
+<p>I&rsquo;d like to deep dive into what really happened, and discover the why.</p>
+
+<h2>Deep diving</h2>
+
+<p>Questions to ask:</p>
+
+<ul>
+<li>What did you do right?</li>
+<li>What did you do wrong?</li>
+<li>What can you do better?</li>
+</ul>
+
+
+<h3>What did I do right?</h3>
+
+<p>In January, I was jumping head first into the Ionic CLI. I was familiar with Node.js, but wasn&rsquo;t nearly at the level I wanted to be at. So I jumped head first into blogs, training courses, books, and more.</p>
+
+<p>I learned a ton by failing forward, bouncing ideas off of others, and most importantly, <em>maintaining a healthy work life balance</em>.</p>
+
+<p>In March, I came up with the crazy idea to make the Ionic CLI easier to consume by almost any user by just point/clicking. In my free time after working on the Ionic CLI, I started cranking out <a href="http://lab.ionic.io">Ionic Lab</a> &ndash; that would do just that.</p>
+
+<p>It was so freeing to use my creative side and use my intuition, listening to myself as I craved to learn more about Node.js and <a href="http://electron.github.io">Electron</a>!</p>
+
+<p>After demoing Ionic Lab to the Ionic team, they were convinced this was a tool that could open the door to more developers and really improve the tooling. Thus, I was instructed to work on it full time. Such a joy!</p>
+
+<p>Then it hit, this thing had to ship. I had to really buckle down and work out the final kinks in integrating Cordova fully into Ionic Lab, which took me down rabbit holes into discovering more about Electron than I wanted to know, fixing stdio errors and things that occurred deep in Cordova library code.</p>
+
+<p>Once we shipped out Ionic Lab in July, I was told to focus on Ionic 2. The rest of the team had been heads down working on the codebase since March, I was the new guy, so I had to really step it up and put in the time to learn Angular 2, TypeScript, ES6, Webpack, and all the other new ground to cover.</p>
+
+<p>It was exciting once again to jump head first into learning and exploration. But something happened that I did not expect.. I became a cynic.</p>
+
+<h4>What did I do wrong?</h4>
+
+<p>I think it wasn&rsquo;t until after July that things started to slow down and my personal happiness started to decline. I started working more hours (60 hours was the minimum). I stayed up late working most every night. I slept less. I started working out less (I gained 10-20 lbs). I started putting myself <em>and my personal growth</em> last.</p>
+
+<p>I stopped calling my friends. I stopped reaching out to my support group as much. I wasn&rsquo;t maintaining my happy upbeat attitude I&rsquo;ve been told has been so inspiring.</p>
+
+<p>I started putting work first. I started accepting others views of myself. I stopped valuing my work, my time, and my efforts to put that towards a company that at the end of the day, only wanted more and more. We all know what this leads to, <em>burn out</em>.</p>
+
+<p>This all was boiling down to the AngularConnect conference, where we planned to unveil Ionic 2 to the European crowds. I was given a hefty task of learning all that was Ionic 2, adding cross platform functionality in Ionic 2, adjusting the Ionic CLI for v2, helping curate content for a workshop at the conference, as well as building the first Ionic v2 app, <a href="http://github.com/driftyco/ionic-conference-app">the Ionic conference app</a>.</p>
+
+<p>All this was going down and other life issues arise, as they do. My older (15y old) dog was getting worse by the day. My girlfriend was not happy that I was putting her second to work. My friends stopped calling me. My shoulder got injured. I lost confidence in my work because I was burning out.</p>
+
+<p>Then in the final weeks, many of the members that had been core to Ionic 2 were unavailable weeks before the conference and it was double red alert to get things done.</p>
+
+<p>When all things are said and done, at the time, in the workshop, <em>I failed to complete my task for the Windows CLI users</em>.</p>
+
+<p>This hurt. Failure when placed heavy, can hurt. It hurt even more when I was putting work first, and myself last.</p>
+
+<p>Looking more hopefully at the situation..</p>
+
+<h4>What can I do better?</h4>
+
+<p>First off &ndash; be honest with myself. Tell others I need a helping hand when needed. Going forward, I will look out for myself better (we all know employers want employees that can look out for themselves).</p>
+
+<p>Don&rsquo;t accept others views of myself unless I first believe them!</p>
+
+<p>Most importantly, respecting myself. I should always take the time to have a 1 on 1 with myself and really get a sense of where I&rsquo;m at. If I need a break, use that vacation that we are so lucky to have!</p>
+
+<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin)</p>
+
+<p>So please, take this time to evaluate yourself and your needs. Be honest with yourself. Focus on caring for yourself. Be compassionate to yourself. Let yourself make mistakes, but learn from them.</p>
+
+<p>Focus on the positive. Surround yourself with upbeat people, ditch the negativity, and remind yourself that your future is in your hands. Take it.</p>
+
+<p>Don&rsquo;t forget that the only difference between a victor and a victim, is their mindset.</p>
+
+<p>Remember, there is no luck, only the work you put in and the effect you see afterwards.</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Ionic 2.0 Generators - Services]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services/"/>
-    <updated>2015-11-06T01:23:00-07:00</updated>
+    <updated>2015-11-06T01:23:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services</id>
     <content type="html"><![CDATA[<p>This is the second post in a series covering the new Ionic Generators in Ionic 2.0. In the <a href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/">first post</a>, we discussed generating pages, let&rsquo;s focus now on generating some services to consume some JSON data via an http request.</p>
 
@@ -176,7 +268,7 @@
   <entry>
     <title type="html"><![CDATA[Using Ionic 2.0 Generators]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/"/>
-    <updated>2015-11-05T21:49:00-07:00</updated>
+    <updated>2015-11-05T21:49:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators</id>
     <content type="html"><![CDATA[<p>At the time of writing this, Ionic 2.0 is still in alpha.</p>
 
@@ -331,7 +423,7 @@
   <entry>
     <title type="html"><![CDATA[Angular 2 and ng-model]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model/"/>
-    <updated>2015-10-21T23:00:00-06:00</updated>
+    <updated>2015-10-21T23:00:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model</id>
     <content type="html"><![CDATA[<p>Angular 2 introduces <code>ng-model</code> from Angular 1 in a completely different manner. Due to this, I wanted to make a quick post on how to use Angular 2&rsquo;s <code>ng-model</code> to build components that alert its parents app/component of changes.</p>
 
@@ -481,7 +573,7 @@
   <entry>
     <title type="html"><![CDATA[Windows and Webpack with TypeScript and Babel]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/"/>
-    <updated>2015-10-20T21:46:00-06:00</updated>
+    <updated>2015-10-20T21:46:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve recently been diving into the land of <a href="https://webpack.github.io">Webpack</a> to handle all the heavy lifting of using <a href="https://babeljs.io">Babel</a> to compile my <a href="www.typescriptlang.org">TypeScript</a> and <a href="http://es6-features.org">ES6</a> into ES5 JavaScript to be used in <a href="http://ionic.io/2">Ionic 2</a>.</p>
 
@@ -631,7 +723,7 @@
   <entry>
     <title type="html"><![CDATA[Angular 2 Injectables]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/19/angular-2-injectables/"/>
-    <updated>2015-10-19T16:34:00-06:00</updated>
+    <updated>2015-10-19T16:34:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/19/angular-2-injectables</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been fortunate enough to be working on Angular 2 while being on the Ionic team.</p>
 
@@ -907,7 +999,7 @@
   <entry>
     <title type="html"><![CDATA[npm Production Checklist]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/17/npm-production-checklist/"/>
-    <updated>2015-10-17T18:33:00-06:00</updated>
+    <updated>2015-10-17T18:33:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/17/npm-production-checklist</id>
     <content type="html"><![CDATA[<p>I recently read this post by RisingStack over the <a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a>.</p>
 
@@ -1009,7 +1101,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Using npm tags]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags/"/>
-    <updated>2015-10-16T15:16:00-06:00</updated>
+    <updated>2015-10-16T15:16:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/16/using-npm-tags</id>
     <content type="html"><![CDATA[<p>If you do any kind of deployments to npm, you&rsquo;ll probably find learning more about npm tags very helpful.</p>
 
@@ -1074,7 +1166,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Understanding Built Node Modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules/"/>
-    <updated>2015-10-15T08:32:00-06:00</updated>
+    <updated>2015-10-15T08:32:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
 
@@ -1105,7 +1197,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Releasing Electron for Windows]]></title>
     <link href="http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows/"/>
-    <updated>2015-09-09T18:50:00-06:00</updated>
+    <updated>2015-09-09T18:50:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows</id>
     <content type="html"><![CDATA[<p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
 
@@ -1324,7 +1416,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Lazy loading your node modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules/"/>
-    <updated>2015-08-25T15:29:00-06:00</updated>
+    <updated>2015-08-25T15:29:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules</id>
     <content type="html"><![CDATA[<p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
 
@@ -1618,7 +1710,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-06:00</updated>
+    <updated>2015-08-14T11:30:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
 
@@ -1809,7 +1901,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[Writing Unit Tests for Electron and AngularJS]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs/"/>
-    <updated>2015-08-12T19:53:00-06:00</updated>
+    <updated>2015-08-12T19:53:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs</id>
     <content type="html"><![CDATA[<p>Unit testing is something most of us dev&rsquo;s don&rsquo;t think much of. Until we encounter some simple to solve bugs or have regressions in code that drives us crazy.</p>
 
@@ -2025,7 +2117,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[Comparisons of nw.js and Electron]]></title>
     <link href="http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron/"/>
-    <updated>2015-05-08T17:11:00-06:00</updated>
+    <updated>2015-05-08T17:11:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron</id>
     <content type="html"><![CDATA[<p>In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There are two main tools that come to mind &ndash; nw.js (formerly known as Node Webkit) and Electron (formerly known as Atom Shell).</p>
 
@@ -2329,7 +2421,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[2014 in review]]></title>
     <link href="http://jbavari.github.io/blog/2014/12/31/2014-in-review/"/>
-    <updated>2014-12-31T14:37:00-07:00</updated>
+    <updated>2014-12-31T14:37:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/12/31/2014-in-review</id>
     <content type="html"><![CDATA[<p>2014 has been an interesting year and I&rsquo;d like to spend a minute to review it for myself as a reminder.</p>
 
@@ -2366,7 +2458,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[A field guide to Snap.svg]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg/"/>
-    <updated>2014-10-23T12:31:00-06:00</updated>
+    <updated>2014-10-23T12:31:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg</id>
     <content type="html"><![CDATA[<p>This last weekend I spent a little time on a fun little side project to learn how to use <a href="http://snapsvg.io/">Snap.svg</a>. I was trying to take my friend Rob&rsquo;s datachomp character and make it a little interactive.</p>
 
@@ -2554,7 +2646,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Exploring Best Practices with Docker for older libraries]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries/"/>
-    <updated>2014-10-21T21:29:00-06:00</updated>
+    <updated>2014-10-21T21:29:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries</id>
     <content type="html"><![CDATA[<p>I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon.</p>
 
@@ -2752,7 +2844,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Managing Environment Variables for your Ionic Application]]></title>
     <link href="http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application/"/>
-    <updated>2014-08-23T20:43:00-06:00</updated>
+    <updated>2014-08-23T20:43:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been lucky enough to be developing with the Ionic framework lately. One issue I keep running into is &ndash; how do I manage some environment variables (base api url, debug enabled, upload url, etc) across my code, both tests and application.</p>
 
@@ -2857,7 +2949,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Making Rails Fixtures Across Postgres Schemas play nice]]></title>
     <link href="http://jbavari.github.io/blog/2014/08/14/making-rails-and-postgres-schemas-play-nice/"/>
-    <updated>2014-08-14T20:58:00-06:00</updated>
+    <updated>2014-08-14T20:58:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/08/14/making-rails-and-postgres-schemas-play-nice</id>
     <content type="html"><![CDATA[<p>This past week or so I&rsquo;ve had another run in with using Rails to access data across Postgres schemas. I thought I would share some of my experiences I&rsquo;ve had with the two.</p>
 
@@ -2945,7 +3037,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Managing Cordova Plugins with package.json and hooks]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks/"/>
-    <updated>2014-06-24T17:52:00-06:00</updated>
+    <updated>2014-06-24T17:52:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks</id>
     <content type="html"><![CDATA[<p>In a previous post, I blogged about <a href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">how to manage plugins with variables</a>. I wanted to expand on that some more, and this time, talk about how to use your package.json to manage your plugins with versions as well as a way to reset your cordova set up.</p>
 
@@ -3221,140 +3313,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
 <p>Easier management for teams, I&rsquo;d like to think.</p>
 
 <p>Hope this helps others.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AngularJS - testing HTTP Post Data]]></title>
-    <link href="http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data/"/>
-    <updated>2014-06-23T13:37:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data</id>
-    <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of testing lately in AngularJS, as I&rsquo;m sure you can tell from my many posts as of late.</p>
-
-<p>One thing I&rsquo;m always curious about is whether or not I&rsquo;m doing things correctly. Testing always helps reinforce this, as does publishing blogs and getting feedback from my peers.</p>
-
-<h2>Problem</h2>
-
-<p>Many times I&rsquo;ll have my AngularJS service fire off an HTTP post request to the server for a message. I can&rsquo;t even begin to tell you how much I sometimes butcher my POST request data.</p>
-
-<p>I wrote a test to verify my post data was correct for the following function:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">sendPost</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">sendPost</span><span class="p">(</span><span class="nx">post</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">$q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">publishPostPath</span> <span class="o">=</span> <span class="s1">&#39;http://example.com/post&#39;</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">postData</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">event_user_id</span><span class="o">:</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">id</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">lat</span><span class="o">:</span> <span class="nx">location</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">post</span><span class="p">.</span><span class="nx">lat</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">lon</span><span class="o">:</span> <span class="nx">location</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">post</span><span class="p">.</span><span class="nx">lon</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">message</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">storyMessage</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_fb</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToFB</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_twitter</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToTwitter</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_team</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToTeam</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">tag</span><span class="o">:</span> <span class="nx">selectedTagId</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="nx">selectedTagId</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$http</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="nx">publishPostPath</span><span class="p">,</span> <span class="nx">postData</span><span class="p">).</span><span class="nx">success</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">deferred</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}).</span><span class="nx">error</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">deferred</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Pretty simple, nothing too fancy.</p>
-
-<p>I want to test this bad boy and make sure its passing the correct post data parameters. Luckily for us, AngularJS gives us our friendly <code>$httpBackend</code> tool to do things like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// Method declaration</span>
-</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="p">[</span><span class="nx">data</span><span class="p">],</span> <span class="p">[</span><span class="nx">headers</span><span class="p">]);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>One thing to note, is the function for <code>[data]</code> is a version of the POST data object after its been run through something like <code>JSON.stringify</code>.</p>
-
-<p>A full test looks like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have true returned for proper sendPost&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">post</span> <span class="o">=</span> <span class="p">{</span><span class="nx">storyMessage</span><span class="o">:</span> <span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="nx">postToFB</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">postToTwitter</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">postToTeam</span><span class="o">:</span> <span class="kc">false</span><span class="p">};</span>
-</span><span class='line'>  <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;http://example.com/post&#39;</span><span class="p">,</span>
-</span><span class='line'>      <span class="kd">function</span><span class="p">(</span><span class="nx">postData</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">jsonData</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">postData</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">message</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">storyMessage</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_fb</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToFB</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_twitter</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToTwitter</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_team</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToTeam</span><span class="p">);</span>
-</span><span class='line'>          <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">).</span><span class="nx">respond</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="kc">true</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">Feed</span><span class="p">.</span><span class="nx">sendPost</span><span class="p">(</span><span class="nx">post</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">d</span><span class="p">).</span><span class="nx">toBeTruthy</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">flush</span><span class="p">();</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Going forward, there should be no excuses as to why my HTTP post requests fail due to parameters being passed or set incorrectly.</p>
-
-<p>I hope this helps any others looking to test their post data parameters.</p>
 ]]></content>
   </entry>
   

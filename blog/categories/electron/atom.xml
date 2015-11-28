@@ -4,7 +4,7 @@
   <title><![CDATA[Category: electron | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/electron/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Releasing Electron for Windows]]></title>
     <link href="http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows/"/>
-    <updated>2015-09-09T18:50:00-06:00</updated>
+    <updated>2015-09-09T18:50:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows</id>
     <content type="html"><![CDATA[<p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
 
@@ -161,7 +161,7 @@ console.log(&lsquo;Built Setup.exe&rsquo;);
   <entry>
     <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-06:00</updated>
+    <updated>2015-08-14T11:30:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
 
@@ -315,7 +315,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[Writing Unit Tests for Electron and AngularJS]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs/"/>
-    <updated>2015-08-12T19:53:00-06:00</updated>
+    <updated>2015-08-12T19:53:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs</id>
     <content type="html"><![CDATA[<p>Unit testing is something most of us dev&rsquo;s don&rsquo;t think much of. Until we encounter some simple to solve bugs or have regressions in code that drives us crazy.</p>
 
@@ -479,7 +479,7 @@ window.__dirname = &lsquo;/some/fake/path&rsquo;;
   <entry>
     <title type="html"><![CDATA[Comparisons of nw.js and Electron]]></title>
     <link href="http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron/"/>
-    <updated>2015-05-08T17:11:00-06:00</updated>
+    <updated>2015-05-08T17:11:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron</id>
     <content type="html"><![CDATA[<p>In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There are two main tools that come to mind &ndash; nw.js (formerly known as Node Webkit) and Electron (formerly known as Atom Shell).</p>
 
@@ -678,15 +678,15 @@ Menu.setApplicationMenu(menu);
 <h1>Run the following commands:</h1>
 
 <p>sips -z 16 16     icon.png &mdash;out ./icon_16x16.png
-sips -z 32 32     icon.png &mdash;out ./<a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#105;&#x63;&#x6f;&#x6e;&#95;&#49;&#x36;&#x78;&#49;&#54;&#64;&#50;&#120;&#46;&#x70;&#110;&#x67;">&#x69;&#x63;&#111;&#x6e;&#x5f;&#x31;&#x36;&#120;&#49;&#54;&#x40;&#x32;&#x78;&#46;&#x70;&#x6e;&#x67;</a>
+sips -z 32 32     icon.png &mdash;out ./<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#x69;&#x63;&#x6f;&#x6e;&#95;&#x31;&#54;&#120;&#49;&#54;&#x40;&#50;&#120;&#x2e;&#x70;&#110;&#x67;">&#105;&#99;&#111;&#110;&#x5f;&#49;&#54;&#120;&#x31;&#x36;&#x40;&#x32;&#120;&#46;&#112;&#x6e;&#x67;</a>
 sips -z 32 32     icon.png &mdash;out ./icon_32x32.png
-sips -z 64 64     icon.png &mdash;out ./<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#105;&#99;&#111;&#110;&#x5f;&#51;&#x32;&#120;&#51;&#50;&#x40;&#x32;&#x78;&#46;&#x70;&#x6e;&#103;">&#105;&#99;&#x6f;&#110;&#x5f;&#51;&#x32;&#120;&#x33;&#50;&#64;&#50;&#120;&#46;&#112;&#110;&#103;</a>
+sips -z 64 64     icon.png &mdash;out ./<a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#105;&#x63;&#x6f;&#x6e;&#95;&#x33;&#50;&#120;&#51;&#50;&#64;&#x32;&#120;&#46;&#x70;&#x6e;&#103;">&#105;&#99;&#111;&#110;&#x5f;&#x33;&#x32;&#120;&#51;&#50;&#64;&#x32;&#x78;&#x2e;&#x70;&#x6e;&#103;</a>
 sips -z 128 128   icon.png &mdash;out ./icon_128x128.png
-sips -z 256 256   icon.png &mdash;out ./<a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#x6f;&#58;&#105;&#99;&#111;&#110;&#x5f;&#x31;&#50;&#x38;&#120;&#x31;&#x32;&#x38;&#64;&#50;&#x78;&#x2e;&#112;&#x6e;&#x67;">&#105;&#x63;&#111;&#110;&#95;&#x31;&#x32;&#x38;&#x78;&#49;&#50;&#56;&#64;&#50;&#120;&#46;&#x70;&#x6e;&#103;</a>
+sips -z 256 256   icon.png &mdash;out ./<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#105;&#99;&#x6f;&#x6e;&#x5f;&#49;&#x32;&#x38;&#x78;&#x31;&#x32;&#56;&#64;&#x32;&#120;&#46;&#x70;&#x6e;&#x67;">&#x69;&#99;&#111;&#110;&#95;&#49;&#x32;&#x38;&#120;&#x31;&#x32;&#56;&#64;&#x32;&#x78;&#x2e;&#x70;&#110;&#103;</a>
 sips -z 256 256   icon.png &mdash;out ./icon_256x256.png
-sips -z 512 512   icon.png &mdash;out ./<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#x3a;&#105;&#x63;&#x6f;&#110;&#x5f;&#50;&#x35;&#x36;&#120;&#x32;&#53;&#54;&#64;&#x32;&#120;&#46;&#x70;&#x6e;&#103;">&#x69;&#x63;&#x6f;&#x6e;&#95;&#x32;&#53;&#54;&#120;&#x32;&#53;&#x36;&#64;&#x32;&#x78;&#46;&#112;&#x6e;&#x67;</a>
+sips -z 512 512   icon.png &mdash;out ./<a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#x69;&#x63;&#111;&#110;&#95;&#x32;&#53;&#54;&#x78;&#50;&#53;&#x36;&#64;&#50;&#120;&#x2e;&#112;&#110;&#103;">&#105;&#x63;&#x6f;&#110;&#x5f;&#50;&#x35;&#54;&#120;&#50;&#x35;&#x36;&#x40;&#50;&#x78;&#46;&#112;&#x6e;&#103;</a>
 sips -z 512 512   icon.png &mdash;out ./icon_512x512.png
-cp icon.png <a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#105;&#99;&#111;&#x6e;&#95;&#53;&#49;&#50;&#x78;&#53;&#x31;&#x32;&#64;&#50;&#x78;&#46;&#x70;&#x6e;&#103;">&#105;&#x63;&#111;&#x6e;&#95;&#53;&#x31;&#x32;&#x78;&#53;&#x31;&#50;&#64;&#x32;&#x78;&#x2e;&#x70;&#x6e;&#103;</a>
+cp icon.png <a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#58;&#105;&#99;&#x6f;&#110;&#95;&#x35;&#49;&#50;&#x78;&#x35;&#49;&#50;&#64;&#50;&#120;&#x2e;&#x70;&#x6e;&#103;">&#105;&#x63;&#111;&#x6e;&#95;&#x35;&#49;&#x32;&#x78;&#x35;&#49;&#50;&#x40;&#50;&#x78;&#46;&#112;&#110;&#103;</a>
 ```</p>
 
 <p>Then just run:</p>

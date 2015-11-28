@@ -4,7 +4,7 @@
   <title><![CDATA[Category: rails | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Pushing Jobs to Sidekiq From Another Server]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server/"/>
-    <updated>2014-06-21T00:35:00-06:00</updated>
+    <updated>2014-06-21T00:35:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server</id>
     <content type="html"><![CDATA[<p>We use <a href="http://sidekiq.org/">Sidekiq</a> for our background job processing for videos, social integrations, and other tasks. It works great for what it does.</p>
 
@@ -76,7 +76,7 @@ end
   <entry>
     <title type="html"><![CDATA[Handling AngularJS Popups for OAuth on Rails]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/04/handling-angularjs-popups-for-oauth/"/>
-    <updated>2014-06-04T22:56:00-06:00</updated>
+    <updated>2014-06-04T22:56:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/04/handling-angularjs-popups-for-oauth</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been using AngularJS a lot lately in some of my projects at work. It&rsquo;s been a great tool to use to help me solve challenging problems the nicest and cleanest way possible.</p>
 
@@ -226,7 +226,7 @@ angular.module(&lsquo;myApp&rsquo;, [&lsquo;ui.bootstrap&rsquo;]);</p>
   <entry>
     <title type="html"><![CDATA[Pow and weird starting issues]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues/"/>
-    <updated>2014-05-07T14:56:00-06:00</updated>
+    <updated>2014-05-07T14:56:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been getting this weird error from Pow in Rails 4:</p>
 
@@ -261,7 +261,7 @@ run Rails.application
   <entry>
     <title type="html"><![CDATA[In depth dive with Postgres Hstore and Rails 4]]></title>
     <link href="http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4/"/>
-    <updated>2014-04-26T12:08:00-06:00</updated>
+    <updated>2014-04-26T12:08:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4</id>
     <content type="html"><![CDATA[<p>I had a unique little situation pop up that needed a little more flexibility when it came to storing data in the db. We use Postgres at RaiseMore because we respect ourselves, so naturally, I wanted to take a swing using some Hstore options for our ever changing data schema.</p>
 
@@ -453,7 +453,7 @@ end
   <entry>
     <title type="html"><![CDATA[Nodejs Rails subdomains - POW!]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/12/nodejs-rails-subdomains-pow/"/>
-    <updated>2014-03-12T23:44:00-06:00</updated>
+    <updated>2014-03-12T23:44:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/12/nodejs-rails-subdomains-pow</id>
     <content type="html"><![CDATA[<p>I wanted to do a quick write up of how I use <a href="http://pow.cx/">Pow</a> to run several rails/rack apps and provide subdomains for the rails / rack apps as well as node.js servers! I&rsquo;ll even throw in a Livereload plug in Rails/rack.</p>
 

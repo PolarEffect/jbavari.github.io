@@ -4,7 +4,7 @@
   <title><![CDATA[Category: popups | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/popups/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Handling AngularJS Popups for OAuth on Rails]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/04/handling-angularjs-popups-for-oauth/"/>
-    <updated>2014-06-04T22:56:00-06:00</updated>
+    <updated>2014-06-04T22:56:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/04/handling-angularjs-popups-for-oauth</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been using AngularJS a lot lately in some of my projects at work. It&rsquo;s been a great tool to use to help me solve challenging problems the nicest and cleanest way possible.</p>
 

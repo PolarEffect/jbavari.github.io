@@ -4,7 +4,7 @@
   <title><![CDATA[Category: kcdc | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/kcdc/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-22T16:43:58-07:00</updated>
+  <updated>2015-11-27T23:22:01-06:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Moving Forward with Phonegap / Cordova Plugins]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins/"/>
-    <updated>2014-05-17T15:24:00-06:00</updated>
+    <updated>2014-05-17T15:24:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins</id>
     <content type="html"><![CDATA[<p>I spoke about how plugins work and how to create plugins in Cordova at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 
@@ -30,7 +30,7 @@ Enjoy!</p>
   <entry>
     <title type="html"><![CDATA[KCDC - Javascript Build System Showdown]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/16/kcdc-javascript-build-system-showdown/"/>
-    <updated>2014-05-16T10:44:00-06:00</updated>
+    <updated>2014-05-16T10:44:00-05:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/16/kcdc-javascript-build-system-showdown</id>
     <content type="html"><![CDATA[<p>I spoke about the different Javascript Build systems at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 
