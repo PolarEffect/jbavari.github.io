@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I&rsquo;m writing this post as a memoir for myself, a retrospect of sorts. I read Seth Godins blog about Unconscious consumption and that post &hellip;">
+  <meta name="description" content="I ran into a quick little issue with serializing some of my Sequel models. The official JSON serializer docs are great, I just wanted to shine more &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,228 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-04T11:17:00-07:00" pubdate data-updated="true">Dec 4<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I ran into a quick little issue with serializing some of my <a href="https://github.com/jeremyevans/sequel">Sequel</a> models.</p>
+
+<p>The <a href="http://sequel.jeremyevans.net/rdoc-plugins/classes/Sequel/Plugins/JsonSerializer.html">official JSON serializer docs</a> are great, I just wanted to shine more light on the issue.</p>
+
+<p>If you&rsquo;re using Sequel models, just throw in the quick line of <code>plugin :json_serializer</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Get our database connection</span>
+</span><span class='line'><span class="n">require_relative</span> <span class="s2">&quot;./db&quot;</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">ScoreboardApi</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Team</span> <span class="o">&lt;</span> <span class="ss">Sequel</span><span class="p">:</span><span class="ss">:Model</span><span class="p">(</span><span class="ss">:team</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">plugin</span> <span class="ss">:json_serializer</span>
+</span><span class='line'>    <span class="n">serialize_attributes</span> <span class="ss">:json</span><span class="p">,</span> <span class="ss">:name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then, you just use the Sinatra contrib gem to have it json serializer attach:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Web framework</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;sinatra&quot;</span><span class="p">,</span> <span class="s2">&quot;1.4.6&quot;</span><span class="p">,</span> <span class="nb">require</span><span class="p">:</span> <span class="s2">&quot;sinatra/base&quot;</span>
+</span><span class='line'><span class="c1"># Sinatra addons - JSON, Namespace</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;sinatra-contrib&quot;</span><span class="p">,</span> <span class="s2">&quot;1.4.6&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set up your API routes and spit out JSON:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;bundler&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/base&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/json&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/namespace&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./models/scoreboard&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./models/team&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bundler</span><span class="o">.</span><span class="n">require</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">ScoreboardApi</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Sinatra</span><span class="p">:</span><span class="ss">:Application</span>
+</span><span class='line'>    <span class="n">register</span> <span class="ss">Sinatra</span><span class="p">:</span><span class="ss">:Namespace</span>
+</span><span class='line'>    <span class="n">configure</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">disable</span> <span class="ss">:method_override</span>
+</span><span class='line'>      <span class="n">disable</span> <span class="ss">:static</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">set</span> <span class="ss">:sessions</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:httponly</span>     <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:secure</span>       <span class="o">=&gt;</span> <span class="n">production?</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:expire_after</span> <span class="o">=&gt;</span> <span class="mi">31557600</span><span class="p">,</span> <span class="c1"># 1 year</span>
+</span><span class='line'>          <span class="ss">:secret</span>       <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;SESSION_SECRET&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Deflater</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">namespace</span> <span class="s2">&quot;/api/v1&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">get</span> <span class="s2">&quot;/scores&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">json</span> <span class="ss">:scoreboard</span> <span class="o">=&gt;</span> <span class="no">Scoreboard</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">get</span> <span class="s2">&quot;/teams&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">json</span> <span class="ss">:teams</span> <span class="o">=&gt;</span> <span class="no">Team</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8221;s all folks!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-03T10:46:00-07:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I just got the new Macbook Pro not too long ago and noticed they had this intimately named featured called Force Touch.</p>
+
+<p>Force touch, as it sounds, lets you touch things more <em>intimately</em>. The gist is this &ndash; there are sensors on the new touch pad that let you determine how hard the touch pad is touched, and has some API into that.</p>
+
+<p>I admit, the API is kinda just for fun since only Safari 9 and new Macbooks have the feature. Still, I wanted to play more with ES6 and create a little API wrapper to make it easier and let this feature name to be a little less creepy.</p>
+
+<p>After a little googling, I found an awesome <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html">blog post by Joshua Kehn</a> that detailed more about using Force touch. I wanted to make a quick wrapper around it to do some fun effects and animations.</p>
+
+<p>The idea is &ndash; we&rsquo;ll have an API called <code>TheForce</code> that we can attach handlers to for fun visual effects.</p>
+
+<p>Joshua&rsquo;s demo had a box that when tapped and applying pressure, padding would be increased. I took <a href="https://gist.github.com/joshkehn/3ed6b535408162fe94ae">his gist</a> and turned it into an ES6 module. (See the <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html#demo">demo</a>)</p>
+
+<h2>The API</h2>
+
+<p>I wrote it up last night in a quick hurry. The gist is this:</p>
+
+<ul>
+<li>Attach to a DOM element</li>
+<li>Apply a glow to the element based applied pressure to touchpad</li>
+</ul>
+
+
+<p>Code to attach a button named <code>you</code>, and trigger it automatically:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">luke</span> <span class="o">=</span> <span class="nx">TheForce</span><span class="p">.</span><span class="nx">beWith</span><span class="p">(</span><span class="s1">&#39;you&#39;</span><span class="p">).</span><span class="nx">alter</span><span class="p">({</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">&lt;!--</span> <span class="nx">luke</span><span class="p">.</span><span class="nx">alter</span><span class="p">(</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span> <span class="o">--&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a></h1>
     
     
@@ -93,7 +315,7 @@
   
 
 
-<time datetime="2015-11-27T21:58:00-06:00" pubdate data-updated="true">Nov 27<span>th</span>, 2015</time>
+<time datetime="2015-11-27T21:58:00-07:00" pubdate data-updated="true">Nov 27<span>th</span>, 2015</time>
         
       </p>
     
@@ -104,9 +326,11 @@
 
 <p>In the last 3 years, amazing events have unfolded. I helped create a start up, <a href="http://raisemore.com">RaiseMore</a>. I moved to Boulder, Colorado. I got a job at Ionic. I met a strong, amazing, beautiful woman who is my girlfriend.</p>
 
-<p>I&rsquo;d like to think what drove that was always reading books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow. I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same.</p>
+<p>I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same. I was striving to always read self-help books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow.</p>
 
 <p>All these new and exciting things kept happening to me. Many times before, I&rsquo;ve asked myself, &lsquo;how did I get so lucky?&rsquo;. Things just had a snowball effect and kept getting better and better!</p>
+
+<p>I&rsquo;d like to think what attracted all these amazing things into my life was from these advancements.</p>
 
 <p>However, something happened during these last 4 months that really threw me in a rut. I developed a poor attitude. I started thinking I was a victim. I no longer work for the company that I had looked up to for so long.</p>
 
@@ -159,9 +383,7 @@
 
 <p>All this was going down and other life issues arise, as they do. My older (15y old) dog was getting worse by the day. My girlfriend was not happy that I was putting her second to work. My friends stopped calling me. My shoulder got injured. I lost confidence in my work because I was burning out.</p>
 
-<p>Then in the final weeks, many of the members that had been core to Ionic 2 were unavailable weeks before the conference and it was double red alert to get things done.</p>
-
-<p>When all things are said and done, at the time, in the workshop, <em>I failed to complete my task for the Windows CLI users</em>.</p>
+<p>Then, a personal goal I had set didn&rsquo;t get delivered to a group of users I was really wanted to, the Windows Ionic CLI users.</p>
 
 <p>This hurt. Failure when placed heavy, can hurt. It hurt even more when I was putting work first, and myself last.</p>
 
@@ -175,7 +397,7 @@
 
 <p>Most importantly, respecting myself. I should always take the time to have a 1 on 1 with myself and really get a sense of where I&rsquo;m at. If I need a break, use that vacation that we are so lucky to have!</p>
 
-<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin)</p>
+<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin). Burnout happens when you don&rsquo;t let your support structure help put out of the flame before you become a pile of ash.</p>
 
 <p>So please, take this time to evaluate yourself and your needs. Be honest with yourself. Focus on caring for yourself. Be compassionate to yourself. Let yourself make mistakes, but learn from them.</p>
 
@@ -213,7 +435,7 @@
   
 
 
-<time datetime="2015-11-06T01:23:00-06:00" pubdate data-updated="true">Nov 6<span>th</span>, 2015</time>
+<time datetime="2015-11-06T01:23:00-07:00" pubdate data-updated="true">Nov 6<span>th</span>, 2015</time>
         
       </p>
     
@@ -401,7 +623,7 @@
   
 
 
-<time datetime="2015-11-05T21:49:00-06:00" pubdate data-updated="true">Nov 5<span>th</span>, 2015</time>
+<time datetime="2015-11-05T21:49:00-07:00" pubdate data-updated="true">Nov 5<span>th</span>, 2015</time>
         
       </p>
     
@@ -584,7 +806,7 @@
   
 
 
-<time datetime="2015-10-21T23:00:00-05:00" pubdate data-updated="true">Oct 21<span>st</span>, 2015</time>
+<time datetime="2015-10-21T23:00:00-06:00" pubdate data-updated="true">Oct 21<span>st</span>, 2015</time>
         
       </p>
     
@@ -762,7 +984,7 @@
   
 
 
-<time datetime="2015-10-20T21:46:00-05:00" pubdate data-updated="true">Oct 20<span>th</span>, 2015</time>
+<time datetime="2015-10-20T21:46:00-06:00" pubdate data-updated="true">Oct 20<span>th</span>, 2015</time>
         
       </p>
     
@@ -940,7 +1162,7 @@
   
 
 
-<time datetime="2015-10-19T16:34:00-05:00" pubdate data-updated="true">Oct 19<span>th</span>, 2015</time>
+<time datetime="2015-10-19T16:34:00-06:00" pubdate data-updated="true">Oct 19<span>th</span>, 2015</time>
         
       </p>
     
@@ -1246,7 +1468,7 @@
 
 
   
-<time datetime="2015-10-17T18:33:00-05:00" pubdate data-updated="true">Oct 17<span>th</span>, 2015</time>
+<time datetime="2015-10-17T18:33:00-06:00" pubdate data-updated="true">Oct 17<span>th</span>, 2015</time>
         
       </p>
     
@@ -1347,6 +1569,17 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <p>It will give you some heads up if there are latest packages, so you can update if you have too many out of date packages.</p>
 
 <p>Hope this helps!</p>
+
+<p>References:</p>
+
+<ul>
+<li><a href="http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/">Using npm as a build tool</a></li>
+<li><a href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags">Using npm tags</a></li>
+<li><a href="https://docs.npmjs.com/cli/shrinkwrap">npm documentation</a></li>
+<li><a href="https://docs.npmjs.com/misc/developers">npm-developers guide</a></li>
+<li><a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a></li>
+</ul>
+
 </div>
   
   
@@ -1378,7 +1611,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 
 
   
-<time datetime="2015-10-16T15:16:00-05:00" pubdate data-updated="true">Oct 16<span>th</span>, 2015</time>
+<time datetime="2015-10-16T15:16:00-06:00" pubdate data-updated="true">Oct 16<span>th</span>, 2015</time>
         
       </p>
     
@@ -1449,312 +1682,6 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/15/understanding-built-node-modules/">Understanding Built Node Modules</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-15T08:32:00-05:00" pubdate data-updated="true">Oct 15<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
-
-<p>TL;DR: If you upgraded node, run <code>npm rebuild</code> or <code>rm -rf node_modules &amp;&amp; npm install</code>.</p>
-
-<p>Why: This has to do with some of your modules you may be using having native bindings to your current system runtime.</p>
-
-<p>This then put me on a quest to understand more how native node modules are used. What I&rsquo;m referring to, is using <a href="https://nodejs.org/api/addons.html">Node addons</a>:</p>
-
-<blockquote><p>Addons are dynamically linked shared objects. They can provide glue to C and C++ libraries. The API (at the moment) is rather complex, involving knowledge of several libraries</p>
-
-<p>Node.js statically compiles all its dependencies into the executable. When compiling your module, you don&rsquo;t need to worry about linking to any of these libraries.</p></blockquote>
-
-<p>Since I maintain the <a href="https://github.com/driftyco/ionic-cli">Ionic CLI</a>, we have a few depedencies to a native node module, node-sass.</p>
-
-<p>Node-sass relies on some native C/C++ bindings to compile SASS down to CSS.</p>
-
-<p>If you have a version of Node 0.12 for example, and install the ionic-cli, then install Node 4.2.1, you may have issues running the CLI.</p>
-
-<p>This is due to the module building itself with that version of node and using those bindings, then when you install a new version of Node, you can&rsquo;t use those same bindings.</p>
-
-<p>When you change versions of node, make sure you do a quick <code>rm -rf node_modules</code> if on mac, or deleting the node_modules folder on windows and doing a fresh <code>npm install</code>.</p>
-
-<p>If you want to read a little more, background information is shared by <a href="http://twitter.com/voodootikigod">Chris Williams</a> about his struggles maintaining the node-serialport module on <a href="http://www.voodootikigod.com/on-maintaining-a-native-node-module/">this post</a>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/09/09/releasing-electron-for-windows/">Releasing Electron for Windows</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-09-09T18:50:00-05:00" pubdate data-updated="true">Sep 9<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
-
-<p>Thankfully, there&rsquo;s a great tool called Squirrel made by <a href="https://twitter.com/paulcbetts">Paul Betts</a> that does a ton of the heavy lifting for you. Codesigning and all.</p>
-
-<p>I really got a ton of knowledge from the blog post, <a href="http://www.mylifeforthecode.com/creating-a-windows-distribution-of-an-electron-app-using-squirrel/">Creating a Windows Distribution of an Electron App using Squirrel</a> and <a href="http://www.mylifeforthecode.com/using-electron-packager-to-package-an-electron-app/">Using Electron Packager to Package an Electron App</a>.</p>
-
-<p>I wanted to curate a ton of knowledge in one place, so here we go.</p>
-
-<p>I use a few tools to get this done on my Mac:</p>
-
-<ul>
-<li><a href="https://github.com/maxogden/electron-packager">Electron Packager</a></li>
-<li><a href="https://www.winehq.org/">Wine</a></li>
-<li><a href="http://wiki.winehq.org/winetricks">Winetricks</a></li>
-<li><a href="http://www.nuget.org/nuget.exe">nuget cli</a></li>
-<li><a href="https://github.com/Squirrel/Squirrel.Windows/releases">Squirrel.Windows</a></li>
-</ul>
-
-
-<p>First, let&rsquo;s look at the project layout:</p>
-
-<h2>Project Layout</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>/build <span class="c"># Installers go here</span>
-</span><span class='line'>  /osx
-</span><span class='line'>  /resources <span class="c"># Icons, iconset, images, etc</span>
-</span><span class='line'>  /win <span class="c"># Binaries to build, Package.nuspec file to specify configurations</span>
-</span><span class='line'>  packager.json <span class="c"># File used by electron-builder to build OSX DMG file.</span>
-</span><span class='line'>/dist <span class="c"># Distributions go here (.app, .exe, .dmg)</span>
-</span><span class='line'>  /osx
-</span><span class='line'>  /win
-</span><span class='line'>/docs <span class="c"># Docs about project.</span>
-</span><span class='line'>/node_modules <span class="c"># Modules used for building/packaging/testing</span>
-</span><span class='line'>/scss <span class="c"># Sass for CSS compilation in www</span>
-</span><span class='line'>/spec <span class="c"># Tests</span>
-</span><span class='line'>  AppCtrl.spec.js
-</span><span class='line'>www <span class="c"># Source code for the application</span>
-</span><span class='line'>  /css
-</span><span class='line'>  /data
-</span><span class='line'>  /img
-</span><span class='line'>  /js
-</span><span class='line'>  /lib
-</span><span class='line'>  /node_modules <span class="c"># Modules here used by the application itself.</span>
-</span><span class='line'>  /templates
-</span><span class='line'>
-</span><span class='line'>karma.conf.js <span class="c"># Configuration for tests.</span>
-</span><span class='line'>livereload.js <span class="c"># Dev script to set up live reload in Electron</span>
-</span><span class='line'>package.json <span class="c"># Main package.json with scripts/dependencies to package/build.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Process</h2>
-
-<p>First we&rsquo;ll need to make the exe and associated files to a <code>dist</code> folder. From there, we take the win <code>dist</code> files and pack them into the <code>Setup.exe</code> file, where Squirrel will do the heavy lifting to pack all this into a one step process.</p>
-
-<h2>npm Scripts</h2>
-
-<p>We&rsquo;ll use the npm script <code>pack:win</code> task to put all our <code>www</code> files into a nice package (resources, exe, etc) and output to the <code>dist</code> folder.</p>
-
-<p><code>pack:win</code> step will just execute <code>electron-packager</code> with some relevant information. Please note the <code>asar=true</code>, this is recommended because sometimes <code>node_modules</code> can get nested a few times and the file paths will be too long for certain Windows platforms.</p>
-
-<p>Script:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s2">&quot;pack:win&quot;</span><span class="o">:</span> <span class="s2">&quot;electron-packager ./www \&quot;Project\&quot; --out=dist/win --platform=win32 --arch=ia32 --version=0.29.1 --icon=build/resources/icon.ico --version-string.CompanyName=\&quot;My Company\&quot; --version-string.ProductName=\&quot;Project\&quot; --version-string.FileDescription=\&quot;Project\&quot; --asar=true&quot;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Electron Build script</h2>
-
-<p>I used a simple build script in node to assist in some of the heavy lifting. I recommend getting an Extended Validation certificate from <a href="http://blogs.msdn.com/b/ie/archive/2012/08/14/microsoft-smartscreen-amp-extended-validation-ev-code-signing-certificates.aspx">this blog post</a>.</p>
-
-<p>This will take the windows package in <code>dist/win</code> and create <code>dist/win/Setup.exe</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'><span class="c1">// File is in root/build/win/build.js</span>
-</span><span class='line'><span class="c1">// First call nuget pack Package.nuspec</span>
-</span><span class='line'><span class="c1">// Then you&#39;ll have Project.&lt;version&gt;.nupkg</span>
-</span><span class='line'><span class="c1">// Run Squirrel.exe --releaseify Project.&lt;version&gt;.nupkg --icon iconPath --loadingGif loadingGifPath</span>
-</span><span class='line'><span class="c1">// resources in build/resources/</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//Need to get around weird command line passes with windows paths</span>
-</span><span class='line'><span class="kd">function</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">childProcess</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">packageJsonPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;package.json&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">packageJsonPath</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">loadingGifPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;windows-loader.png&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageSpecPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Package.nuspec&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageOutputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="s1">&#39;.1.0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;.nupkg&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="c1">// nugetPackageName = [&#39;Project&#39;, packageJson.version, &#39;.nupkg&#39;].join(&#39;&#39;),</span>
-</span><span class='line'>  <span class="nx">nugetPackagePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">,</span> <span class="nx">nugetPackageName</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;nuget.exe&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">setupIconPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;icon.ico&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">setupReleasePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span> <span class="s1">&#39;win&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">signatureCertificatePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Certificate.pfx&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">signParams</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&quot;/a /f &quot;&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">signatureCertificatePath</span><span class="p">),</span> <span class="s1">&#39;&quot; /p &#39;</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRIVATE_CERT_PASSWORD</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">squirrelExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Squirrel.exe&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;sign params&#39;</span><span class="p">,</span> <span class="nx">signParams</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">createNugetPackageCommand</span> <span class="o">=</span> <span class="p">[</span><span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetExePath</span><span class="p">),</span> <span class="s1">&#39;pack&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageSpecPath</span><span class="p">),</span> <span class="s1">&#39;-OutputDirectory&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">)].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">createSetupCommand</span> <span class="o">=</span> <span class="p">[</span>
-</span><span class='line'>              <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">squirrelExePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--releasify&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackagePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--loadingGif&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">loadingGifPath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--icon&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupIconPath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--releaseDir&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupReleasePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--signWithParams&#39;</span><span class="p">,</span> <span class="nx">signParams</span>
-</span><span class='line'>            <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Creating nuget package from nuget spec file:&#39;</span><span class="p">,</span> <span class="nx">nugetPackageSpecPath</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// console.log(createNugetPackageCommand);</span>
-</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createNugetPackageCommand</span><span class="p">);</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Created nuget package&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Building Setup.exe&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// console.log(createSetupCommand);</span>
-</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createSetupCommand</span><span class="p">);</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Built Setup.exe&#39;</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hope this helps!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -1770,6 +1697,14 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
@@ -1779,14 +1714,6 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
     
       <li class="post">
         <a href="/blog/2015/11/05/using-ionic-2-dot-0-generators/">Using Ionic 2.0 Generators</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/21/angular-2-and-ng-model/">Angular 2 and Ng-model</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/">Windows and Webpack With TypeScript and Babel</a>
       </li>
     
   </ul>

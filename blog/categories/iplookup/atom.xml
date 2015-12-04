@@ -4,7 +4,7 @@
   <title><![CDATA[Category: iplookup | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/iplookup/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Automating Local IP Lookup With Grunt and Node]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/04/automating-local-ip-lookup-with-grunt-and-node/"/>
-    <updated>2013-12-04T15:18:00-06:00</updated>
+    <updated>2013-12-04T15:18:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/04/automating-local-ip-lookup-with-grunt-and-node</id>
     <content type="html"><![CDATA[<p>In the last few write-ups I&rsquo;ve done lately (see <a href="/blog/2013/12/02/automating-underlying-mobile-infrastructure-with-grunt">the servers post</a> and the <a href="/blog/2013/11/30/automating-phonegap-builds-with-grunt">phonegap builds post</a>), I&rsquo;ve been requiring the user to pass in the IP or the host in the command line. That works and all, but I usually have to go look up that ip using the good ol &lsquo;ifconfig&rsquo; command.</p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: android | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/android/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Enabling Android Remote Debugging in Phonegap 2.9]]></title>
     <link href="http://jbavari.github.io/blog/2014/04/18/enabling-android-remote-debugging-in-phonegap-2-dot-9/"/>
-    <updated>2014-04-18T10:13:00-05:00</updated>
+    <updated>2014-04-18T10:13:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/04/18/enabling-android-remote-debugging-in-phonegap-2-dot-9</id>
     <content type="html"><![CDATA[<p>Recently the Cordova (as well as Phonegap) team has introduced <a href="http://www.raymondcamden.com/index.cfm/2014/1/2/Apache-Cordova-33-and-Remote-Debugging-for-Android">the ability to remote debug Android 4.4+</a> from <a href="https://issues.apache.org/jira/browse/CB-5487">this issue</a>.</p>
 
@@ -52,7 +52,7 @@ if(android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.KITKAT)
   <entry>
     <title type="html"><![CDATA[How to be a good imitator in PhoneGap/Cordova]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/11/how-to-be-a-good-imitator-in-phonegap-slash-cordova/"/>
-    <updated>2014-03-11T01:02:00-05:00</updated>
+    <updated>2014-03-11T01:02:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/11/how-to-be-a-good-imitator-in-phonegap-slash-cordova</id>
     <content type="html"><![CDATA[<p>If you found your way here, then you&rsquo;re probably seeking knowlege about Phonegap/Cordova. I want to first remind you what the purpose of the PhoneGap / Cordova project is:</p>
 

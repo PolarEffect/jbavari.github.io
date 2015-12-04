@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="While working at Ionic I&rsquo;ve been focused on the Ionic CLI. My first big refactor of the CLI was pulling out most of the 21 commands it offers &hellip;">
+  <meta name="description" content="If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,312 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2015/10/15/understanding-built-node-modules/">Understanding Built Node Modules</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-10-15T08:32:00-06:00" pubdate data-updated="true">Oct 15<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
+
+<p>TL;DR: If you upgraded node, run <code>npm rebuild</code> or <code>rm -rf node_modules &amp;&amp; npm install</code>.</p>
+
+<p>Why: This has to do with some of your modules you may be using having native bindings to your current system runtime.</p>
+
+<p>This then put me on a quest to understand more how native node modules are used. What I&rsquo;m referring to, is using <a href="https://nodejs.org/api/addons.html">Node addons</a>:</p>
+
+<blockquote><p>Addons are dynamically linked shared objects. They can provide glue to C and C++ libraries. The API (at the moment) is rather complex, involving knowledge of several libraries</p>
+
+<p>Node.js statically compiles all its dependencies into the executable. When compiling your module, you don&rsquo;t need to worry about linking to any of these libraries.</p></blockquote>
+
+<p>Since I maintain the <a href="https://github.com/driftyco/ionic-cli">Ionic CLI</a>, we have a few depedencies to a native node module, node-sass.</p>
+
+<p>Node-sass relies on some native C/C++ bindings to compile SASS down to CSS.</p>
+
+<p>If you have a version of Node 0.12 for example, and install the ionic-cli, then install Node 4.2.1, you may have issues running the CLI.</p>
+
+<p>This is due to the module building itself with that version of node and using those bindings, then when you install a new version of Node, you can&rsquo;t use those same bindings.</p>
+
+<p>When you change versions of node, make sure you do a quick <code>rm -rf node_modules</code> if on mac, or deleting the node_modules folder on windows and doing a fresh <code>npm install</code>.</p>
+
+<p>If you want to read a little more, background information is shared by <a href="http://twitter.com/voodootikigod">Chris Williams</a> about his struggles maintaining the node-serialport module on <a href="http://www.voodootikigod.com/on-maintaining-a-native-node-module/">this post</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/09/releasing-electron-for-windows/">Releasing Electron for Windows</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-09T18:50:00-06:00" pubdate data-updated="true">Sep 9<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
+
+<p>Thankfully, there&rsquo;s a great tool called Squirrel made by <a href="https://twitter.com/paulcbetts">Paul Betts</a> that does a ton of the heavy lifting for you. Codesigning and all.</p>
+
+<p>I really got a ton of knowledge from the blog post, <a href="http://www.mylifeforthecode.com/creating-a-windows-distribution-of-an-electron-app-using-squirrel/">Creating a Windows Distribution of an Electron App using Squirrel</a> and <a href="http://www.mylifeforthecode.com/using-electron-packager-to-package-an-electron-app/">Using Electron Packager to Package an Electron App</a>.</p>
+
+<p>I wanted to curate a ton of knowledge in one place, so here we go.</p>
+
+<p>I use a few tools to get this done on my Mac:</p>
+
+<ul>
+<li><a href="https://github.com/maxogden/electron-packager">Electron Packager</a></li>
+<li><a href="https://www.winehq.org/">Wine</a></li>
+<li><a href="http://wiki.winehq.org/winetricks">Winetricks</a></li>
+<li><a href="http://www.nuget.org/nuget.exe">nuget cli</a></li>
+<li><a href="https://github.com/Squirrel/Squirrel.Windows/releases">Squirrel.Windows</a></li>
+</ul>
+
+
+<p>First, let&rsquo;s look at the project layout:</p>
+
+<h2>Project Layout</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>/build <span class="c"># Installers go here</span>
+</span><span class='line'>  /osx
+</span><span class='line'>  /resources <span class="c"># Icons, iconset, images, etc</span>
+</span><span class='line'>  /win <span class="c"># Binaries to build, Package.nuspec file to specify configurations</span>
+</span><span class='line'>  packager.json <span class="c"># File used by electron-builder to build OSX DMG file.</span>
+</span><span class='line'>/dist <span class="c"># Distributions go here (.app, .exe, .dmg)</span>
+</span><span class='line'>  /osx
+</span><span class='line'>  /win
+</span><span class='line'>/docs <span class="c"># Docs about project.</span>
+</span><span class='line'>/node_modules <span class="c"># Modules used for building/packaging/testing</span>
+</span><span class='line'>/scss <span class="c"># Sass for CSS compilation in www</span>
+</span><span class='line'>/spec <span class="c"># Tests</span>
+</span><span class='line'>  AppCtrl.spec.js
+</span><span class='line'>www <span class="c"># Source code for the application</span>
+</span><span class='line'>  /css
+</span><span class='line'>  /data
+</span><span class='line'>  /img
+</span><span class='line'>  /js
+</span><span class='line'>  /lib
+</span><span class='line'>  /node_modules <span class="c"># Modules here used by the application itself.</span>
+</span><span class='line'>  /templates
+</span><span class='line'>
+</span><span class='line'>karma.conf.js <span class="c"># Configuration for tests.</span>
+</span><span class='line'>livereload.js <span class="c"># Dev script to set up live reload in Electron</span>
+</span><span class='line'>package.json <span class="c"># Main package.json with scripts/dependencies to package/build.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Process</h2>
+
+<p>First we&rsquo;ll need to make the exe and associated files to a <code>dist</code> folder. From there, we take the win <code>dist</code> files and pack them into the <code>Setup.exe</code> file, where Squirrel will do the heavy lifting to pack all this into a one step process.</p>
+
+<h2>npm Scripts</h2>
+
+<p>We&rsquo;ll use the npm script <code>pack:win</code> task to put all our <code>www</code> files into a nice package (resources, exe, etc) and output to the <code>dist</code> folder.</p>
+
+<p><code>pack:win</code> step will just execute <code>electron-packager</code> with some relevant information. Please note the <code>asar=true</code>, this is recommended because sometimes <code>node_modules</code> can get nested a few times and the file paths will be too long for certain Windows platforms.</p>
+
+<p>Script:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;pack:win&quot;</span><span class="o">:</span> <span class="s2">&quot;electron-packager ./www \&quot;Project\&quot; --out=dist/win --platform=win32 --arch=ia32 --version=0.29.1 --icon=build/resources/icon.ico --version-string.CompanyName=\&quot;My Company\&quot; --version-string.ProductName=\&quot;Project\&quot; --version-string.FileDescription=\&quot;Project\&quot; --asar=true&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Electron Build script</h2>
+
+<p>I used a simple build script in node to assist in some of the heavy lifting. I recommend getting an Extended Validation certificate from <a href="http://blogs.msdn.com/b/ie/archive/2012/08/14/microsoft-smartscreen-amp-extended-validation-ev-code-signing-certificates.aspx">this blog post</a>.</p>
+
+<p>This will take the windows package in <code>dist/win</code> and create <code>dist/win/Setup.exe</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
+</span><span class='line'><span class="c1">// File is in root/build/win/build.js</span>
+</span><span class='line'><span class="c1">// First call nuget pack Package.nuspec</span>
+</span><span class='line'><span class="c1">// Then you&#39;ll have Project.&lt;version&gt;.nupkg</span>
+</span><span class='line'><span class="c1">// Run Squirrel.exe --releaseify Project.&lt;version&gt;.nupkg --icon iconPath --loadingGif loadingGifPath</span>
+</span><span class='line'><span class="c1">// resources in build/resources/</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//Need to get around weird command line passes with windows paths</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">childProcess</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">packageJsonPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;package.json&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">packageJsonPath</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">loadingGifPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;windows-loader.png&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageSpecPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Package.nuspec&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageOutputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="s1">&#39;.1.0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;.nupkg&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="c1">// nugetPackageName = [&#39;Project&#39;, packageJson.version, &#39;.nupkg&#39;].join(&#39;&#39;),</span>
+</span><span class='line'>  <span class="nx">nugetPackagePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">,</span> <span class="nx">nugetPackageName</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;nuget.exe&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">setupIconPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;icon.ico&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">setupReleasePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span> <span class="s1">&#39;win&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">signatureCertificatePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Certificate.pfx&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">signParams</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&quot;/a /f &quot;&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">signatureCertificatePath</span><span class="p">),</span> <span class="s1">&#39;&quot; /p &#39;</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRIVATE_CERT_PASSWORD</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">squirrelExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Squirrel.exe&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;sign params&#39;</span><span class="p">,</span> <span class="nx">signParams</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">createNugetPackageCommand</span> <span class="o">=</span> <span class="p">[</span><span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetExePath</span><span class="p">),</span> <span class="s1">&#39;pack&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageSpecPath</span><span class="p">),</span> <span class="s1">&#39;-OutputDirectory&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">)].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">createSetupCommand</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class='line'>              <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">squirrelExePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--releasify&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackagePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--loadingGif&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">loadingGifPath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--icon&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupIconPath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--releaseDir&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupReleasePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--signWithParams&#39;</span><span class="p">,</span> <span class="nx">signParams</span>
+</span><span class='line'>            <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Creating nuget package from nuget spec file:&#39;</span><span class="p">,</span> <span class="nx">nugetPackageSpecPath</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// console.log(createNugetPackageCommand);</span>
+</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createNugetPackageCommand</span><span class="p">);</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Created nuget package&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Building Setup.exe&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// console.log(createSetupCommand);</span>
+</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createSetupCommand</span><span class="p">);</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Built Setup.exe&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Hope this helps!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2015/08/25/lazy-loading-your-node-modules/">Lazy Loading Your Node Modules</a></h1>
     
     
@@ -93,7 +399,7 @@
   
 
 
-<time datetime="2015-08-25T15:29:00-05:00" pubdate data-updated="true">Aug 25<span>th</span>, 2015</time>
+<time datetime="2015-08-25T15:29:00-06:00" pubdate data-updated="true">Aug 25<span>th</span>, 2015</time>
         
       </p>
     
@@ -415,7 +721,7 @@
   
 
 
-<time datetime="2015-08-14T11:30:00-05:00" pubdate data-updated="true">Aug 14<span>th</span>, 2015</time>
+<time datetime="2015-08-14T11:30:00-06:00" pubdate data-updated="true">Aug 14<span>th</span>, 2015</time>
         
       </p>
     
@@ -634,7 +940,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   
 
 
-<time datetime="2015-08-12T19:53:00-05:00" pubdate data-updated="true">Aug 12<span>th</span>, 2015</time>
+<time datetime="2015-08-12T19:53:00-06:00" pubdate data-updated="true">Aug 12<span>th</span>, 2015</time>
         
       </p>
     
@@ -878,7 +1184,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   
 
 
-<time datetime="2015-05-08T17:11:00-05:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+<time datetime="2015-05-08T17:11:00-06:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
         
       </p>
     
@@ -1210,7 +1516,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   
 
 
-<time datetime="2014-12-31T14:37:00-06:00" pubdate data-updated="true">Dec 31<span>st</span>, 2014</time>
+<time datetime="2014-12-31T14:37:00-07:00" pubdate data-updated="true">Dec 31<span>st</span>, 2014</time>
         
       </p>
     
@@ -1275,7 +1581,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   
 
 
-<time datetime="2014-10-23T12:31:00-05:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2014</time>
+<time datetime="2014-10-23T12:31:00-06:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2014</time>
         
       </p>
     
@@ -1491,7 +1797,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   
 
 
-<time datetime="2014-10-21T21:29:00-05:00" pubdate data-updated="true">Oct 21<span>st</span>, 2014</time>
+<time datetime="2014-10-21T21:29:00-06:00" pubdate data-updated="true">Oct 21<span>st</span>, 2014</time>
         
       </p>
     
@@ -1717,7 +2023,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   
 
 
-<time datetime="2014-08-23T20:43:00-05:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2014</time>
+<time datetime="2014-08-23T20:43:00-06:00" pubdate data-updated="true">Aug 23<span>rd</span>, 2014</time>
         
       </p>
     
@@ -1828,432 +2134,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/08/14/making-rails-and-postgres-schemas-play-nice/">Making Rails Fixtures Across Postgres Schemas Play Nice</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-08-14T20:58:00-05:00" pubdate data-updated="true">Aug 14<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>This past week or so I&rsquo;ve had another run in with using Rails to access data across Postgres schemas. I thought I would share some of my experiences I&rsquo;ve had with the two.</p>
-
-<p>I&rsquo;m going to assume you&rsquo;re comfortable with Rails (ActiveRecord with models) and Postgres (what is a schema and why you&rsquo;d want to use one).</p>
-
-<h2>The wild wild west of data</h2>
-
-<p>I had a <code>public</code> schema for most of my data (people, preferences, etc) and another schema <code>bikeshop</code> that has several entries from an external data feed, that may or may not change format along the way.</p>
-
-<h2>To ActiveRecord &ndash; or not to be</h2>
-
-<p>First I tried making some simple ActiveRecord classes, all while admitting I&rsquo;m really not that fond of ActiveRecord.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">BikeStore</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">set_table_name</span> <span class="s1">&#39;bikes.store&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Easy right? It happens to work too, sweet.</p>
-
-<h2>Wait, I thought you wrote tests too?</h2>
-
-<p>Woops, let&rsquo;s get that set up too. First I&rsquo;ll start by setting up my fixtures (<a href="http://google.com">heres</a> a few <a href="http://googe.com">reasons</a> I still use <a href="http://google.com">minitest &amp; fixtures</a>). I started by naming my file <code>bikeshop.yml</code> and it looks like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">first</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">1</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&#39;Jims</span><span class="nv"> </span><span class="s">Bike</span><span class="nv"> </span><span class="s">shop&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And a quick test:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">BikeStoreTest</span> <span class="o">&lt;</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:TestCase</span>
-</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
-</span><span class='line'>      <span class="vi">@bike_store</span> <span class="o">=</span> <span class="n">bikesstore</span><span class="p">(</span><span class="ss">:first</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">test</span> <span class="s1">&#39;should get bike store name&#39;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">refute_nil</span> <span class="vi">@bike_store</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Right away you&rsquo;ll get one of these errors:</p>
-
-<ul>
-<li>There is no table named <code>bikestore</code></li>
-<li>There is no function named bikesstore</li>
-</ul>
-
-
-<p>How do you even use or access the fixture data then?</p>
-
-<h3>Fixture naming with schemas</h3>
-
-<p>The trick is this: naming the fixture yaml file <code>schema.table.yml</code> &ndash; that properly sets up the fixture to let us get some test data. I called my file <code>bikes.store.yml</code> and that fixed things up.</p>
-
-<h3>Accessing the fixture data in a test</h3>
-
-<p>Still not sure on this one folks. Please someone comment and help the world out!</p>
-
-<p>Hope this helps</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks/">Managing Cordova Plugins With package.json and Hooks</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T17:52:00-05:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In a previous post, I blogged about <a href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">how to manage plugins with variables</a>. I wanted to expand on that some more, and this time, talk about how to use your package.json to manage your plugins with versions as well as a way to reset your cordova set up.</p>
-
-<h2>The problem</h2>
-
-<p>Whenever I start a new Cordova project, I start by adding in all my plugins. Then once they are added, I&rsquo;ll then commit them all and push the repository with all the plugins.</p>
-
-<p>My workflow is usually like this:</p>
-
-<ul>
-<li>cordova create new ProjectApp</li>
-<li>cd ProjectApp</li>
-<li>cordova platform add ios</li>
-<li>cordova plugin add org.apache.cordova.camera</li>
-<li>cordova plugin add org.apache.cordova.contacts</li>
-<li>insert more plugin statements for every plugin we want</li>
-<li>cordova run ios</li>
-<li>cordova run android</li>
-</ul>
-
-
-<p>Occassionaly, I run into this issue when I&rsquo;m using plugins that require native variable hooks when installing. The prime example is the facebook plugin, it requires the <code>APP_ID</code> to be passed in with the <code>cordova plugin add</code> command with the options of <code>--variable APP_ID="some_id"</code>.</p>
-
-<h2>What I&rsquo;d rather do</h2>
-
-<p>It&rsquo;d be nice to have these plugins being saved with their version, so when the next user needs to pull the plugins, or modify the installation, they can just modify the package.json and run a command to install them all. That way, we can get some kind of versioning on our plugins.</p>
-
-<p>Ideally, I want to just type <code>cordova setup</code> &ndash; have it look at my package.json file, and just begin installing what&rsquo;s listed there.</p>
-
-<h3>Making the dream come true</h3>
-
-<p>First, lets start by putting our platforms and plugins in our package.json like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SampleApp&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Sample App&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;ISC&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;platforms&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;ios&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;android&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;plugins&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.camera&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.console&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.contacts&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.device&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.dialogs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file-transfer&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.geolocation&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.inappbrowser&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media-capture&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.network-information&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.splashscreen&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="nt">&quot;locator&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/jbavari/cordova-facebook-connect.git&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nt">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nt">&quot;APP_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
-</span><span class='line'>          <span class="nt">&quot;APP_NAME&quot;</span><span class="p">:</span> <span class="s2">&quot;some_name&quot;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;load-grunt-tasks&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.0&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;time-grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.3.1&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.4&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt-shell&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.6.4&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Platforms</h3>
-
-<p>Now, we&rsquo;ll need a script that will look at our <code>package.json</code> and begin installing our platforms and plugins.</p>
-
-<p>My platform installation script is located in the <code>tasks</code> directory named <code>platforms.js</code>, and looks like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'><span class="c1">//usage: node platforms.js [add | remove]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">packageJson</span><span class="p">.</span><span class="nx">platforms</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">platform</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">platformCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova platform &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nx">platform</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">platformCmd</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Plugins</h3>
-
-<p>My plugin installation script is also in my <code>tasks</code> directory, and named <code>plugins.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//usage: node plugins.js [ add | remove ]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova plugin &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">plugin</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="nx">command</span> <span class="o">===</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">locator</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">variable</span><span class="p">){</span>
-</span><span class='line'>                    <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="s1">&#39;--variable &#39;</span> <span class="o">+</span> <span class="nx">variable</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">[</span><span class="nx">variable</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">;</span>
-</span><span class='line'>                <span class="p">});</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">pluginCmd</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">index</span> <span class="o">&gt;=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">plugin</span> <span class="o">=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCommand</span> <span class="o">=</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>        <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">processPlugin</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Great. Now I don&rsquo;t really need to add all the plugins, remove them, or worry about platforms. I can just run my scripts by doing <code>node tasks/platforms.js</code> or <code>node tasks/plugins.js</code> to have it set up my project as stated in my <code>package.json</code> file.</p>
-
-<p>Easier management for teams, I&rsquo;d like to think.</p>
-
-<p>Hope this helps others.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/3/">&larr; Older</a>
@@ -2271,6 +2151,14 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
@@ -2280,14 +2168,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
     
       <li class="post">
         <a href="/blog/2015/11/05/using-ionic-2-dot-0-generators/">Using Ionic 2.0 Generators</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/21/angular-2-and-ng-model/">Angular 2 and Ng-model</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/">Windows and Webpack With TypeScript and Babel</a>
       </li>
     
   </ul>

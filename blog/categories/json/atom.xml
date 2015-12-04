@@ -4,7 +4,7 @@
   <title><![CDATA[Category: json | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/json/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -14,9 +14,99 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Using JSON serializers in Sinatra]]></title>
+    <link href="http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra/"/>
+    <updated>2015-12-04T11:17:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra</id>
+    <content type="html"><![CDATA[<p>I ran into a quick little issue with serializing some of my <a href="https://github.com/jeremyevans/sequel">Sequel</a> models.</p>
+
+<p>The <a href="http://sequel.jeremyevans.net/rdoc-plugins/classes/Sequel/Plugins/JsonSerializer.html">official JSON serializer docs</a> are great, I just wanted to shine more light on the issue.</p>
+
+<p>If you&rsquo;re using Sequel models, just throw in the quick line of <code>plugin :json_serializer</code>.</p>
+
+<p>``` ruby</p>
+
+<h1>Get our database connection</h1>
+
+<p>require_relative &ldquo;./db&rdquo;
+module ScoreboardApi
+  class Team &lt; Sequel::Model(:team)</p>
+
+<pre><code>plugin :json_serializer
+serialize_attributes :json, :name
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Then, you just use the Sinatra contrib gem to have it json serializer attach:</p>
+
+<p>```</p>
+
+<h1>Web framework</h1>
+
+<p>gem &ldquo;sinatra&rdquo;, &ldquo;1.4.6&rdquo;, require: &ldquo;sinatra/base&rdquo;</p>
+
+<h1>Sinatra addons &ndash; JSON, Namespace</h1>
+
+<p>gem &ldquo;sinatra-contrib&rdquo;, &ldquo;1.4.6&rdquo;
+```</p>
+
+<p>Set up your API routes and spit out JSON:</p>
+
+<p>```
+require &ldquo;bundler&rdquo;
+require &ldquo;sinatra/base&rdquo;
+require &ldquo;sinatra/json&rdquo;
+require &ldquo;sinatra/namespace&rdquo;</p>
+
+<p>require &ldquo;./models/scoreboard&rdquo;
+require &ldquo;./models/team&rdquo;</p>
+
+<p>Bundler.require</p>
+
+<p>module ScoreboardApi
+  class App &lt; Sinatra::Application</p>
+
+<pre><code>register Sinatra::Namespace
+configure do
+  disable :method_override
+  disable :static
+
+  set :sessions,
+      :httponly     =&gt; true,
+      :secure       =&gt; production?,
+      :expire_after =&gt; 31557600, # 1 year
+      :secret       =&gt; ENV["SESSION_SECRET"]
+end
+
+use Rack::Deflater
+
+namespace "/api/v1" do
+  get "/scores" do
+    json :scoreboard =&gt; Scoreboard.all
+  end
+
+  get "/teams" do
+    json :teams =&gt; Team.all
+  end
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>```</p>
+
+<p>That"s all folks!</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[RethinkDB the importing json process]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process/"/>
-    <updated>2014-03-19T00:51:00-05:00</updated>
+    <updated>2014-03-19T00:51:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process</id>
     <content type="html"><![CDATA[<p>I was playing around tonight with RethinkDB &ndash; and I wanted to import some data from a JSON file. It wasn&rsquo;t very well documented, so I wanted to make sure I high-light that for others. <a href="http://www.rethinkdb.com/docs/tutorials/elections/">The tutorial post to see RethinkDB&rsquo;s import</a> covers this command to fire off:</p>
 

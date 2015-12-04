@@ -4,7 +4,7 @@
   <title><![CDATA[Category: jasmine | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/jasmine/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Unit Testing AngularJS Services]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/11/unit-testing-angularjs-services/"/>
-    <updated>2014-06-11T17:52:00-05:00</updated>
+    <updated>2014-06-11T17:52:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/11/unit-testing-angularjs-services</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been using AngularJS a lot lately. Since I do a lot of Javascript, that means I&rsquo;m prone to make a lot of runtime script errors.</p>
 
@@ -461,7 +461,7 @@ it('should have sent a POST request to the checkuser API', function() {
   <entry>
     <title type="html"><![CDATA[Automating Jasmine Tests With Grunt Karma]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/03/automating-jasmine-tests-with-grunt-karma/"/>
-    <updated>2013-12-03T09:22:00-06:00</updated>
+    <updated>2013-12-03T09:22:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/03/automating-jasmine-tests-with-grunt-karma</id>
     <content type="html"><![CDATA[<p>I find myself lately in falling in love unit testing in Javascript with the <a href="http://pivotal.github.io/jasmine/">Jasmine</a> framework. It&rsquo;s really upped my trust levels that I&rsquo;ve been writing lately.</p>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: plugins | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/plugins/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Moving Forward with Phonegap / Cordova Plugins]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins/"/>
-    <updated>2014-05-17T15:24:00-05:00</updated>
+    <updated>2014-05-17T15:24:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins</id>
     <content type="html"><![CDATA[<p>I spoke about how plugins work and how to create plugins in Cordova at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 
@@ -30,7 +30,7 @@ Enjoy!</p>
   <entry>
     <title type="html"><![CDATA[Properly using Plugins with variables in Phonegap / Cordova applications]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/"/>
-    <updated>2014-03-29T02:14:00-05:00</updated>
+    <updated>2014-03-29T02:14:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications</id>
     <content type="html"><![CDATA[<p>In the past week I&rsquo;ve been working on upgrading our mobile application from PhoneGap 2.9 to Cordova 3.4. (There is no real reason for going from PhoneGap to Cordova, just that I&rsquo;ve been actively committing to the Cordova project).</p>
 

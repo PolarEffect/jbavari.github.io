@@ -4,7 +4,7 @@
   <title><![CDATA[Category: testing | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/testing/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Writing Unit Tests for Electron and AngularJS]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs/"/>
-    <updated>2015-08-12T19:53:00-05:00</updated>
+    <updated>2015-08-12T19:53:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs</id>
     <content type="html"><![CDATA[<p>Unit testing is something most of us dev&rsquo;s don&rsquo;t think much of. Until we encounter some simple to solve bugs or have regressions in code that drives us crazy.</p>
 
@@ -180,7 +180,7 @@ window.__dirname = &lsquo;/some/fake/path&rsquo;;
   <entry>
     <title type="html"><![CDATA[AngularJS - testing HTTP Post Data]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data/"/>
-    <updated>2014-06-23T13:37:00-05:00</updated>
+    <updated>2014-06-23T13:37:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/23/angularjs-testing-http-post-data</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been doing a lot of testing lately in AngularJS, as I&rsquo;m sure you can tell from my many posts as of late.</p>
 
@@ -271,7 +271,7 @@ $httpBackend.flush();
   <entry>
     <title type="html"><![CDATA[Testing Interceptor Headers in AngularJS]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/20/testing-interceptor-headers-in-angularjs/"/>
-    <updated>2014-06-20T21:22:00-05:00</updated>
+    <updated>2014-06-20T21:22:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/20/testing-interceptor-headers-in-angularjs</id>
     <content type="html"><![CDATA[<p>In AngularJS, you can set up <a href="https://docs.angularjs.org/api/ng/service/$http">HTTP Interceptors</a> (middleware) to inject headers etc.</p>
 

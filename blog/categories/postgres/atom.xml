@@ -4,7 +4,7 @@
   <title><![CDATA[Category: postgres | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/postgres/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[In depth dive with Postgres Hstore and Rails 4]]></title>
     <link href="http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4/"/>
-    <updated>2014-04-26T12:08:00-05:00</updated>
+    <updated>2014-04-26T12:08:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4</id>
     <content type="html"><![CDATA[<p>I had a unique little situation pop up that needed a little more flexibility when it came to storing data in the db. We use Postgres at RaiseMore because we respect ourselves, so naturally, I wanted to take a swing using some Hstore options for our ever changing data schema.</p>
 
@@ -208,7 +208,7 @@ end
   <entry>
     <title type="html"><![CDATA[Making Rails and Postgres Arrays Play Nice]]></title>
     <link href="http://jbavari.github.io/blog/2014/01/14/making-rails-and-postgres-arrays-play-nice/"/>
-    <updated>2014-01-14T12:01:00-06:00</updated>
+    <updated>2014-01-14T12:01:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2014/01/14/making-rails-and-postgres-arrays-play-nice</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve had a small need to store an array of string values in a Postgres array instead of making foreign tables and dealing with the fun ActiveRecord fancies there are to play with.</p>
 

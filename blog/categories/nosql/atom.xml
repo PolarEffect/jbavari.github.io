@@ -4,7 +4,7 @@
   <title><![CDATA[Category: nosql | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/nosql/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Handling Relationships in RethinkDB]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/handling-relationships-in-rethinkdb/"/>
-    <updated>2014-05-17T23:06:00-05:00</updated>
+    <updated>2014-05-17T23:06:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/handling-relationships-in-rethinkdb</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been playing a lot with <a href="http://rethinkdb.com">RethinkDB</a> and I&rsquo;m in love with it. Such a sweet document database, amazingly beautiful web interface, and easy to use API&rsquo;s in three different languages. I started up a side project that involves some relational data, and ran into a few bumps along the road.</p>
 

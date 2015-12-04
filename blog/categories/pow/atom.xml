@@ -4,7 +4,7 @@
   <title><![CDATA[Category: pow | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/pow/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Pow and weird starting issues]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues/"/>
-    <updated>2014-05-07T14:56:00-05:00</updated>
+    <updated>2014-05-07T14:56:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been getting this weird error from Pow in Rails 4:</p>
 
@@ -51,7 +51,7 @@ run Rails.application
   <entry>
     <title type="html"><![CDATA[Nodejs Rails subdomains - POW!]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/12/nodejs-rails-subdomains-pow/"/>
-    <updated>2014-03-12T23:44:00-05:00</updated>
+    <updated>2014-03-12T23:44:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/12/nodejs-rails-subdomains-pow</id>
     <content type="html"><![CDATA[<p>I wanted to do a quick write up of how I use <a href="http://pow.cx/">Pow</a> to run several rails/rack apps and provide subdomains for the rails / rack apps as well as node.js servers! I&rsquo;ll even throw in a Livereload plug in Rails/rack.</p>
 

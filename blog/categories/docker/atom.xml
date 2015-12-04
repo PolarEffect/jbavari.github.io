@@ -4,7 +4,7 @@
   <title><![CDATA[Category: docker | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Exploring Best Practices with Docker for older libraries]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries/"/>
-    <updated>2014-10-21T21:29:00-05:00</updated>
+    <updated>2014-10-21T21:29:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries</id>
     <content type="html"><![CDATA[<p>I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon.</p>
 

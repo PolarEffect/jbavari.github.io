@@ -4,7 +4,7 @@
   <title><![CDATA[Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -14,17 +14,185 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Using JSON serializers in Sinatra]]></title>
+    <link href="http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra/"/>
+    <updated>2015-12-04T11:17:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra</id>
+    <content type="html"><![CDATA[<p>I ran into a quick little issue with serializing some of my <a href="https://github.com/jeremyevans/sequel">Sequel</a> models.</p>
+
+<p>The <a href="http://sequel.jeremyevans.net/rdoc-plugins/classes/Sequel/Plugins/JsonSerializer.html">official JSON serializer docs</a> are great, I just wanted to shine more light on the issue.</p>
+
+<p>If you&rsquo;re using Sequel models, just throw in the quick line of <code>plugin :json_serializer</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Get our database connection</span>
+</span><span class='line'><span class="n">require_relative</span> <span class="s2">&quot;./db&quot;</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">ScoreboardApi</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Team</span> <span class="o">&lt;</span> <span class="ss">Sequel</span><span class="p">:</span><span class="ss">:Model</span><span class="p">(</span><span class="ss">:team</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">plugin</span> <span class="ss">:json_serializer</span>
+</span><span class='line'>    <span class="n">serialize_attributes</span> <span class="ss">:json</span><span class="p">,</span> <span class="ss">:name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then, you just use the Sinatra contrib gem to have it json serializer attach:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Web framework</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;sinatra&quot;</span><span class="p">,</span> <span class="s2">&quot;1.4.6&quot;</span><span class="p">,</span> <span class="nb">require</span><span class="p">:</span> <span class="s2">&quot;sinatra/base&quot;</span>
+</span><span class='line'><span class="c1"># Sinatra addons - JSON, Namespace</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;sinatra-contrib&quot;</span><span class="p">,</span> <span class="s2">&quot;1.4.6&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Set up your API routes and spit out JSON:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;bundler&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/base&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/json&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;sinatra/namespace&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./models/scoreboard&quot;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;./models/team&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bundler</span><span class="o">.</span><span class="n">require</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">ScoreboardApi</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">App</span> <span class="o">&lt;</span> <span class="ss">Sinatra</span><span class="p">:</span><span class="ss">:Application</span>
+</span><span class='line'>    <span class="n">register</span> <span class="ss">Sinatra</span><span class="p">:</span><span class="ss">:Namespace</span>
+</span><span class='line'>    <span class="n">configure</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">disable</span> <span class="ss">:method_override</span>
+</span><span class='line'>      <span class="n">disable</span> <span class="ss">:static</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">set</span> <span class="ss">:sessions</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:httponly</span>     <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:secure</span>       <span class="o">=&gt;</span> <span class="n">production?</span><span class="p">,</span>
+</span><span class='line'>          <span class="ss">:expire_after</span> <span class="o">=&gt;</span> <span class="mi">31557600</span><span class="p">,</span> <span class="c1"># 1 year</span>
+</span><span class='line'>          <span class="ss">:secret</span>       <span class="o">=&gt;</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;SESSION_SECRET&quot;</span><span class="o">]</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">use</span> <span class="ss">Rack</span><span class="p">:</span><span class="ss">:Deflater</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">namespace</span> <span class="s2">&quot;/api/v1&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">get</span> <span class="s2">&quot;/scores&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">json</span> <span class="ss">:scoreboard</span> <span class="o">=&gt;</span> <span class="no">Scoreboard</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">get</span> <span class="s2">&quot;/teams&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">json</span> <span class="ss">:teams</span> <span class="o">=&gt;</span> <span class="no">Team</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&#8221;s all folks!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Playing with Safari 9 Force Touch API]]></title>
+    <link href="http://jbavari.github.io/blog/2015/12/03/playing-with-safari-9-force-touch-api/"/>
+    <updated>2015-12-03T10:46:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/12/03/playing-with-safari-9-force-touch-api</id>
+    <content type="html"><![CDATA[<p>I just got the new Macbook Pro not too long ago and noticed they had this intimately named featured called Force Touch.</p>
+
+<p>Force touch, as it sounds, lets you touch things more <em>intimately</em>. The gist is this &ndash; there are sensors on the new touch pad that let you determine how hard the touch pad is touched, and has some API into that.</p>
+
+<p>I admit, the API is kinda just for fun since only Safari 9 and new Macbooks have the feature. Still, I wanted to play more with ES6 and create a little API wrapper to make it easier and let this feature name to be a little less creepy.</p>
+
+<p>After a little googling, I found an awesome <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html">blog post by Joshua Kehn</a> that detailed more about using Force touch. I wanted to make a quick wrapper around it to do some fun effects and animations.</p>
+
+<p>The idea is &ndash; we&rsquo;ll have an API called <code>TheForce</code> that we can attach handlers to for fun visual effects.</p>
+
+<p>Joshua&rsquo;s demo had a box that when tapped and applying pressure, padding would be increased. I took <a href="https://gist.github.com/joshkehn/3ed6b535408162fe94ae">his gist</a> and turned it into an ES6 module. (See the <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html#demo">demo</a>)</p>
+
+<h2>The API</h2>
+
+<p>I wrote it up last night in a quick hurry. The gist is this:</p>
+
+<ul>
+<li>Attach to a DOM element</li>
+<li>Apply a glow to the element based applied pressure to touchpad</li>
+</ul>
+
+
+<p>Code to attach a button named <code>you</code>, and trigger it automatically:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">luke</span> <span class="o">=</span> <span class="nx">TheForce</span><span class="p">.</span><span class="nx">beWith</span><span class="p">(</span><span class="s1">&#39;you&#39;</span><span class="p">).</span><span class="nx">alter</span><span class="p">({</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c">&lt;!--</span> <span class="nx">luke</span><span class="p">.</span><span class="nx">alter</span><span class="p">(</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span> <span class="o">--&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Respect yourself]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/27/respect-yourself/"/>
-    <updated>2015-11-27T21:58:00-06:00</updated>
+    <updated>2015-11-27T21:58:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/27/respect-yourself</id>
     <content type="html"><![CDATA[<p>I&rsquo;m writing this post as a memoir for myself, a retrospect of sorts. I read <a href="http://sethgodin.typepad.com/seths_blog/2015/11/unconscious-consumption.html">Seth Godins blog about Unconscious consumption</a> and that post inspired me to write this post.</p>
 
 <p>In the last 3 years, amazing events have unfolded. I helped create a start up, <a href="http://raisemore.com">RaiseMore</a>. I moved to Boulder, Colorado. I got a job at Ionic. I met a strong, amazing, beautiful woman who is my girlfriend.</p>
 
-<p>I&rsquo;d like to think what drove that was always reading books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow. I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same.</p>
+<p>I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same. I was striving to always read self-help books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow.</p>
 
 <p>All these new and exciting things kept happening to me. Many times before, I&rsquo;ve asked myself, &lsquo;how did I get so lucky?&rsquo;. Things just had a snowball effect and kept getting better and better!</p>
+
+<p>I&rsquo;d like to think what attracted all these amazing things into my life was from these advancements.</p>
 
 <p>However, something happened during these last 4 months that really threw me in a rut. I developed a poor attitude. I started thinking I was a victim. I no longer work for the company that I had looked up to for so long.</p>
 
@@ -77,9 +245,7 @@
 
 <p>All this was going down and other life issues arise, as they do. My older (15y old) dog was getting worse by the day. My girlfriend was not happy that I was putting her second to work. My friends stopped calling me. My shoulder got injured. I lost confidence in my work because I was burning out.</p>
 
-<p>Then in the final weeks, many of the members that had been core to Ionic 2 were unavailable weeks before the conference and it was double red alert to get things done.</p>
-
-<p>When all things are said and done, at the time, in the workshop, <em>I failed to complete my task for the Windows CLI users</em>.</p>
+<p>Then, a personal goal I had set didn&rsquo;t get delivered to a group of users I was really wanted to, the Windows Ionic CLI users.</p>
 
 <p>This hurt. Failure when placed heavy, can hurt. It hurt even more when I was putting work first, and myself last.</p>
 
@@ -93,7 +259,7 @@
 
 <p>Most importantly, respecting myself. I should always take the time to have a 1 on 1 with myself and really get a sense of where I&rsquo;m at. If I need a break, use that vacation that we are so lucky to have!</p>
 
-<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin)</p>
+<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin). Burnout happens when you don&rsquo;t let your support structure help put out of the flame before you become a pile of ash.</p>
 
 <p>So please, take this time to evaluate yourself and your needs. Be honest with yourself. Focus on caring for yourself. Be compassionate to yourself. Let yourself make mistakes, but learn from them.</p>
 
@@ -108,7 +274,7 @@
   <entry>
     <title type="html"><![CDATA[Ionic 2.0 Generators - Services]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services/"/>
-    <updated>2015-11-06T01:23:00-06:00</updated>
+    <updated>2015-11-06T01:23:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services</id>
     <content type="html"><![CDATA[<p>This is the second post in a series covering the new Ionic Generators in Ionic 2.0. In the <a href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/">first post</a>, we discussed generating pages, let&rsquo;s focus now on generating some services to consume some JSON data via an http request.</p>
 
@@ -268,7 +434,7 @@
   <entry>
     <title type="html"><![CDATA[Using Ionic 2.0 Generators]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/"/>
-    <updated>2015-11-05T21:49:00-06:00</updated>
+    <updated>2015-11-05T21:49:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators</id>
     <content type="html"><![CDATA[<p>At the time of writing this, Ionic 2.0 is still in alpha.</p>
 
@@ -423,7 +589,7 @@
   <entry>
     <title type="html"><![CDATA[Angular 2 and ng-model]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model/"/>
-    <updated>2015-10-21T23:00:00-05:00</updated>
+    <updated>2015-10-21T23:00:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/21/angular-2-and-ng-model</id>
     <content type="html"><![CDATA[<p>Angular 2 introduces <code>ng-model</code> from Angular 1 in a completely different manner. Due to this, I wanted to make a quick post on how to use Angular 2&rsquo;s <code>ng-model</code> to build components that alert its parents app/component of changes.</p>
 
@@ -573,7 +739,7 @@
   <entry>
     <title type="html"><![CDATA[Windows and Webpack with TypeScript and Babel]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/"/>
-    <updated>2015-10-20T21:46:00-05:00</updated>
+    <updated>2015-10-20T21:46:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve recently been diving into the land of <a href="https://webpack.github.io">Webpack</a> to handle all the heavy lifting of using <a href="https://babeljs.io">Babel</a> to compile my <a href="www.typescriptlang.org">TypeScript</a> and <a href="http://es6-features.org">ES6</a> into ES5 JavaScript to be used in <a href="http://ionic.io/2">Ionic 2</a>.</p>
 
@@ -723,7 +889,7 @@
   <entry>
     <title type="html"><![CDATA[Angular 2 Injectables]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/19/angular-2-injectables/"/>
-    <updated>2015-10-19T16:34:00-05:00</updated>
+    <updated>2015-10-19T16:34:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/19/angular-2-injectables</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been fortunate enough to be working on Angular 2 while being on the Ionic team.</p>
 
@@ -999,7 +1165,7 @@
   <entry>
     <title type="html"><![CDATA[npm Production Checklist]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/17/npm-production-checklist/"/>
-    <updated>2015-10-17T18:33:00-05:00</updated>
+    <updated>2015-10-17T18:33:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/17/npm-production-checklist</id>
     <content type="html"><![CDATA[<p>I recently read this post by RisingStack over the <a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a>.</p>
 
@@ -1095,13 +1261,24 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <p>It will give you some heads up if there are latest packages, so you can update if you have too many out of date packages.</p>
 
 <p>Hope this helps!</p>
+
+<p>References:</p>
+
+<ul>
+<li><a href="http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/">Using npm as a build tool</a></li>
+<li><a href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags">Using npm tags</a></li>
+<li><a href="https://docs.npmjs.com/cli/shrinkwrap">npm documentation</a></li>
+<li><a href="https://docs.npmjs.com/misc/developers">npm-developers guide</a></li>
+<li><a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a></li>
+</ul>
+
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Using npm tags]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags/"/>
-    <updated>2015-10-16T15:16:00-05:00</updated>
+    <updated>2015-10-16T15:16:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/16/using-npm-tags</id>
     <content type="html"><![CDATA[<p>If you do any kind of deployments to npm, you&rsquo;ll probably find learning more about npm tags very helpful.</p>
 
@@ -1166,7 +1343,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Understanding Built Node Modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules/"/>
-    <updated>2015-10-15T08:32:00-05:00</updated>
+    <updated>2015-10-15T08:32:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
 
@@ -1197,7 +1374,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Releasing Electron for Windows]]></title>
     <link href="http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows/"/>
-    <updated>2015-09-09T18:50:00-05:00</updated>
+    <updated>2015-09-09T18:50:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows</id>
     <content type="html"><![CDATA[<p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
 
@@ -1416,7 +1593,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Lazy loading your node modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules/"/>
-    <updated>2015-08-25T15:29:00-05:00</updated>
+    <updated>2015-08-25T15:29:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules</id>
     <content type="html"><![CDATA[<p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
 
@@ -1710,7 +1887,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-05:00</updated>
+    <updated>2015-08-14T11:30:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
 
@@ -1901,7 +2078,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[Writing Unit Tests for Electron and AngularJS]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs/"/>
-    <updated>2015-08-12T19:53:00-05:00</updated>
+    <updated>2015-08-12T19:53:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs</id>
     <content type="html"><![CDATA[<p>Unit testing is something most of us dev&rsquo;s don&rsquo;t think much of. Until we encounter some simple to solve bugs or have regressions in code that drives us crazy.</p>
 
@@ -2117,7 +2294,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[Comparisons of nw.js and Electron]]></title>
     <link href="http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron/"/>
-    <updated>2015-05-08T17:11:00-05:00</updated>
+    <updated>2015-05-08T17:11:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron</id>
     <content type="html"><![CDATA[<p>In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There are two main tools that come to mind &ndash; nw.js (formerly known as Node Webkit) and Electron (formerly known as Atom Shell).</p>
 
@@ -2421,7 +2598,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[2014 in review]]></title>
     <link href="http://jbavari.github.io/blog/2014/12/31/2014-in-review/"/>
-    <updated>2014-12-31T14:37:00-06:00</updated>
+    <updated>2014-12-31T14:37:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2014/12/31/2014-in-review</id>
     <content type="html"><![CDATA[<p>2014 has been an interesting year and I&rsquo;d like to spend a minute to review it for myself as a reminder.</p>
 
@@ -2458,7 +2635,7 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
   <entry>
     <title type="html"><![CDATA[A field guide to Snap.svg]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg/"/>
-    <updated>2014-10-23T12:31:00-05:00</updated>
+    <updated>2014-10-23T12:31:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/23/a-field-guide-to-snap-dot-svg</id>
     <content type="html"><![CDATA[<p>This last weekend I spent a little time on a fun little side project to learn how to use <a href="http://snapsvg.io/">Snap.svg</a>. I was trying to take my friend Rob&rsquo;s datachomp character and make it a little interactive.</p>
 
@@ -2646,7 +2823,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Exploring Best Practices with Docker for older libraries]]></title>
     <link href="http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries/"/>
-    <updated>2014-10-21T21:29:00-05:00</updated>
+    <updated>2014-10-21T21:29:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries</id>
     <content type="html"><![CDATA[<p>I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon.</p>
 
@@ -2844,7 +3021,7 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <entry>
     <title type="html"><![CDATA[Managing Environment Variables for your Ionic Application]]></title>
     <link href="http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application/"/>
-    <updated>2014-08-23T20:43:00-05:00</updated>
+    <updated>2014-08-23T20:43:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/08/23/managing-environment-variables-for-your-ionic-application</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been lucky enough to be developing with the Ionic framework lately. One issue I keep running into is &ndash; how do I manage some environment variables (base api url, debug enabled, upload url, etc) across my code, both tests and application.</p>
 
@@ -2943,376 +3120,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
 <p>As I mentioned &ndash; this works great for my tests, as I include the preprocessed file in <code>karma.conf.js</code> so my tests can use <code>AppSettings.baseApiUrl</code> (make sure you have your tests call the <code>dev</code> task first!)</p>
 
 <p>I hope this helps any who may have some environment variables they need to change between environments!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Making Rails Fixtures Across Postgres Schemas play nice]]></title>
-    <link href="http://jbavari.github.io/blog/2014/08/14/making-rails-and-postgres-schemas-play-nice/"/>
-    <updated>2014-08-14T20:58:00-05:00</updated>
-    <id>http://jbavari.github.io/blog/2014/08/14/making-rails-and-postgres-schemas-play-nice</id>
-    <content type="html"><![CDATA[<p>This past week or so I&rsquo;ve had another run in with using Rails to access data across Postgres schemas. I thought I would share some of my experiences I&rsquo;ve had with the two.</p>
-
-<p>I&rsquo;m going to assume you&rsquo;re comfortable with Rails (ActiveRecord with models) and Postgres (what is a schema and why you&rsquo;d want to use one).</p>
-
-<h2>The wild wild west of data</h2>
-
-<p>I had a <code>public</code> schema for most of my data (people, preferences, etc) and another schema <code>bikeshop</code> that has several entries from an external data feed, that may or may not change format along the way.</p>
-
-<h2>To ActiveRecord &ndash; or not to be</h2>
-
-<p>First I tried making some simple ActiveRecord classes, all while admitting I&rsquo;m really not that fond of ActiveRecord.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">BikeStore</span> <span class="o">&lt;</span> <span class="ss">ActiveRecord</span><span class="p">:</span><span class="ss">:Base</span>
-</span><span class='line'>  <span class="n">set_table_name</span> <span class="s1">&#39;bikes.store&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Easy right? It happens to work too, sweet.</p>
-
-<h2>Wait, I thought you wrote tests too?</h2>
-
-<p>Woops, let&rsquo;s get that set up too. First I&rsquo;ll start by setting up my fixtures (<a href="http://google.com">heres</a> a few <a href="http://googe.com">reasons</a> I still use <a href="http://google.com">minitest &amp; fixtures</a>). I started by naming my file <code>bikeshop.yml</code> and it looks like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">first</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">id</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">1</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="s">&#39;Jims</span><span class="nv"> </span><span class="s">Bike</span><span class="nv"> </span><span class="s">shop&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And a quick test:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test_helper&#39;</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">BikeStoreTest</span> <span class="o">&lt;</span> <span class="ss">ActiveSupport</span><span class="p">:</span><span class="ss">:TestCase</span>
-</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
-</span><span class='line'>      <span class="vi">@bike_store</span> <span class="o">=</span> <span class="n">bikesstore</span><span class="p">(</span><span class="ss">:first</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nb">test</span> <span class="s1">&#39;should get bike store name&#39;</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">refute_nil</span> <span class="vi">@bike_store</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Right away you&rsquo;ll get one of these errors:</p>
-
-<ul>
-<li>There is no table named <code>bikestore</code></li>
-<li>There is no function named bikesstore</li>
-</ul>
-
-
-<p>How do you even use or access the fixture data then?</p>
-
-<h3>Fixture naming with schemas</h3>
-
-<p>The trick is this: naming the fixture yaml file <code>schema.table.yml</code> &ndash; that properly sets up the fixture to let us get some test data. I called my file <code>bikes.store.yml</code> and that fixed things up.</p>
-
-<h3>Accessing the fixture data in a test</h3>
-
-<p>Still not sure on this one folks. Please someone comment and help the world out!</p>
-
-<p>Hope this helps</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Managing Cordova Plugins with package.json and hooks]]></title>
-    <link href="http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks/"/>
-    <updated>2014-06-24T17:52:00-05:00</updated>
-    <id>http://jbavari.github.io/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks</id>
-    <content type="html"><![CDATA[<p>In a previous post, I blogged about <a href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">how to manage plugins with variables</a>. I wanted to expand on that some more, and this time, talk about how to use your package.json to manage your plugins with versions as well as a way to reset your cordova set up.</p>
-
-<h2>The problem</h2>
-
-<p>Whenever I start a new Cordova project, I start by adding in all my plugins. Then once they are added, I&rsquo;ll then commit them all and push the repository with all the plugins.</p>
-
-<p>My workflow is usually like this:</p>
-
-<ul>
-<li>cordova create new ProjectApp</li>
-<li>cd ProjectApp</li>
-<li>cordova platform add ios</li>
-<li>cordova plugin add org.apache.cordova.camera</li>
-<li>cordova plugin add org.apache.cordova.contacts</li>
-<li>insert more plugin statements for every plugin we want</li>
-<li>cordova run ios</li>
-<li>cordova run android</li>
-</ul>
-
-
-<p>Occassionaly, I run into this issue when I&rsquo;m using plugins that require native variable hooks when installing. The prime example is the facebook plugin, it requires the <code>APP_ID</code> to be passed in with the <code>cordova plugin add</code> command with the options of <code>--variable APP_ID="some_id"</code>.</p>
-
-<h2>What I&rsquo;d rather do</h2>
-
-<p>It&rsquo;d be nice to have these plugins being saved with their version, so when the next user needs to pull the plugins, or modify the installation, they can just modify the package.json and run a command to install them all. That way, we can get some kind of versioning on our plugins.</p>
-
-<p>Ideally, I want to just type <code>cordova setup</code> &ndash; have it look at my package.json file, and just begin installing what&rsquo;s listed there.</p>
-
-<h3>Making the dream come true</h3>
-
-<p>First, lets start by putting our platforms and plugins in our package.json like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SampleApp&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Sample App&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;ISC&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;platforms&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;ios&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;android&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;plugins&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.camera&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.console&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.contacts&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.device&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.dialogs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file-transfer&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.geolocation&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.inappbrowser&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media-capture&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.network-information&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.splashscreen&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="nt">&quot;locator&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/jbavari/cordova-facebook-connect.git&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nt">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nt">&quot;APP_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
-</span><span class='line'>          <span class="nt">&quot;APP_NAME&quot;</span><span class="p">:</span> <span class="s2">&quot;some_name&quot;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;load-grunt-tasks&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.0&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;time-grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.3.1&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.4&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt-shell&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.6.4&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Platforms</h3>
-
-<p>Now, we&rsquo;ll need a script that will look at our <code>package.json</code> and begin installing our platforms and plugins.</p>
-
-<p>My platform installation script is located in the <code>tasks</code> directory named <code>platforms.js</code>, and looks like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'><span class="c1">//usage: node platforms.js [add | remove]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">packageJson</span><span class="p">.</span><span class="nx">platforms</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">platform</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">platformCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova platform &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nx">platform</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">platformCmd</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Plugins</h3>
-
-<p>My plugin installation script is also in my <code>tasks</code> directory, and named <code>plugins.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//usage: node plugins.js [ add | remove ]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova plugin &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">plugin</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="nx">command</span> <span class="o">===</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">locator</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">variable</span><span class="p">){</span>
-</span><span class='line'>                    <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="s1">&#39;--variable &#39;</span> <span class="o">+</span> <span class="nx">variable</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">[</span><span class="nx">variable</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">;</span>
-</span><span class='line'>                <span class="p">});</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">pluginCmd</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">index</span> <span class="o">&gt;=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">plugin</span> <span class="o">=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCommand</span> <span class="o">=</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>        <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">processPlugin</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Great. Now I don&rsquo;t really need to add all the plugins, remove them, or worry about platforms. I can just run my scripts by doing <code>node tasks/platforms.js</code> or <code>node tasks/plugins.js</code> to have it set up my project as stated in my <code>package.json</code> file.</p>
-
-<p>Easier management for teams, I&rsquo;d like to think.</p>
-
-<p>Hope this helps others.</p>
 ]]></content>
   </entry>
   

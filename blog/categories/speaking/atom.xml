@@ -4,7 +4,7 @@
   <title><![CDATA[Category: speaking | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/speaking/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[OKCjs - Javascript Debugging Techniques]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/20/okcjs-javascript-debugging-techniques/"/>
-    <updated>2014-05-20T11:39:00-05:00</updated>
+    <updated>2014-05-20T11:39:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/20/okcjs-javascript-debugging-techniques</id>
     <content type="html"><![CDATA[<p>I gave a lightning talk today at OKC.js about Javascript Debugging Techniques.</p>
 
@@ -27,7 +27,7 @@
   <entry>
     <title type="html"><![CDATA[Moving Forward with Phonegap / Cordova Plugins]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins/"/>
-    <updated>2014-05-17T15:24:00-05:00</updated>
+    <updated>2014-05-17T15:24:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/moving-forward-with-phonegap-slash-cordova-plugins</id>
     <content type="html"><![CDATA[<p>I spoke about how plugins work and how to create plugins in Cordova at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 
@@ -41,7 +41,7 @@ Enjoy!</p>
   <entry>
     <title type="html"><![CDATA[KCDC - Javascript Build System Showdown]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/16/kcdc-javascript-build-system-showdown/"/>
-    <updated>2014-05-16T10:44:00-05:00</updated>
+    <updated>2014-05-16T10:44:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/16/kcdc-javascript-build-system-showdown</id>
     <content type="html"><![CDATA[<p>I spoke about the different Javascript Build systems at KCDC. I wanted to make sure my slides are available to any who wanted to view them.</p>
 
@@ -59,7 +59,7 @@ Enjoy!</p>
   <entry>
     <title type="html"><![CDATA[Dont be a grunt]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/17/dont-be-a-grunt/"/>
-    <updated>2013-12-17T10:18:00-06:00</updated>
+    <updated>2013-12-17T10:18:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/17/dont-be-a-grunt</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve posted some slides I presented at the <a href="http://okcjs.com">OKC Javascript User Group</a> over Grunt.js titled <a href="http://jbavari.github.io/Dont-Be-a-Grunt-Use-Grunt-Slides/">Dont be a grunt, use grunt</a>.</p>
 

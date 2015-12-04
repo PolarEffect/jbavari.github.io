@@ -4,7 +4,7 @@
   <title><![CDATA[Category: automation | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/automation/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Automating Local IP Lookup With Grunt and Node]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/04/automating-local-ip-lookup-with-grunt-and-node/"/>
-    <updated>2013-12-04T15:18:00-06:00</updated>
+    <updated>2013-12-04T15:18:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/04/automating-local-ip-lookup-with-grunt-and-node</id>
     <content type="html"><![CDATA[<p>In the last few write-ups I&rsquo;ve done lately (see <a href="/blog/2013/12/02/automating-underlying-mobile-infrastructure-with-grunt">the servers post</a> and the <a href="/blog/2013/11/30/automating-phonegap-builds-with-grunt">phonegap builds post</a>), I&rsquo;ve been requiring the user to pass in the IP or the host in the command line. That works and all, but I usually have to go look up that ip using the good ol &lsquo;ifconfig&rsquo; command.</p>
 
@@ -108,7 +108,7 @@ grunt.registerTask('debug', [ 'env:stage', 'preprocess:stage', 'bgShell:weinre']
   <entry>
     <title type="html"><![CDATA[Automating Jasmine Tests With Grunt Karma]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/03/automating-jasmine-tests-with-grunt-karma/"/>
-    <updated>2013-12-03T09:22:00-06:00</updated>
+    <updated>2013-12-03T09:22:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/03/automating-jasmine-tests-with-grunt-karma</id>
     <content type="html"><![CDATA[<p>I find myself lately in falling in love unit testing in Javascript with the <a href="http://pivotal.github.io/jasmine/">Jasmine</a> framework. It&rsquo;s really upped my trust levels that I&rsquo;ve been writing lately.</p>
 
@@ -170,7 +170,7 @@ autoWatch: true
   <entry>
     <title type="html"><![CDATA[Automating Underlying Mobile Infrastructure With Grunt]]></title>
     <link href="http://jbavari.github.io/blog/2013/12/02/automating-underlying-mobile-infrastructure-with-grunt/"/>
-    <updated>2013-12-02T19:15:00-06:00</updated>
+    <updated>2013-12-02T19:15:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/12/02/automating-underlying-mobile-infrastructure-with-grunt</id>
     <content type="html"><![CDATA[<p>I&rsquo;m obsessed with automating some of the tasks that I find myself repetitively doing. I don&rsquo;t know about you, but I hate doing the same thing over and over &ndash; it&rsquo;s boring and pointless</p>
 
@@ -296,7 +296,7 @@ grunt emulator
   <entry>
     <title type="html"><![CDATA[Automating Phonegap Builds with Grunt]]></title>
     <link href="http://jbavari.github.io/blog/2013/11/30/automating-phonegap-builds-with-grunt/"/>
-    <updated>2013-11-30T21:36:00-06:00</updated>
+    <updated>2013-11-30T21:36:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/11/30/automating-phonegap-builds-with-grunt</id>
     <content type="html"><![CDATA[<p>One big thorn in my side lately has been getting our Phonegap/Cordova builds out to our team in a timely manner or just getting our mobile app environment set up. Currently our process involves changing a few files up, running some command line prompts, and then hitting a few different IDE&rsquo;s to crank out builds to manually upload to Testflight (www.testflightapp.com).</p>
 

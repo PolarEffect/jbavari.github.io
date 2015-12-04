@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -14,9 +14,99 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Using JSON serializers in Sinatra]]></title>
+    <link href="http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra/"/>
+    <updated>2015-12-04T11:17:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/12/04/using-json-serializers-in-sinatra</id>
+    <content type="html"><![CDATA[<p>I ran into a quick little issue with serializing some of my <a href="https://github.com/jeremyevans/sequel">Sequel</a> models.</p>
+
+<p>The <a href="http://sequel.jeremyevans.net/rdoc-plugins/classes/Sequel/Plugins/JsonSerializer.html">official JSON serializer docs</a> are great, I just wanted to shine more light on the issue.</p>
+
+<p>If you&rsquo;re using Sequel models, just throw in the quick line of <code>plugin :json_serializer</code>.</p>
+
+<p>``` ruby</p>
+
+<h1>Get our database connection</h1>
+
+<p>require_relative &ldquo;./db&rdquo;
+module ScoreboardApi
+  class Team &lt; Sequel::Model(:team)</p>
+
+<pre><code>plugin :json_serializer
+serialize_attributes :json, :name
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Then, you just use the Sinatra contrib gem to have it json serializer attach:</p>
+
+<p>```</p>
+
+<h1>Web framework</h1>
+
+<p>gem &ldquo;sinatra&rdquo;, &ldquo;1.4.6&rdquo;, require: &ldquo;sinatra/base&rdquo;</p>
+
+<h1>Sinatra addons &ndash; JSON, Namespace</h1>
+
+<p>gem &ldquo;sinatra-contrib&rdquo;, &ldquo;1.4.6&rdquo;
+```</p>
+
+<p>Set up your API routes and spit out JSON:</p>
+
+<p>```
+require &ldquo;bundler&rdquo;
+require &ldquo;sinatra/base&rdquo;
+require &ldquo;sinatra/json&rdquo;
+require &ldquo;sinatra/namespace&rdquo;</p>
+
+<p>require &ldquo;./models/scoreboard&rdquo;
+require &ldquo;./models/team&rdquo;</p>
+
+<p>Bundler.require</p>
+
+<p>module ScoreboardApi
+  class App &lt; Sinatra::Application</p>
+
+<pre><code>register Sinatra::Namespace
+configure do
+  disable :method_override
+  disable :static
+
+  set :sessions,
+      :httponly     =&gt; true,
+      :secure       =&gt; production?,
+      :expire_after =&gt; 31557600, # 1 year
+      :secret       =&gt; ENV["SESSION_SECRET"]
+end
+
+use Rack::Deflater
+
+namespace "/api/v1" do
+  get "/scores" do
+    json :scoreboard =&gt; Scoreboard.all
+  end
+
+  get "/teams" do
+    json :teams =&gt; Team.all
+  end
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>```</p>
+
+<p>That"s all folks!</p>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Pushing Jobs to Sidekiq From Another Server]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server/"/>
-    <updated>2014-06-21T00:35:00-05:00</updated>
+    <updated>2014-06-21T00:35:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/21/pushing-jobs-to-sidekiq-from-another-server</id>
     <content type="html"><![CDATA[<p>We use <a href="http://sidekiq.org/">Sidekiq</a> for our background job processing for videos, social integrations, and other tasks. It works great for what it does.</p>
 
@@ -76,7 +166,7 @@ end
   <entry>
     <title type="html"><![CDATA[Handling Relationships in RethinkDB]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/17/handling-relationships-in-rethinkdb/"/>
-    <updated>2014-05-17T23:06:00-05:00</updated>
+    <updated>2014-05-17T23:06:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/17/handling-relationships-in-rethinkdb</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been playing a lot with <a href="http://rethinkdb.com">RethinkDB</a> and I&rsquo;m in love with it. Such a sweet document database, amazingly beautiful web interface, and easy to use API&rsquo;s in three different languages. I started up a side project that involves some relational data, and ran into a few bumps along the road.</p>
 
@@ -391,7 +481,7 @@ user.first.to_json
   <entry>
     <title type="html"><![CDATA[Pow and weird starting issues]]></title>
     <link href="http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues/"/>
-    <updated>2014-05-07T14:56:00-05:00</updated>
+    <updated>2014-05-07T14:56:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/05/07/pow-and-weird-starting-issues</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been getting this weird error from Pow in Rails 4:</p>
 
@@ -426,7 +516,7 @@ run Rails.application
   <entry>
     <title type="html"><![CDATA[In depth dive with Postgres Hstore and Rails 4]]></title>
     <link href="http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4/"/>
-    <updated>2014-04-26T12:08:00-05:00</updated>
+    <updated>2014-04-26T12:08:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4</id>
     <content type="html"><![CDATA[<p>I had a unique little situation pop up that needed a little more flexibility when it came to storing data in the db. We use Postgres at RaiseMore because we respect ourselves, so naturally, I wanted to take a swing using some Hstore options for our ever changing data schema.</p>
 
@@ -612,94 +702,6 @@ end
 <li><a href="http://blog.remarkablelabs.com/2012/12/a-love-affair-with-postgresql-rails-4-countdown-to-2013">RemarkableLabs &ndash; A love affair with PostgreSQL [Rails 4 Countdown to 2013]</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Making Rails and Postgres Arrays Play Nice]]></title>
-    <link href="http://jbavari.github.io/blog/2014/01/14/making-rails-and-postgres-arrays-play-nice/"/>
-    <updated>2014-01-14T12:01:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2014/01/14/making-rails-and-postgres-arrays-play-nice</id>
-    <content type="html"><![CDATA[<p>Lately I&rsquo;ve had a small need to store an array of string values in a Postgres array instead of making foreign tables and dealing with the fun ActiveRecord fancies there are to play with.</p>
-
-<p>Digging into the topic, I was looking for some pre-existing knowledge on the topic. Turns out the people at <a href="http://blog.relatabase.com/rails-postgres-arrays">Relatabase</a> and <a href="https://coderwall.com/p/sud9ja">Stuart Liston at CoderWall</a> had some great knowledge to share on this.</p>
-
-<p>Being the simpleton that I am, I found a ton of knowledge on how to query them, how to add them to your models, but still lacked some basic knowledge of how to USE them. Maybe you&rsquo;re like me, and this will help.</p>
-
-<p>Adding to Stuart&rsquo;s code, lets assume we&rsquo;ve added the postgres column:</p>
-
-<p>``` ruby
-class AddTechToCompanies &lt; ActiveRecord::Migration
-  def change</p>
-
-<pre><code>add_column :companies, :technology_used, :string, array: true, default: '{}'
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>Using <a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Ruby Scopes</a> and the proper Postgres querying syntax:</p>
-
-<p>``` ruby
-class Company &lt; ActiveRecord::Base</p>
-
-<pre><code>scope :any_tech, -&gt; (tech){where('? = ANY(technology_used)', tech)}
-scope :all_tech, -&gt; (tech){where('? = ALL(technology_used)', tech)}
-</code></pre>
-
-<p>end
-```</p>
-
-<p>Simple enough and easy to read. Lets tackle the simple task of adding a company with a few properties: Name, website, and technology_used.</p>
-
-<p>``` ruby</p>
-
-<h1>..snip..</h1>
-
-<p>company = Company.new
-company.name = &ldquo;RaiseMore&rdquo;
-company.website_url = &ldquo;<a href="http://www.raisemore.com">http://www.raisemore.com</a>&rdquo;
-company.technology_used = [&lsquo;Ruby&rsquo;, &lsquo;Rails&rsquo;, &lsquo;Sinatra&rsquo;, &lsquo;JavaScript&rsquo;, &lsquo;Redis&rsquo;, &lsquo;PhoneGap&rsquo;, &lsquo;Sidekiq&rsquo;]</p>
-
-<p>company.save!
-```</p>
-
-<p>This will add our basic info, as well as get us our data back by doing this:</p>
-
-<p>``` ruby Interactive Console Output
-rails_company = Company.any_tech(&lsquo;Rails&rsquo;)</p>
-
-<p>Company Load (2.6ms)  SELECT &ldquo;companies&rdquo;.* FROM &ldquo;companies&rdquo; WHERE (&lsquo;Rails&rsquo; = ANY(technology_used))
- => #&lt;ActiveRecord::Relation [#<Company id: 1, name: "RaiseMore", founded: "2011", website_url: "http://www.raisemore.com", logo_url: "http://res.cloudinary.com/hfjjoialf/image/upload/v1...", description: "We are an event fundraising platform focused on hel...", company_type: "Start up", market: "Charity Fundraising", technology_used: ["Rails", "Postgres", "Sinatra", "PhoneGap", "JavaScript", "HTML5", "Redis"], interns_needed: true, twitter_id: "@raise_more", created_at: "2014-01-13 21:49:39", updated_at: "2014-01-13 21:49:39">]></p>
-
-<p>rails_company.technology_used</p>
-
-<p>=> [&ldquo;Rails&rdquo;, &ldquo;Postgres&rdquo;, &ldquo;Sinatra&rdquo;, &ldquo;PhoneGap&rdquo;, &ldquo;JavaScript&rdquo;, &ldquo;HTML5&rdquo;, &ldquo;Redis&rdquo;]</p>
-
-<p>```</p>
-
-<p>Cool, so saving the array data is easy. What about updating? As <a href="http://blog.relatabase.com/rails-postgres-arrays">the relatabase post points out</a>,</p>
-
-<p><code>One huge caveat of this approach is that rails doesn’t clone the array when saving the original for dirty checking, so any in-place modification to the array won’t register that it’s changed.</code></p>
-
-<p>This leaves us with these options:</p>
-
-<ul>
-<li>set the dirty flag ourselves: <code>rails_company.technology_used_will_change!</code></li>
-<li>update using update_attributes: <code>rails_company.update_attributes(:technology_used =&gt; ['Rails', 'Redis', 'Go', 'Erlang'] )</code></li>
-</ul>
-
-
-<h2>Overall results</h2>
-
-<p>The way Rails handles arrays is not as complete as a like, but hey, we are skipping a step by getting around foreign key tables. It&rsquo;s not like you should expect much. I&rsquo;d say they are allowed for small use projects, but if you really need to do some searching or have referential integrity, stick with foreign key tables.</p>
-
-<p>Also, check out the following resources:</p>
-
-<p><a href="http://adamsanderson.github.io/railsconf_2013/?full#1">Postgres &ndash; The Best Tool You&rsquo;re Already Using</a></p>
-
-<p><a href="http://reefpoints.dockyard.com/ruby/2012/09/18/rails-4-sneak-peek-postgresql-array-support.html">Rails 4.0 Sneak Peek: PostgreSQL array support</a></p>
 ]]></content>
   </entry>
   

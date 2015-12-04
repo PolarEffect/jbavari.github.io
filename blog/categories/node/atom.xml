@@ -4,7 +4,7 @@
   <title><![CDATA[Category: node | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/node/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Ionic 2.0 Generators - Services]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services/"/>
-    <updated>2015-11-06T01:23:00-06:00</updated>
+    <updated>2015-11-06T01:23:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/06/ionic-2-dot-0-generators-services</id>
     <content type="html"><![CDATA[<p>This is the second post in a series covering the new Ionic Generators in Ionic 2.0. In the <a href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/">first post</a>, we discussed generating pages, let&rsquo;s focus now on generating some services to consume some JSON data via an http request.</p>
 
@@ -136,7 +136,7 @@ data.retrieveData();
   <entry>
     <title type="html"><![CDATA[Using Ionic 2.0 Generators]]></title>
     <link href="http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators/"/>
-    <updated>2015-11-05T21:49:00-06:00</updated>
+    <updated>2015-11-05T21:49:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/11/05/using-ionic-2-dot-0-generators</id>
     <content type="html"><![CDATA[<p>At the time of writing this, Ionic 2.0 is still in alpha.</p>
 
@@ -263,7 +263,7 @@ Available generators:
   <entry>
     <title type="html"><![CDATA[npm Production Checklist]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/17/npm-production-checklist/"/>
-    <updated>2015-10-17T18:33:00-05:00</updated>
+    <updated>2015-10-17T18:33:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/17/npm-production-checklist</id>
     <content type="html"><![CDATA[<p>I recently read this post by RisingStack over the <a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a>.</p>
 
@@ -359,13 +359,24 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <p>It will give you some heads up if there are latest packages, so you can update if you have too many out of date packages.</p>
 
 <p>Hope this helps!</p>
+
+<p>References:</p>
+
+<ul>
+<li><a href="http://blog.keithcirkel.co.uk/how-to-use-npm-as-a-build-tool/">Using npm as a build tool</a></li>
+<li><a href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags">Using npm tags</a></li>
+<li><a href="https://docs.npmjs.com/cli/shrinkwrap">npm documentation</a></li>
+<li><a href="https://docs.npmjs.com/misc/developers">npm-developers guide</a></li>
+<li><a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a></li>
+</ul>
+
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Using npm tags]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags/"/>
-    <updated>2015-10-16T15:16:00-05:00</updated>
+    <updated>2015-10-16T15:16:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/16/using-npm-tags</id>
     <content type="html"><![CDATA[<p>If you do any kind of deployments to npm, you&rsquo;ll probably find learning more about npm tags very helpful.</p>
 
@@ -430,7 +441,7 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
   <entry>
     <title type="html"><![CDATA[Understanding Built Node Modules]]></title>
     <link href="http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules/"/>
-    <updated>2015-10-15T08:32:00-05:00</updated>
+    <updated>2015-10-15T08:32:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/10/15/understanding-built-node-modules</id>
     <content type="html"><![CDATA[<p>If you&rsquo;ve recently change node versions and begun running into issues with some of your modules, you might get a little help from understanding how native node modules work.</p>
 

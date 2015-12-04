@@ -4,7 +4,7 @@
   <title><![CDATA[Category: testflight | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/testflight/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Automating Phonegap Builds with Grunt]]></title>
     <link href="http://jbavari.github.io/blog/2013/11/30/automating-phonegap-builds-with-grunt/"/>
-    <updated>2013-11-30T21:36:00-06:00</updated>
+    <updated>2013-11-30T21:36:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2013/11/30/automating-phonegap-builds-with-grunt</id>
     <content type="html"><![CDATA[<p>One big thorn in my side lately has been getting our Phonegap/Cordova builds out to our team in a timely manner or just getting our mobile app environment set up. Currently our process involves changing a few files up, running some command line prompts, and then hitting a few different IDE&rsquo;s to crank out builds to manually upload to Testflight (www.testflightapp.com).</p>
 

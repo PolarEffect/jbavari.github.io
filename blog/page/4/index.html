@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="Lately I&rsquo;ve been playing a lot with RethinkDB and I&rsquo;m in love with it. Such a sweet document database, amazingly beautiful web interface &hellip;">
+  <meta name="description" content="I&rsquo;ve been using AngularJS a lot lately in some of my projects at work. It&rsquo;s been a great tool to use to help me solve challenging &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -76,6 +76,275 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2014/06/04/handling-angularjs-popups-for-oauth/">Handling AngularJS Popups for OAuth on Rails</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-04T22:56:00-06:00" pubdate data-updated="true">Jun 4<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;ve been using AngularJS a lot lately in some of my projects at work. It&rsquo;s been a great tool to use to help me solve challenging problems the nicest and cleanest way possible.</p>
+
+<p>I ran into needing some users to log into a variety of different social platforms. Since I was using Rails, I chose to use <a href="https://github.com/intridea/omniauth">omniauth</a> for <a href="https://github.com/mkdynamic/omniauth-facebook">facebook</a> and <a href="https://github.com/arunagw/omniauth-twitter">twitter</a>. It became even more challenging because they needed to login to these platforms with THEIR social application ID&rsquo;s, not ours.</p>
+
+<h2>The Problem</h2>
+
+<ul>
+<li>Need to have admin window where user clicks login button for facebook or twitter and logs in with their Facebook application (think Coke, Pepsi, etc)</li>
+<li>User then sees pop up window where OAuth login process happens</li>
+<li>After OAuth login complete, pop up window goes away and they resume their actions</li>
+</ul>
+
+
+<h2>The solution</h2>
+
+<h3>Solving dynamic twitter/facebook log ins for Social Platforms</h3>
+
+<p>I started by having this config in Rails for my omniauth initializer:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='rb'><span class='line'><span class="no">SETUP_FACEBOOK</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">env</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">AccountAuth</span><span class="o">.</span><span class="n">setup_facebook_keys</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">SETUP_TWITTER</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">env</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">AccountAuth</span><span class="o">.</span><span class="n">setup_twitter_keys</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">use</span> <span class="ss">OmniAuth</span><span class="p">:</span><span class="ss">:Builder</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">provider</span> <span class="ss">:twitter</span><span class="p">,</span> <span class="ss">:setup</span> <span class="o">=&gt;</span> <span class="no">SETUP_TWITTER</span>
+</span><span class='line'>    <span class="n">provider</span> <span class="ss">:facebook</span><span class="p">,</span> <span class="ss">:setup</span> <span class="o">=&gt;</span> <span class="no">SETUP_FACEBOOK</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Simple and clean. In those AccountAuth methods, I take the <code>env</code> variable (essential the request) and pick off my variables there from an OAuth URL (<a href="http://my.dashboard.dev/auth/facebook?appid=123456789">http://my.dashboard.dev/auth/facebook?appid=123456789</a>).</p>
+
+<h3>Solving the User pop up</h3>
+
+<p>I had a dashboard with a ton of user actions, as well as two well placed social log in buttons. View template like so:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;container&quot;</span> <span class="na">ng-controller=</span><span class="s">&quot;SettingsCtrl&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-12&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;header-copy&quot;</span><span class="nt">&gt;</span>Account Settings<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;section-title&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;row&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-6&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;header-copy&quot;</span><span class="nt">&gt;</span>Facebook Settings<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;divider&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">ng-show=</span><span class="s">&quot;facebookId&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                    Currently ({{ facebookName}}) <span class="ni">&amp;nbsp;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;btn dash-subs&quot;</span> <span class="na">ng-click=</span><span class="s">&quot;logout(&#39;facebook&#39;)&quot;</span><span class="nt">&gt;</span>Logout<span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">ng-hide=</span><span class="s">&quot;facebookId&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;btn dash-subs login-btn&quot;</span> <span class="na">ng-click=</span><span class="s">&quot;authNetwork(&#39;facebook&#39;)&quot;</span><span class="nt">&gt;</span>Login With Facebook<span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;col-md-6&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;header-copy&quot;</span><span class="nt">&gt;</span>Twitter Settings<span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;divider&quot;</span><span class="nt">&gt;&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">ng-show=</span><span class="s">&quot;twitterName&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                    Currently (@{{twitterName}}) <span class="ni">&amp;nbsp;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;btn dash-subs&quot;</span> <span class="na">ng-click=</span><span class="s">&quot;logout(&#39;twitter&#39;)&quot;</span><span class="nt">&gt;</span>Logout<span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;div</span> <span class="na">ng-hide=</span><span class="s">&quot;twitterName&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>                    <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;btn dash-subs login-btn&quot;</span> <span class="na">ng-click=</span><span class="s">&quot;authNetwork(&#39;twitter&#39;)&quot;</span><span class="nt">&gt;</span>Login With Twitter<span class="nt">&lt;/span&gt;</span>
+</span><span class='line'>                <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>            <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>        <span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now on my SettingsCtrl, I had to respond to the authNetwork clicks in the template above to show my pop up window for the network specified, handle its settings, then update this controller. We get that link by setting a global variable on the <code>window</code> that opened by doing <code>window.$windowScope = $scope</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;myApp&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ui.bootstrap&#39;</span><span class="p">]);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">SettingsCtrl</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">$http</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">//..snip!..</span>
+</span><span class='line'>   <span class="nx">$scope</span><span class="p">.</span><span class="nx">handlePopupAuthentication</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">handlePopupAuthentication</span><span class="p">(</span><span class="nx">network</span><span class="p">,</span> <span class="nx">account</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1">//Note: using $scope.$apply wrapping</span>
+</span><span class='line'>      <span class="c1">//the window popup will call this </span>
+</span><span class='line'>      <span class="c1">//and is unwatched func </span>
+</span><span class='line'>      <span class="c1">//so we need to wrap</span>
+</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">(</span><span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>         <span class="nx">$scope</span><span class="p">.</span><span class="nx">applyNetwork</span><span class="p">(</span><span class="nx">network</span><span class="p">,</span> <span class="nx">account</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="nx">$scope</span><span class="p">.</span><span class="nx">authNetwork</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">authNetwork</span><span class="p">(</span><span class="nx">network</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">openUrl</span> <span class="o">=</span> <span class="s1">&#39;/auth/&#39;</span> <span class="o">+</span> <span class="nx">network</span> <span class="o">+</span> <span class="s1">&#39;?account_id=&#39;</span> <span class="o">+</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">accountTokens</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;&amp;eid=&quot;</span> <span class="o">+</span> <span class="nx">eventId</span><span class="p">;</span>
+</span><span class='line'>      <span class="nb">window</span><span class="p">.</span><span class="nx">$windowScope</span> <span class="o">=</span> <span class="nx">$scope</span><span class="p">;</span>
+</span><span class='line'>      <span class="nb">window</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="nx">openUrl</span><span class="p">,</span> <span class="s2">&quot;Authenticate Account&quot;</span><span class="p">,</span> <span class="s2">&quot;width=500, height=500&quot;</span><span class="p">);</span>
+</span><span class='line'>   <span class="p">};</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Solving popup talking to AngularJS controller</h3>
+
+<p>Once the OAuth pop up that is being opened via <code>window.open</code> is completed, it will come back to our server (<a href="http://my.dashboard.dev/session/create">http://my.dashboard.dev/session/create</a>) in which I will render a view through Rails that will display a simple &lsquo;this window is closing&rsquo; message. It will also pass in some information from the Rails controller and pass back its completed information back to our calling AngularJS controller. (Thats a lot of controllers, folks)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="o">&lt;</span><span class="nx">p</span><span class="o">&gt;</span><span class="nx">This</span> <span class="nx">view</span> <span class="nx">will</span> <span class="nx">now</span> <span class="nx">self</span><span class="o">-</span><span class="nx">destruct</span><span class="o">&lt;</span><span class="err">/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+</span><span class='line'>   <span class="k">try</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nb">window</span><span class="p">.</span><span class="nx">opener</span><span class="p">.</span><span class="nx">$windowScope</span><span class="p">.</span><span class="nx">handlePopupAuthentication</span><span class="p">(</span><span class="s1">&#39;&lt;%= @provider %&gt;&#39;</span><span class="p">,</span> <span class="o">&lt;%=</span> <span class="err">@</span><span class="nx">account</span><span class="p">.</span><span class="nx">to_json</span><span class="p">.</span><span class="nx">html_safe</span> <span class="o">%&gt;</span><span class="p">);</span>
+</span><span class='line'>   <span class="p">}</span> <span class="k">catch</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{}</span>
+</span><span class='line'>   <span class="nb">window</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Conclusion</h3>
+
+<p>That&rsquo;s pretty much it. That is how I handled my popups reporting back to its calling AngularJS controller through OAuth on Rails. Hope this helps others out there trying to solve problems like these.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/05/20/okcjs-javascript-debugging-techniques/">OKCjs - Javascript Debugging Techniques</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-05-20T11:39:00-06:00" pubdate data-updated="true">May 20<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I gave a lightning talk today at OKC.js about Javascript Debugging Techniques.</p>
+
+<p>The slides can be found <a href="http://jbavari.github.io/JavascriptDebuggingTechniques/#/">here</a>.</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2014/05/17/handling-relationships-in-rethinkdb/">Handling Relationships in RethinkDB</a></h1>
     
     
@@ -93,7 +362,7 @@
   
 
 
-<time datetime="2014-05-17T23:06:00-05:00" pubdate data-updated="true">May 17<span>th</span>, 2014</time>
+<time datetime="2014-05-17T23:06:00-06:00" pubdate data-updated="true">May 17<span>th</span>, 2014</time>
         
       </p>
     
@@ -562,7 +831,7 @@
   
 
 
-<time datetime="2014-05-17T15:24:00-05:00" pubdate data-updated="true">May 17<span>th</span>, 2014</time>
+<time datetime="2014-05-17T15:24:00-06:00" pubdate data-updated="true">May 17<span>th</span>, 2014</time>
         
       </p>
     
@@ -604,7 +873,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-05-16T10:44:00-05:00" pubdate data-updated="true">May 16<span>th</span>, 2014</time>
+<time datetime="2014-05-16T10:44:00-06:00" pubdate data-updated="true">May 16<span>th</span>, 2014</time>
         
       </p>
     
@@ -650,7 +919,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-05-07T14:56:00-05:00" pubdate data-updated="true">May 7<span>th</span>, 2014</time>
+<time datetime="2014-05-07T14:56:00-06:00" pubdate data-updated="true">May 7<span>th</span>, 2014</time>
         
       </p>
     
@@ -716,7 +985,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-04-26T12:08:00-05:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time>
+<time datetime="2014-04-26T12:08:00-06:00" pubdate data-updated="true">Apr 26<span>th</span>, 2014</time>
         
       </p>
     
@@ -981,7 +1250,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-04-18T10:13:00-05:00" pubdate data-updated="true">Apr 18<span>th</span>, 2014</time>
+<time datetime="2014-04-18T10:13:00-06:00" pubdate data-updated="true">Apr 18<span>th</span>, 2014</time>
         
       </p>
     
@@ -1052,7 +1321,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-04-14T20:58:00-05:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
+<time datetime="2014-04-14T20:58:00-06:00" pubdate data-updated="true">Apr 14<span>th</span>, 2014</time>
         
       </p>
     
@@ -1105,7 +1374,7 @@ Enjoy!</p>
   
 
 
-<time datetime="2014-04-03T10:04:00-05:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
+<time datetime="2014-04-03T10:04:00-06:00" pubdate data-updated="true">Apr 3<span>rd</span>, 2014</time>
         
       </p>
     
@@ -1147,205 +1416,6 @@ Enjoy!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">Properly Using Plugins With Variables in Phonegap / Cordova Applications</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-29T02:14:00-05:00" pubdate data-updated="true">Mar 29<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In the past week I&rsquo;ve been working on upgrading our mobile application from PhoneGap 2.9 to Cordova 3.4. (There is no real reason for going from PhoneGap to Cordova, just that I&rsquo;ve been actively committing to the Cordova project).</p>
-
-<p>I&rsquo;ve come in contact with a weird bug with the Cordova CLI when using plugins that require variables to install them.</p>
-
-<p>Currently <a href="http://devgirl.org/2013/11/12/three-hooks-your-cordovaphonegap-project-needs/">Holly Schinsky and Dan Moore</a> recommend using the <a href="https://github.com/apache/cordova-cli/blob/master/templates/hooks-README.md">Cordova Hook</a> <code>after_platform_add</code> to add in the plugins via a plugin list. While I too think this is a great idea, there is a small problem with it as of Phonegap/Cordova 3.4 when you use plugins with variables.</p>
-
-<p>Before we go further, lets just get a quick intro to the platform hook calls that the <a href="https://github.com/apache/cordova-cli/blob/master/src/platform.js#l56">Cordova CLI</a> gives us. First it will fire off the scripts in the <code>/app/hooks/before_platform_add</code> (or <code>/app/.cordova/hooks/before_platform_add</code> if you&rsquo;re on PhoneGap/Cordova &lt;= 3.3) folder.</p>
-
-<p>Next, Cordova CLI will go through some configs and eventually use a function named <code>call_into_create</code> that will do some housecleaning, but most importantly will <a href="https://github.com/apache/cordova-cli/blob/master/src/platform.js#l378">re-install currently installed plugins</a>.</p>
-
-<p>Certain plugins will require variables for them to be installed. Take a look at the Phonegap Facebook Connect plugin, for example: <code>cordova plugin add https://github.com/phonegap/phonegap-facebook-plugin.git --variable APP_ID='appId' --variable APP_NAME='appName'</code>. Using Holly and Dan&rsquo;s solution, you an add that inline as well, like so:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>var pluginlist = [
-</span><span class='line'>    "https://github.com/phonegap/phonegap-facebook-plugin.git --variable APP_ID='" + appId + "' --variable APP_NAME='" + appName + "'",
-</span><span class='line'>    "org.apache.cordova.camera",
-</span><span class='line'>    "org.apache.cordova.console",
-</span><span class='line'>    "org.apache.cordova.contacts"];
-</span><span class='line'>
-</span><span class='line'>var fs = require('fs');
-</span><span class='line'>var path = require('path');
-</span><span class='line'>var sys = require('sys')
-</span><span class='line'>var exec = require('child_process').exec;
-</span><span class='line'> 
-</span><span class='line'>function puts(error, stdout, stderr) {
-</span><span class='line'>    sys.puts(stdout)
-</span><span class='line'>}
-</span><span class='line'> 
-</span><span class='line'>pluginlist.forEach(function(plug) {
-</span><span class='line'>    exec("cordova plugin add " + plug, puts);
-</span><span class='line'>});
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>The problem is, when Cordova CLI goes through to reinstall the plugins, it isn&rsquo;t passing in the variables and will fail to install them, but it will still add the folder to the plugins directory and json file. In fact, after adding the plugins, it will then call the hook (as seen above) and try to install plug-ins yet a second time. And by fail, I mean it will still fail with the facebook plugin &ndash; cordova CLI failed therefore it&rsquo;s half installed, so the hook will fail. (I hope this is clear)</p>
-
-<p>To recap, here&rsquo;s the flow of how to reproduce the problem:</p>
-
-<ul>
-<li>Create new project with <code>cordova create</code></li>
-<li>Add platform for ios</li>
-<li>Add plugin with variables &ndash; <code>cordova plugin add https://github.com/phonegap/phonegap-facebook-plugin.git --variable APP_ID='appId' --variable APP_NAME='appName'</code></li>
-<li>Add platform for android</li>
-</ul>
-
-
-<p>That&rsquo;s when you&rsquo;ll see:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Installing com.phonegap.plugins.facebookconnect (android)
-</span><span class='line'>Error: Variable(s) missing: APP_ID, APP_NAME
-</span><span class='line'>    at /usr/local/lib/node_modules/cordova/node_modules/plugman/src/install.js:252:29
-</span><span class='line'>    at _fulfilled (/usr/local/lib/node_modules/cordova/node_modules/q/q.js:798:54)
-</span><span class='line'>    at self.promiseDispatch.done (/usr/local/lib/node_modules/cordova/node_modules/q/q.js:827:30)
-</span><span class='line'>    at Promise.promise.promiseDispatch (/usr/local/lib/node_modules/cordova/node_modules/q/q.js:760:13)
-</span><span class='line'>    at /usr/local/lib/node_modules/cordova/node_modules/q/q.js:574:44
-</span><span class='line'>    at flush (/usr/local/lib/node_modules/cordova/node_modules/q/q.js:108:17)
-</span><span class='line'>    at process._tickCallback (node.js:415:13)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You&rsquo;re probably wondering &ndash; why not add both of the platforms first, then add the plugin? That&rsquo;s what I recommend doing now.</p>
-
-<p>However, going back to Holly and Dan&rsquo;s post, I highly recommend if you have any plugins with variables that you do a little clean-up of plugin&rsquo;s before adding them. And by clean-up, I mean, remove the plugins before adding them.</p>
-
-<p>This should only be an issue until the awesome Cordova team fixes the issue of adding plugins correctly.</p>
-
-<p>Hope this helps!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/03/19/rethinkdb-the-importing-json-process/">RethinkDB the Importing Json Process</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-03-19T00:51:00-05:00" pubdate data-updated="true">Mar 19<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I was playing around tonight with RethinkDB &ndash; and I wanted to import some data from a JSON file. It wasn&rsquo;t very well documented, so I wanted to make sure I high-light that for others. <a href="http://www.rethinkdb.com/docs/tutorials/elections/">The tutorial post to see RethinkDB&rsquo;s import</a> covers this command to fire off:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>rethinkdb import -c localhost:28015 --table registry.plugins --pkey _id -f plugins.json --format json</span></code></pre></td></tr></table></div></figure>
-
-
-<p>It&rsquo;s real easy &ndash; lets break it down:</p>
-
-<ul>
-<li>The first part, <code>-c localhost:28015</code> specifies the cluster host and port.</li>
-<li>The next, <code>--table registry.plugins</code> specifies the database &lsquo;registry&rsquo;, and the table &lsquo;plugins&rsquo;.</li>
-<li>Next up is specifying the primary index key of &lsquo;_id&rsquo; with <code>--pkey _id</code>.</li>
-<li>Finally, <code>-f plugins.json --format json</code> tells Rethink to pull in the file located in the CWD named plugins.json, in the jason formats!</li>
-</ul>
-
-
-<p>Chances are, you might not have that Python driver, which gives you this message:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Error when launching rethinkdb-import: No such file or directory
-</span><span class='line'>The rethinkdb-import command depends on the RethinkDB Python driver, which must be installed.
-</span><span class='line'>Instructions for installing the RethinkDB Python driver are available here:
-</span><span class='line'>http://www.rethinkdb.com/docs/install-drivers/python/</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If thats the case, run the command to install the rethinkdb-import Python driver:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo pip install rethinkdb</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Boom! Now get back to work.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -1363,6 +1433,14 @@ Enjoy!</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
@@ -1372,14 +1450,6 @@ Enjoy!</p>
     
       <li class="post">
         <a href="/blog/2015/11/05/using-ionic-2-dot-0-generators/">Using Ionic 2.0 Generators</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/21/angular-2-and-ng-model/">Angular 2 and Ng-model</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/10/20/windows-and-webpack-with-typescript-and-babel/">Windows and Webpack With TypeScript and Babel</a>
       </li>
     
   </ul>

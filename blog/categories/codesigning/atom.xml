@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codesigning | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/codesigning/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
     <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-05:00</updated>
+    <updated>2015-08-14T11:30:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
     <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
 

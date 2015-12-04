@@ -4,7 +4,7 @@
   <title><![CDATA[Category: nodejs | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/nodejs/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-11-27T23:22:01-06:00</updated>
+  <updated>2015-12-04T11:28:24-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Using npm scripts for Cordova]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova/"/>
-    <updated>2014-06-19T00:25:00-05:00</updated>
+    <updated>2014-06-19T00:25:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/19/using-npm-scripts-for-cordova</id>
     <content type="html"><![CDATA[<p>For those of you that don&rsquo;t know, Cordova has <a href="https://github.com/apache/cordova-lib/blob/master/cordova-lib/templates/hooks-README.md">hooks</a> that can run on each of the specific build tasks that Cordova goes through. For example the task that happens after all the platform specific code is set up, the <code>after_prepare</code> hook is fired.</p>
 
@@ -184,7 +184,7 @@ console.log(&lsquo;Removed: &rsquo;, uglifyJsPath)
   <entry>
     <title type="html"><![CDATA[Building a chat client with Ionic / Socket.io / Redis / Node.js]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic/"/>
-    <updated>2014-06-17T00:09:00-05:00</updated>
+    <updated>2014-06-17T00:09:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/17/building-a-chat-client-with-ionic</id>
     <content type="html"><![CDATA[<p>I wanted a fun challenge to push myself and cross a few things off my ever so growing <code>I want to play with this</code> type of lists. I love learning, and there are so many awesome tools / utilities / libraries out there to evaluate its hard to justify incorporating them into every project at work without having some knowledge of the tools.</p>
 
@@ -447,7 +447,7 @@ $scope.joinChannel('Lobby');
   <entry>
     <title type="html"><![CDATA[Unit Testing AngularJS Services]]></title>
     <link href="http://jbavari.github.io/blog/2014/06/11/unit-testing-angularjs-services/"/>
-    <updated>2014-06-11T17:52:00-05:00</updated>
+    <updated>2014-06-11T17:52:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/06/11/unit-testing-angularjs-services</id>
     <content type="html"><![CDATA[<p>I&rsquo;ve been using AngularJS a lot lately. Since I do a lot of Javascript, that means I&rsquo;m prone to make a lot of runtime script errors.</p>
 
@@ -892,7 +892,7 @@ it('should have sent a POST request to the checkuser API', function() {
   <entry>
     <title type="html"><![CDATA[How I use npm link]]></title>
     <link href="http://jbavari.github.io/blog/2014/04/03/how-i-use-npm-link/"/>
-    <updated>2014-04-03T10:04:00-05:00</updated>
+    <updated>2014-04-03T10:04:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/04/03/how-i-use-npm-link</id>
     <content type="html"><![CDATA[<p>Throughout the last few months, I&rsquo;ve began helping out the <a href="http://cordova.apache.orc">Cordova</a> team with a few bug fixes that I come across and want to contribute back.</p>
 
@@ -928,7 +928,7 @@ it('should have sent a POST request to the checkuser API', function() {
   <entry>
     <title type="html"><![CDATA[RethinkDB the importing json process]]></title>
     <link href="http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process/"/>
-    <updated>2014-03-19T00:51:00-05:00</updated>
+    <updated>2014-03-19T00:51:00-06:00</updated>
     <id>http://jbavari.github.io/blog/2014/03/19/rethinkdb-the-importing-json-process</id>
     <content type="html"><![CDATA[<p>I was playing around tonight with RethinkDB &ndash; and I wanted to import some data from a JSON file. It wasn&rsquo;t very well documented, so I wanted to make sure I high-light that for others. <a href="http://www.rethinkdb.com/docs/tutorials/elections/">The tutorial post to see RethinkDB&rsquo;s import</a> covers this command to fire off:</p>
 
