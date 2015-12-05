@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-12-04T11:28:24-07:00</updated>
+  <updated>2015-12-04T18:03:52-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,217 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[The Scoreboard Project]]></title>
+    <link href="http://jbavari.github.io/blog/2015/12/04/the-scoreboard-project/"/>
+    <updated>2015-12-04T17:22:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2015/12/04/the-scoreboard-project</id>
+    <content type="html"><![CDATA[<p>Lately, I&rsquo;ve been wanting to get a feel for some technologies I&rsquo;ve been wanting to explore and gain more experience. Not only this, but I wanted to make sure my dev workflow was great, my tools were sharpened, and I was re-establishing the best practices as much as I could.</p>
+
+<p>Those specific technologies I wanted to dig into was:</p>
+
+<ul>
+<li>Building a CLI in Ruby, using <a href="https://github.com/erikhuda/thor">Thor</a></li>
+<li>A <a href="http://sinatrarb.com">Sinatra</a> Modular API</li>
+<li><a href="https://github.com/jeremyevans/sequel">Sequel</a> Models</li>
+<li><a href="https://github.com/Shopify/dashing">Dashing</a> &ndash; Building a dashboard</li>
+<li><a href="https://github.com/bbatsov/rubocop">Rubocop</a> &ndash; A Ruby static code analyzer, based on the community Ruby style guide.</li>
+<li><a href="http://codeclimate.com">CodeClimate</a> &ndash; Automated Code Review</li>
+</ul>
+
+
+<p>I found a way to connect all the dots in what I&rsquo;m calling the scoreboard project. I chose these technologies because it would let me shine up my ruby/sql skills without a framework carrying me the way. (Although they mostly did anyway!)</p>
+
+<p>This blog post will go over the idea of making an API around scoreboards. There will be a simple CLI tool to gather scores on &lsquo;games&rsquo;. Those scores will be sent to the API, to store in Postgres. The dashboard project will then pull these values and display them in an easy to digest way.</p>
+
+<h2>This post</h2>
+
+<p>With this post, i&rsquo;ll go over the individual pieces of the project, the interesting tidbits of each one, and finally go over a short retrospective over the entire project.</p>
+
+<h2>The pieces</h2>
+
+<ul>
+<li><a href="https://github.com/jbavari/scoreboard-cli">Scoreboard CLI</a></li>
+<li><a href="https://github.com/jbavari/scoreboard-api">Scoreboard API</a></li>
+<li><a href="https://github.com/jbavari/scoreboard-dashboard">Scoreboard Dashboard</a></li>
+<li>Scoreboard Mobile App (coming soon)</li>
+</ul>
+
+
+<p>All of the projects are listed on my github profile. I&rsquo;ve been trying to keep most issues in the github repo&rsquo;s issue page for each respective project.</p>
+
+<p>All of the projects are checked by CodeClimate, and I&rsquo;ve been trying to keep up with rubocop&rsquo;s rules on these as I go.</p>
+
+<h2>Scoreboard CLI</h2>
+
+<p>The idea for the CLI was to prompt the user for a home team and visitor team, then collect data about getting a touch down for the home team, for example: <code>h:td</code>.</p>
+
+<p>It would keep prompting for more scoring plays until the user gives a SIGTERM or hits CTRL+D.</p>
+
+<p>First I started by reading up on Thor, which was an absolute pleasure to work with. You can download it via <code>gem install scoreboard</code>. The main points were, creating the</p>
+
+<p>To make it available via command line, I added this:</p>
+
+<p><code>ruby
+  spec.bindir        = "bin"
+  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+</code></p>
+
+<p>Then in <code>bin/scoreboard</code> <a href="https://github.com/jbavari/scoreboard-cli/blob/master/bin/scoreboard">link</a>, we just require in our CLI and run it with the arguments:</p>
+
+<p>``` ruby</p>
+
+<h1>!/usr/bin/env ruby</h1>
+
+<p>require_relative &ldquo;../lib/scoreboard/cli&rdquo;</p>
+
+<p>begin
+  cli = Scoreboard::Cli.new
+  cli.start(ARGV)
+rescue => e
+  raise e if $DEBUG
+  STDERR.puts e.message
+  STDERR.puts e.backtrace.join(&ldquo;\n&rdquo;)
+  exit 1
+end
+```</p>
+
+<h3>A note on the SIGTERM exception handling</h3>
+
+<p>If you see in my <code>STDIN.each_line</code> loop where I read in scoring entries, <a href="https://github.com/jbavari/scoreboard-cli/blob/master/lib/scoreboard/cli.rb#L47">you will see</a> I rescue all Exception. This could be improved to find the exact SIGTERM exception is being thrown, but for simplicity, I left it catching the general exception.</p>
+
+<h2>Scoreboard API</h2>
+
+<p>The API has a few paths, based on the <code>/api/v1</code> namespace for requests.</p>
+
+<p>You can access its teams or the entire scoreboard, via <code>GET /api/v1/teams</code> or <code>GET /api/v1/scores</code>. You can see the core <a href="https://github.com/jbavari/scoreboard-api/blob/master/application.rb">Sinatra Application</a> on github.</p>
+
+<p>It was absolutely easy to set up the <a href="https://github.com/jbavari/scoreboard-api/tree/master/migrations">Sequel migrations</a> to define the team table and the scoreboard table in postgres.</p>
+
+<p>The main tying point was getting the Sequel models to serialize, which was solved in another blog post.</p>
+
+<h2>Scoreboard Dashboard</h2>
+
+<p>Dashing was really easy to get started, a project set up, and out the gate.</p>
+
+<p>First I had to include Sequel to get me my data, which I included an <code>Api</code> model to ease the SQL bridge for me.</p>
+
+<p>The main point here was the <code>scoreboard.rb</code> file which was scheduled to run every 5 seconds, gather data from some crafty queries, and send that data to the dashboard. Other than the HTML markup, this was the chunky part of it:</p>
+
+<p>``` ruby
+require &lsquo;sequel&rsquo;</p>
+
+<p>DB = Sequel.connect(&lsquo;postgres://localhost/scoreboard&rsquo;)
+scoreboard = DB[:scoreboard]
+team = DB[:team]</p>
+
+<p>send_event(&lsquo;games-played&rsquo;, { value: scoreboard.count })</p>
+
+<p>def teams_played
+  DB[&lt;&lt;-eos</p>
+
+<pre><code>  select
+    sum(value)::int as value,
+    label
+  from (
+    select count(home_id) as value, name as label from team inner join scoreboard on team.id = scoreboard.home_id group by scoreboard.home_id, team.name
+
+    UNION ALL
+
+    select count(visitor_id) as value, name as label from team inner join scoreboard on team.id = scoreboard.visitor_id group by scoreboard.visitor_id, team.name
+  ) sub
+  group by value, label
+  order by value desc
+eos
+</code></pre>
+
+<p>  ]</p>
+
+<p>end</p>
+
+<p>def team_scoreboard
+  DB[&lt;&lt;-eos</p>
+
+<pre><code>  select 
+    s.id,
+    t.name as home_team, 
+    t2.name as visitor_team, 
+    home_score, 
+    visitor_score 
+  from team t 
+  inner join scoreboard s on s.home_id = t.id 
+  inner join team t2 on t2.id = s.visitor_id
+  limit 10;
+eos
+</code></pre>
+
+<p>  ]
+end</p>
+
+<p>SCHEDULER.every &lsquo;5s&rsquo; do
+  teams = teams_played.map do |item|</p>
+
+<pre><code>{:label =&gt; item[:label], :value =&gt; item[:value]}
+</code></pre>
+
+<p>  end
+  send_event(&lsquo;games-played&rsquo;, { value: scoreboard.count })
+  send_event(&lsquo;teams&rsquo;, { items: teams })
+  puts &ldquo;Scoreboard: #{team_scoreboard.to_a}&rdquo;</p>
+
+<p>  send_event(&lsquo;scoreboard&rsquo;, { items: team_scoreboard.to_a })
+end
+```</p>
+
+<h1>Retrospective</h1>
+
+<ul>
+<li>What went right</li>
+<li>What went wrong</li>
+<li>What could be improved</li>
+</ul>
+
+
+<h2>What went right</h2>
+
+<ul>
+<li>The CLI came together smoothly. Thor was easy to get running.</li>
+<li>Getting data to post to the API was a breeze</li>
+<li>Sinatra and Sequel were easy to hoist up a simple API to take POST data and serve GET requests as JSON</li>
+<li>Getting data into the dashboard was SUPER easy with Sequel, no need to do the ORM dance</li>
+<li>Dashing was easy to create my own scoreboard component, using the <code>data-</code> type DOM attributes</li>
+</ul>
+
+
+<h2>What went wrong</h2>
+
+<ul>
+<li>Had some issues handling SIGTERM in CLI</li>
+<li>CLI still doesnt validate input</li>
+<li>API for Sinatra was a little difficult to get JSON serialization off the bat</li>
+<li>Dashing is very &lsquo;opinionated&rsquo; and doesnt give you more room to fit into an existing app</li>
+<li>No tests were made</li>
+<li>Nothing is deployed to servers yet</li>
+</ul>
+
+
+<h2>What could be improved</h2>
+
+<ul>
+<li>Minitest suite for CLI, API, and the Dashboard</li>
+<li>Dashboard process tasks could be broken out to be more DRY</li>
+<li>CLI needs to check and validate input</li>
+<li>API needs to add in rollbar, new relic, or other metrics to help find errors</li>
+<li>Deploy all the things!</li>
+</ul>
+
+
+<h1>Future plans</h1>
+
+<p>The plan is to keep working on this project and continue improving tooling and getting other best practices in place. Finally, ship it to digital ocean and enjoy the conveniences they provide.</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Using JSON serializers in Sinatra]]></title>
@@ -510,198 +721,6 @@ run Rails.application
 </code></p>
 
 <p>Hope this helps.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[In depth dive with Postgres Hstore and Rails 4]]></title>
-    <link href="http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4/"/>
-    <updated>2014-04-26T12:08:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2014/04/26/in-depth-dive-with-postgres-hstore-and-rails-4</id>
-    <content type="html"><![CDATA[<p>I had a unique little situation pop up that needed a little more flexibility when it came to storing data in the db. We use Postgres at RaiseMore because we respect ourselves, so naturally, I wanted to take a swing using some Hstore options for our ever changing data schema.</p>
-
-<p>My intention is not to cover the basics of getting started with Rails 4 and <a href="http://www.postgresql.org/docs/9.3/static/hstore.html">Postgres HStore</a>, so <a href="http://tastehoneyco.com/blog/postgresql-array-and-hstore-column-reference/?utm_source=rubyweekly&amp;utm_medium=email/">read at Honey Co</a> or <a href="http://inopinatus.org/2013/07/12/using-arrays-of-hstore-with-rails-4/">here at inopinatus</a> to get started.</p>
-
-<h2>What I needed</h2>
-
-<p>Simple, to store a few bits of data about a communication &ndash; primarily the subject, message, date/time, and what networks it was sent out on. It may or may not have some of these fields, and the networks may or may not change in the future. This sounds perfect for HStore.</p>
-
-<p>First I started with a simple schema:</p>
-
-<p>```
-CREATE TABLE comm_logs (</p>
-
-<pre><code>id serial NOT NULL,
-user_id integer,
-history hstore
-</code></pre>
-
-<p>)
-```</p>
-
-<p>At first, I just wanted to store when a message was sent and on what networks. I figured I&rsquo;d just have an AR model with one hstore column and everything would fit into that. It looked like this:</p>
-
-<p>```
-class CommunicationLogging &lt; ActiveRecord::Base</p>
-
-<pre><code>def self.log(user_id, network, message, subject = nil)
-    comm = CommunicationLogging.where('user_id = ?', user_id).first
-    if comm.nil?
-        comm = CommunicationLogging.new
-        comm.user_id = user_id
-        # Storing network as an array incase they decide to send to another network after this.
-        comm.history = { 'message' =&gt; message, 'subject' =&gt; subject, 'network' =&gt; [network], 'time' =&gt; DateTime.now }}
-    else 
-        # Add history to array stored in network
-        comm.history['network'].push(network)
-    end
-    comm.history_will_change!
-    comm.save!
-end
-</code></pre>
-
-<p>end
-```</p>
-
-<p>Pretty easy right? I ran into some difficulties REAL fast. The first was from JSON serialization. When I did this:</p>
-
-<p>```</p>
-
-<h1>In Rails Console</h1>
-
-<p>CommunicationLogging.find(4).history[&lsquo;network&rsquo;]
-=> &ldquo;[\"facebook\&rdquo;, \&ldquo;twitter\&rdquo;]&ldquo;
-```</p>
-
-<p>It gave me a nice FAT serialized version of a Hash array. What good does a string do me? I want my object! BLEH!</p>
-
-<p>We still have to get this thing working, so lets proceed anyway and just do some manual converions with PostgreSQL&rsquo;s awesome <code>to_json</code> functionality.</p>
-
-<p>Our result:</p>
-
-<p><code>
-"{"c": "networks", "networks": "[\"facebook\", \"twitter\"]"}"
-</code></p>
-
-<p>Cool, so its gonna be nasty still. Ok, how about just using Rails to_json method:</p>
-
-<p><code>
-"{\"id\":11,\"event_user_id\":null,\"history\":null,\"networks\":{\"c\":\"networks\",\"networks\":\"[\\\"facebook\\\", \\\"twitter\\\"]\"}}"
-</code></p>
-
-<p>Thanks, but no thanks. I&rsquo;m pretty set on having an array of values instead of some manual labor on converting those values.</p>
-
-<p>I was learning real fast that storing arrays in hstore was going to be a challenge. The next stab I wanted to take was to simplify the storage and retrieval as well as using natural arrays.</p>
-
-<p>NOTE: I changed the way I attacked the problem here partly because I was doing it wrong. Hopefully you can learn from my mistakes? :&ndash;)</p>
-
-<p>This was my next stab, altering the table structure just a bit:</p>
-
-<p>```
-CREATE TABLE communication_logs (</p>
-
-<pre><code>id serial NOT NULL,
-user_id integer,
-history hstore[]
-networks hstore
-</code></pre>
-
-<p>)
-```</p>
-
-<p>What I did here was harness the awesome power of PostgreSQL&rsquo;s arrays and hstore. Taking this thing to the limit. I did this for two reasons:</p>
-
-<ul>
-<li>Constraints changed, we could send multiple communications out on multiple networks at any given time</li>
-<li>I wanted a log of history with whatever pieces of data may or may not be there</li>
-<li>Be able to quickly get the networks sent out per user</li>
-</ul>
-
-
-<p>Now my AR model is decorated with <a href="http://api.rubyonrails.org/classes/ActiveRecord/Store.html">store_accessor</a> to give me model attributes for the networks. It also stores the log of messages in an array naturally through the model, and accessed as a real HSTORE with array values (instead of json, yay).</p>
-
-<p>```
-class CommunicationLogging &lt; ActiveRecord::Base</p>
-
-<pre><code>store_accessor :networks, :facebook, :twitter, :email, :sms, :push
-
-def set_network(network)
-    # for brevity only one listed
-    case network.downcase
-    when 'twitter'
-        self.twitter = true
-    end
-end
-
-def self.log(user_id, network, message, subject = nil)
-    comm = CommunicationLogging.where('user_id = ?', user_id).first
-    if comm.nil?
-        comm = CommunicationLogging.new
-        comm.user_id = user_id
-    end
-
-    comm.set_network(network)
-
-    history_log = { 'message' =&gt; message, 'subject' =&gt; subject, 'network' =&gt; network, 'time' =&gt; DateTime.now }
-    comm.history.push(history_log)
-
-
-    comm.networks_will_change!
-    comm.history_will_change!
-    comm.save!
-end
-</code></pre>
-
-<p>end
-```</p>
-
-<p>So what happens when I to_json my fields now in PostgreSQL?</p>
-
-<p>```
-// Networks
-&ldquo;{"twitter&rdquo;: &ldquo;true&rdquo;}"</p>
-
-<p>// History
-&ldquo;[{"time&rdquo;: &ldquo;2014-04-27T10:15:50-05:00&rdquo;, &ldquo;message&rdquo;: &ldquo;asf&rdquo;, &ldquo;network&rdquo;: &ldquo;twitter&rdquo;, &ldquo;subject&rdquo;: &ldquo;asd&rdquo;}]&ldquo;
-```</p>
-
-<p>And rails?</p>
-
-<p>```</p>
-
-<h1>Networks</h1>
-
-<p>&ldquo;{"twitter&rdquo;:\&ldquo;true&rdquo;}"</p>
-
-<h1>History</h1>
-
-<p>&ldquo;[{"time&rdquo;:&ldquo;2014-04-27T10:15:50-05:00&rdquo;,&ldquo;message&rdquo;:&ldquo;asf&rdquo;,&ldquo;network&rdquo;:&ldquo;twitter&rdquo;,&ldquo;subject&rdquo;:&ldquo;asd&rdquo;}]&ldquo;
-```</p>
-
-<p>Beautiful.</p>
-
-<p>I had a lot of fun using PostgreSQL and Rails 4. I didn&rsquo;t find a lot of in-depth knowledge on it so I wanted to shed some light on the topic and hope this would push someone else who might be considering to try it out to give it a go.</p>
-
-<p>I&rsquo;d like to follow up this post with another article on how to search these bad boys.</p>
-
-<p>In closing:</p>
-
-<ul>
-<li>I will definitely use hstore more in the future. I like the freedom to just store whatever I want</li>
-<li>I need to reach out to the Rails team and see what I can do about improving the array support in Active Record</li>
-<li>I hope you try it out as well</li>
-</ul>
-
-
-<h3>Additional Resources</h3>
-
-<ul>
-<li><a href="http://postgresguide.com/sexy/hstore.html">Postgres Guide on HStore</a></li>
-<li><a href="http://mikecoutermarsh.com/using-hstore-with-rails-4/">Mike Countermash&rsquo;s guide to Hstore with Rails 4</a></li>
-<li><a href="http://platformonrails.wordpress.com/2013/03/17/enabling-postgresql-hstore-with-rails-4/">Platform on Rails &ndash; Enabling PostgreSQL Hstore in Rails 4</a></li>
-<li><a href="http://blog.remarkablelabs.com/2012/12/a-love-affair-with-postgresql-rails-4-countdown-to-2013">RemarkableLabs &ndash; A love affair with PostgreSQL [Rails 4 Countdown to 2013]</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

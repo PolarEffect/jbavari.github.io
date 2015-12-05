@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I&rsquo;m obsessed with automating some of the tasks that I find myself repetitively doing. I don&rsquo;t know about you, but I hate doing the same &hellip;">
+  <meta name="description" content="I find myself lately in falling in love unit testing in Javascript with the Jasmine framework. It&rsquo;s really upped my trust levels that I&rsquo; &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,99 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/12/03/automating-jasmine-tests-with-grunt-karma/">Automating Jasmine Tests With Grunt Karma</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-12-03T09:22:00-07:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2013</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I find myself lately in falling in love unit testing in Javascript with the <a href="http://pivotal.github.io/jasmine/">Jasmine</a> framework. It&rsquo;s really upped my trust levels that I&rsquo;ve been writing lately.</p>
+
+<p>I don&rsquo;t want to go in depth about jasmine and how to use it, but what I do want to do is discuss a little bit of how to automate some of the precious tests you may already have.</p>
+
+<h2>Why I wanted to start automating these tests</h2>
+
+<p>I had a great set of tests created. Since most of the tests were in javascript, I needed a browser of some sort to act as the test runner.</p>
+
+<p>My initial options for work flow after writing tests:</p>
+
+<ul>
+<li>Have a browser (chrome/firefox) pointed at the local SpecRunner.html and manually refresh after making code changes</li>
+<li>Manually execute <a href="https://github.com/ariya/phantomjs/">phantomJS</a> to get the results from the SpecRunner.html file</li>
+<li>Have a grunt task that would watch the code files and on change open a browser to execute the code changes</li>
+</ul>
+
+
+<h3>Whats wrong with the prior steps?</h3>
+
+<p>It&rsquo;s manual. You have to take control and do it. That means, another step in the process. I&rsquo;m obsessed with automation which means I want to automate this.</p>
+
+<h2>Do you believe in Karma?</h2>
+
+<p>I did a quick google search for a Grunt plugin for automating jasmine tests and stumbled across <a href="https://github.com/karma-runner/grunt-karma">Grunt Karma</a> . I bet you&rsquo;re wonder what karma is? <a href="https://github.com/karma-runner/karma">Karma</a> is a node.js tool that opens multiple browsers and executes the tests you specify. SA-WEET.</p>
+
+<p>Also to be noted, Karma works with other testing frameworks as well, so you aren&rsquo;t stuck with just Jasmine.</p>
+
+<h3>AUTOMATE ME</h3>
+
+<p>Getting started is easy, first running the &lsquo;npm install -g karma&rsquo; command to get karma installed, then running &lsquo;karma init&rsquo; to set up a config. In the config interactive set up,  you specify what testing framework to use, whether or not to use Require.js, what browsers to test with (multiple at a time is an option), what files to test, any files to ignore, and whether or not you want automatically watch and run tests after they change.</p>
+
+<p>Once you&rsquo;re done, add the grunt config settings for karma as such:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">karma</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">unit</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">configFile</span><span class="o">:</span> <span class="s1">&#39;karma.conf.js&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">autoWatch</span><span class="o">:</span> <span class="kc">true</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>If you got it right, fire it off with &lsquo;grunt karma&rsquo; &ndash; it should automatically start popping up browsers and giving you test statistics.</p>
+
+<h2>What I would like to do with these test results</h2>
+
+<p>On any code changes or check-ins, I&rsquo;d like to automatically run the unit tests and update our developer dashboard statistics (we use <a href="http://shopify.github.io/dashing/">Dashing</a> ) so we can have live stats of how our code is doing.</p>
+
+<p>The next step in this process is to have Jenkins fire this puppy off when it needs. Perhaps even fire off a build to TestFlight to get the app right into the hands of our tests after all test have verified!</p>
+
+<p>Cheers!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1095,6 +1188,10 @@ end
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/04/the-scoreboard-project/">The Scoreboard Project</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
       </li>
     
@@ -1108,10 +1205,6 @@ end
     
       <li class="post">
         <a href="/blog/2015/11/06/ionic-2-dot-0-generators-services/">Ionic 2.0 Generators - Services</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/05/using-ionic-2-dot-0-generators/">Using Ionic 2.0 Generators</a>
       </li>
     
   </ul>
