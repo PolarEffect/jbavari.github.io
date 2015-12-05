@@ -4,7 +4,7 @@
   <title><![CDATA[Category: javascript | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-12-04T18:03:52-07:00</updated>
+  <updated>2015-12-05T00:53:31-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -18,23 +18,23 @@
     <link href="http://jbavari.github.io/blog/2015/12/04/the-scoreboard-project/"/>
     <updated>2015-12-04T17:22:00-07:00</updated>
     <id>http://jbavari.github.io/blog/2015/12/04/the-scoreboard-project</id>
-    <content type="html"><![CDATA[<p>Lately, I&rsquo;ve been wanting to get a feel for some technologies I&rsquo;ve been wanting to explore and gain more experience. Not only this, but I wanted to make sure my dev workflow was great, my tools were sharpened, and I was re-establishing the best practices as much as I could.</p>
+    <content type="html"><![CDATA[<p>Lately, I&rsquo;ve been wanting to get a better feel for some technologies I&rsquo;ve been wanting to explore and gain more experience. Not only this, but I wanted to make sure my dev workflow was great, my tools were sharpened, and I was re-establishing the best practices as much as I could.</p>
 
 <p>Those specific technologies I wanted to dig into was:</p>
 
 <ul>
 <li>Building a CLI in Ruby, using <a href="https://github.com/erikhuda/thor">Thor</a></li>
 <li>A <a href="http://sinatrarb.com">Sinatra</a> Modular API</li>
-<li><a href="https://github.com/jeremyevans/sequel">Sequel</a> Models</li>
-<li><a href="https://github.com/Shopify/dashing">Dashing</a> &ndash; Building a dashboard</li>
-<li><a href="https://github.com/bbatsov/rubocop">Rubocop</a> &ndash; A Ruby static code analyzer, based on the community Ruby style guide.</li>
-<li><a href="http://codeclimate.com">CodeClimate</a> &ndash; Automated Code Review</li>
+<li>Solifying <a href="https://github.com/jeremyevans/sequel">Sequel</a> Model usage and JSON serialization</li>
+<li>Building a dashboard using <a href="https://github.com/Shopify/dashing">Dashing</a></li>
+<li>Diving more into <a href="https://github.com/bbatsov/rubocop">Rubocop</a> for Ruby static code analysis</li>
+<li>Automated Code Review using <a href="http://codeclimate.com">CodeClimate</a></li>
 </ul>
 
 
 <p>I found a way to connect all the dots in what I&rsquo;m calling the scoreboard project. I chose these technologies because it would let me shine up my ruby/sql skills without a framework carrying me the way. (Although they mostly did anyway!)</p>
 
-<p>This blog post will go over the idea of making an API around scoreboards. There will be a simple CLI tool to gather scores on &lsquo;games&rsquo;. Those scores will be sent to the API, to store in Postgres. The dashboard project will then pull these values and display them in an easy to digest way.</p>
+<p>This blog post will go over the idea of making an API around scoreboards. There will be a simple CLI tool to gather scores on &lsquo;games&rsquo;. Those scores will be sent to the API, to store in Postgres. The dashboard project will then pull these values from postgres and display them in an easy to view manner.</p>
 
 <h2>This post</h2>
 
@@ -60,7 +60,7 @@
 
 <p>It would keep prompting for more scoring plays until the user gives a SIGTERM or hits CTRL+D.</p>
 
-<p>First I started by reading up on Thor, which was an absolute pleasure to work with. You can download it via <code>gem install scoreboard</code>. The main points were, creating the</p>
+<p>First I started by reading up on Thor, which was an absolute pleasure to work with. You can download it via <code>gem install scoreboard</code>.</p>
 
 <p>To make it available via command line, I added this:</p>
 
