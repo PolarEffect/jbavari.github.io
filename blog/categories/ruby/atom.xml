@@ -4,7 +4,7 @@
   <title><![CDATA[Category: ruby | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-12-05T00:56:13-07:00</updated>
+  <updated>2015-12-05T00:58:52-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -39,6 +39,8 @@
 <h2>This post</h2>
 
 <p>With this post, i&rsquo;ll go over the individual pieces of the project, the interesting tidbits of each one, and finally go over a short retrospective over the entire project.</p>
+
+<p>In entire time, the project took about a day and a half. It was fun, and I really enjoyed the experience over all.</p>
 
 <h2>The pieces</h2>
 
