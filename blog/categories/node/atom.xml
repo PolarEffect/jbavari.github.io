@@ -4,7 +4,7 @@
   <title><![CDATA[Category: node | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/node/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-12-05T01:00:56-07:00</updated>
+  <updated>2015-12-09T01:04:12-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -367,7 +367,9 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <li><a href="http://jbavari.github.io/blog/2015/10/16/using-npm-tags">Using npm tags</a></li>
 <li><a href="https://docs.npmjs.com/cli/shrinkwrap">npm documentation</a></li>
 <li><a href="https://docs.npmjs.com/misc/developers">npm-developers guide</a></li>
+<li><a href="https://www.npmjs.com/package/module-best-practices#naming-conventions">npm &ndash; Module best practices</a></li>
 <li><a href="https://blog.risingstack.com/node-js-production-checklist">Node.js Production Checklist</a></li>
+<li><a href="http://blog.nchaulet.fr/publish-package-on-npm-best-practice/">Publish packages on npm &ndash; best practice</a></li>
 </ul>
 
 ]]></content>

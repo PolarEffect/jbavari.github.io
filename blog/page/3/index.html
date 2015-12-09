@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I&rsquo;ve been lucky enough to be developing with the Ionic framework lately. One issue I keep running into is &ndash; how do I manage some &hellip;">
+  <meta name="description" content="I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon. Problem: I need to reassemble an old C &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,232 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/10/21/exploring-best-practices-with-docker-for-older-libraries/">Exploring Best Practices With Docker for Older Libraries</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-21T21:29:00-06:00" pubdate data-updated="true">Oct 21<span>st</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon.</p>
+
+<h2>Problem: I need to reassemble an old C++ project with some old libraries and files that may not be around (or have disappeared already).</h2>
+
+<p>First theres a big chunk of files that are used strictly for rendering a video, ~560MB. Some of which had since gone missing.</p>
+
+<p>Then theres some old C++ libraries which a previous shell script was doing a <code>wget</code> request for, and the files are nowhere to be found.</p>
+
+<p>Finally, there&rsquo;s the need to rebuild the image used to render the files.</p>
+
+<p>Theres so many ways to attack this problem, I&rsquo;m just going to cover my approaches. I&rsquo;m open to new ones as well.</p>
+
+<h1>Potential solutions for rendering files</h1>
+
+<ul>
+<li>store on AWS S3</li>
+<li>put into git repo</li>
+<li>store on server somewhere</li>
+</ul>
+
+
+<h4>Lets break down the pros / cons of these</h4>
+
+<h2>Store on AWS S3</h2>
+
+<h3>PROS:</h3>
+
+<ul>
+<li>quick to add</li>
+<li>cheap to store</li>
+</ul>
+
+
+<h3>CONS:</h3>
+
+<ul>
+<li>can go missing (and did)</li>
+</ul>
+
+
+<h2>Put into git repo</h2>
+
+<h3>PROS:</h3>
+
+<ul>
+<li>versioning control with notes (none before)</li>
+<li>the files give a story in time</li>
+<li>cheap or free</li>
+</ul>
+
+
+<h3>CONS:</h3>
+
+<ul>
+<li>slow to pull repo (duh)</li>
+<li>storing binary files (derp)</li>
+</ul>
+
+
+<h2>Store on server somewhere</h2>
+
+<h3>PROS:</h3>
+
+<ul>
+<li>cheap to store</li>
+<li>fast to access (local network)</li>
+</ul>
+
+
+<h3>CONS:</h3>
+
+<ul>
+<li>can go missing (and did)</li>
+<li>no story to the files</li>
+</ul>
+
+
+<h1>Potential solutions for server image</h1>
+
+<ul>
+<li>single shell script to run for setting up image</li>
+<li>dockerfile to build up the image with <code>RUN</code> commands</li>
+<li>dockerfile to execute the single shell script</li>
+</ul>
+
+
+<p>Some of the libraries this said project was depending on are no longer where they were from a previous shell script to set them all up. That means I have to do some kind of dependency management. Whether that be forking the libraries into a git repo I know will be solid, or copying the files somewhere I can trust, or more simply committing them to my own repo (560 MB or more.. ugh).</p>
+
+<p>This is my thought process, not sure if its right:</p>
+
+<p>If your aim is to have something fully repeatable and easy to run again, go with the docker solution.</p>
+
+<p>If your aim is to just get it done quickly, go with the shell script.</p>
+
+<p>However, I still can&rsquo;t decipher what the pro/cons of the dockerfile just running a single shell script.</p>
+
+<p>Let&rsquo;s dive deeper into the pros and cons of each.</p>
+
+<h2>Single shell script</h2>
+
+<p>Steps:</p>
+
+<ul>
+<li>Create instance from Amazon AMI</li>
+<li>create / test shell script</li>
+<li>copy shell script to server</li>
+<li>run shell script on server</li>
+</ul>
+
+
+<h3>PROS:</h3>
+
+<ul>
+<li>quick to run (once completed, overall time)</li>
+<li>quick to tell you of errors</li>
+<li>works on my machine</li>
+</ul>
+
+
+<h3>CONS:</h3>
+
+<ul>
+<li>not easily repeatable</li>
+<li>may not work in another environment (things are assumed)</li>
+<li>not always easy to debug</li>
+</ul>
+
+
+<h2>Dockerfile with RUN commmands</h2>
+
+<p>Steps:</p>
+
+<ul>
+<li>install docker (if not already)</li>
+<li>create Dockerfile with RUN commands</li>
+<li>ADD dependencies to the docker container</li>
+<li>docker build image</li>
+<li>docker run image</li>
+<li>bundle image to Amazon AMI</li>
+<li>start instance</li>
+<li>profit</li>
+</ul>
+
+
+<h3>PROS:</h3>
+
+<ul>
+<li>control the starting point environment</li>
+<li>commands verified to work step by step</li>
+<li>easily repeatable</li>
+<li>quick to tell you of errors</li>
+<li>fast after first run (cache)</li>
+</ul>
+
+
+<h3>CONS:</h3>
+
+<ul>
+<li>slow start up with downloads/updates/git clones/etc</li>
+<li>costly for disk space</li>
+<li>must install docker / boot2docker / etc</li>
+</ul>
+
+
+<h2>Dockerfile to execute single shell script</h2>
+
+<p>Steps:</p>
+
+<ul>
+<li>install docker (if not already)</li>
+<li>create image from dockerfile</li>
+<li>run image</li>
+<li>create / test shell script in image</li>
+<li>modify dockerfile &ndash; ADD shell script created in previous step</li>
+</ul>
+
+
+<h3>PROS:</h3>
+
+<ul>
+<li>quick to test out your commands</li>
+</ul>
+
+
+<h3>CONS</h3>
+
+<ul>
+<li>harder to have the diffs between images when modifying shell script</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1566,455 +1792,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/17/building-a-chat-client-with-ionic/">Building a Chat Client With Ionic / Socket.io / Redis / Node.js</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-17T00:09:00-06:00" pubdate data-updated="true">Jun 17<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I wanted a fun challenge to push myself and cross a few things off my ever so growing <code>I want to play with this</code> type of lists. I love learning, and there are so many awesome tools / utilities / libraries out there to evaluate its hard to justify incorporating them into every project at work without having some knowledge of the tools.</p>
-
-<p>DISCLAIMER: I may use some tools incorrectly, but the main purpose of this fun little project was to learn and have fun.</p>
-
-<p>The list was this:</p>
-
-<ul>
-<li><a href="http://ionicframework.com">Ionic Framework</a></li>
-<li><a href="http://socket.io">Socket.io</a></li>
-<li><a href="http://redis.io">Redis</a></li>
-<li><a href="https://github.com/mranney/node_redis">Node.js Redis client</a></li>
-</ul>
-
-
-<h2>The Idea</h2>
-
-<p>I wanted to build a chat client that would have messages that disappear after a certain time, much like SnapChat. The idea also included the ability to create channels that also disappear after a certain time like messages.</p>
-
-<p>In future versions, I&rsquo;d love to include location to join channels that are near you.</p>
-
-<p>Users can join existing channels, or create their own. All users can see channels, and join any.</p>
-
-<h2>Tech details &ndash; using Redis / Node.js</h2>
-
-<p>At first, I wanted to create messages some how and have them each have <code>expire</code> times. After failing miserably, I got the amazing chance to pair up with <a href="https://twitter.com/michaelgorsuch">Michael Gorsuch</a> to give me some alternative ideas. (Shameless plug &ndash; if you need to do some server monitoring, check out his project <a href="http://canary.io/">Canary.io</a>, it&rsquo;s AWESOME).</p>
-
-<p>The concept is &ndash; instead of using separate keys with ezxpire times &ndash; use Redis&#8217; sorted sets with scores of the times in UNIX format and the member being a JSON encoded string. I had my channels keys in the format of <code>messages:ChannelName</code>.</p>
-
-<p>Something like:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//ZADD key score member [score member ...]
-</span><span class='line'>zadd messages:RedisChat 10581098019 '{"name": "Josh", "id": "5"}'</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now, when we want to get all messages for a channel, its simply:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>//ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT offset count]
-</span><span class='line'>zrangebyscore messages:RedisChat 0 10924019840</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Since I was using Node.js &ndash; I simply used <code>setInterval</code> to have a function be run that removes all old posts named <code>removeKeys</code>, and looked as such:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//NOTE: Using Moment.js, as well as having channelWatchList being populated</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">channelWatchList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Lobby&#39;</span><span class="p">,</span> <span class="s1">&#39;RedisChat&#39;</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">removeKeys</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;We are removing old messages&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">channelIndex</span> <span class="k">in</span> <span class="nx">channelWatchList</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">channelWatchList</span><span class="p">[</span><span class="nx">channelIndex</span><span class="p">];</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">messageChannel</span> <span class="o">=</span> <span class="s1">&#39;messages:&#39;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;message channel&#39;</span><span class="p">,</span> <span class="nx">messageChannel</span><span class="p">)</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">timeToRemove</span> <span class="o">=</span> <span class="nx">moment</span><span class="p">().</span><span class="nx">subtract</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">).</span><span class="nx">unix</span><span class="p">();</span> <span class="c1">//Remove messages before min ago</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">redisClient</span><span class="p">.</span><span class="nx">zrangebyscore</span><span class="p">(</span><span class="nx">messageChannel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">timeToRemove</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nx">result</span> <span class="o">&amp;&amp;</span> <span class="nx">result</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">resultIndex</span> <span class="k">in</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="kd">var</span> <span class="nx">message</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">result</span><span class="p">[</span><span class="nx">resultIndex</span><span class="p">]);</span>
-</span><span class='line'>          <span class="c1">//NOTE: Using socket.io</span>
-</span><span class='line'>          <span class="nx">io</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message:remove:channel:&#39;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">message</span><span class="p">,</span> <span class="nx">channel</span><span class="o">:</span> <span class="nx">channel</span> <span class="p">});</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">redisClient</span><span class="p">.</span><span class="nx">zremrangebyscore</span><span class="p">(</span><span class="nx">messageChannel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">timeToRemove</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Removed &#39;</span><span class="p">,</span> <span class="nx">result</span><span class="p">,</span> <span class="s1">&#39; messages&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>The client &ndash; Ionic</h2>
-
-<p>This was by far the easy part. First I just used the Ionic CLI to create a basic app.</p>
-
-<p>I started by modifying the index.html file to include Socket.io. Nothing too fancy: <code>&lt;script src="js/socket.io.js"&gt;&lt;/script&gt;</code>.</p>
-
-<p>Next, I used some AngularJS <a href="https://github.com/jbavari/ionic-socket.io-redis-chat/blob/master/client/RedisChat/www/js/services.js">services</a> for socket.io:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="p">[])</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;socket&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">socket</span><span class="p">(</span><span class="nx">$rootScope</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">socket</span> <span class="o">=</span> <span class="nx">io</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="nx">baseUrl</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">on</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">eventName</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">eventName</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">;</span>
-</span><span class='line'>        <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">callback</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">socket</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="p">},</span>
-</span><span class='line'>    <span class="nx">emit</span><span class="o">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">eventName</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="nx">eventName</span><span class="p">,</span> <span class="nx">data</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">arguments</span><span class="p">;</span>
-</span><span class='line'>        <span class="nx">$rootScope</span><span class="p">.</span><span class="nx">$apply</span><span class="p">(</span><span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">if</span> <span class="p">(</span><span class="nx">callback</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">callback</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">socket</span><span class="p">,</span> <span class="nx">args</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>        <span class="p">});</span>
-</span><span class='line'>      <span class="p">})</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then, I constructed my <code>AppCtrl</code> to handle my <a href="https://github.com/jbavari/ionic-socket.io-redis-chat/blob/master/client/RedisChat/www/js/controllers.js">controllers</a> interaction with Socket.io:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;starter.controllers&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;services&#39;</span><span class="p">])</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">controller</span><span class="p">(</span><span class="s1">&#39;AppCtrl&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$scope</span><span class="p">,</span> <span class="nx">$state</span><span class="p">,</span> <span class="nx">$filter</span><span class="p">,</span> <span class="nx">socket</span><span class="p">,</span> <span class="nx">Auth</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">//Ensure they are authed first.</span>
-</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">()</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">$state</span><span class="p">.</span><span class="nx">go</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//input models</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">draft</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="s1">&#39;&#39;</span> <span class="p">};</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">channel</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;&#39;</span> <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//App info</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">channels</span> <span class="o">=</span> <span class="p">[];</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">listeningChannels</span> <span class="o">=</span> <span class="p">[];</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">activeChannel</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">userName</span> <span class="o">=</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">name</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span> <span class="o">=</span> <span class="p">[];</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">//Socket.io listeners</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;channels&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">channels</span><span class="p">(</span><span class="nx">channels</span><span class="p">){</span>
-</span><span class='line'>      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;channels&#39;</span><span class="p">,</span> <span class="nx">channels</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">channels</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">channels</span> <span class="o">=</span> <span class="nx">channels</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message:received&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">messageReceived</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;user:joined&#39;</span><span class="p">,</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">name</span><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;user:joined&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;user:joined&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">user</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">listenChannel</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">listenChannel</span> <span class="p">(</span><span class="nx">channel</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;messages:channel:&#39;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">messages</span><span class="p">(</span><span class="nx">messages</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;got messages: &#39;</span><span class="p">,</span> <span class="nx">messages</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">messages</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
-</span><span class='line'>          <span class="k">for</span><span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">j</span> <span class="o">=</span> <span class="nx">messages</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">j</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>              <span class="kd">var</span> <span class="nx">message</span> <span class="o">=</span> <span class="nx">messages</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
-</span><span class='line'>              <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">);</span>
-</span><span class='line'>              <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>                  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;apply with function&#39;</span><span class="p">);</span>
-</span><span class='line'>              <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message:channel:&#39;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">message</span><span class="p">(</span><span class="nx">message</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;got message: &#39;</span> <span class="o">+</span> <span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>          <span class="k">if</span><span class="p">(</span><span class="nx">channel</span> <span class="o">!=</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">activeChannel</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>              <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>          <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">message</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;message:remove:channel:&#39;</span> <span class="o">+</span> <span class="nx">channel</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">removalInfo</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;removalInfo to remove: &#39;</span><span class="p">,</span> <span class="nx">removalInfo</span><span class="p">);</span>
-</span><span class='line'>          <span class="kd">var</span> <span class="nx">expires</span> <span class="o">=</span> <span class="nx">removalInfo</span><span class="p">.</span><span class="nx">message</span><span class="p">.</span><span class="nx">expires</span><span class="p">;</span>
-</span><span class='line'>          <span class="kd">var</span> <span class="nx">expireMessageIndex</span> <span class="o">=</span> <span class="nx">$filter</span><span class="p">(</span><span class="s1">&#39;messageByExpires&#39;</span><span class="p">)(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">,</span> <span class="nx">expires</span><span class="p">);</span>
-</span><span class='line'>          <span class="k">if</span><span class="p">(</span><span class="nx">expireMessageIndex</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>              <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">expireMessageIndex</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">listeningChannels</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">channel</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">// Controller methods</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'><span class="c1">///////////////////////////////////////////////////////////////////////</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">joinChannel</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">joinChannel</span><span class="p">(</span><span class="nx">channel</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">activeChannel</span> <span class="o">=</span> <span class="nx">channel</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">messages</span> <span class="o">=</span> <span class="p">[];</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">channel</span><span class="p">.</span><span class="nx">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="c1">//Listen to channel if we dont have it already.</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nx">$scope</span><span class="p">.</span><span class="nx">listeningChannels</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="nx">channel</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">$scope</span><span class="p">.</span><span class="nx">listenChannel</span><span class="p">(</span><span class="nx">channel</span><span class="p">);</span>     
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;channel:join&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">channel</span><span class="o">:</span> <span class="nx">channel</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">name</span> <span class="p">});</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">sendMessage</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">sendMessage</span><span class="p">(</span><span class="nx">draft</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="o">!</span><span class="nx">draft</span><span class="p">.</span><span class="nx">message</span> <span class="o">||</span> <span class="nx">draft</span><span class="p">.</span><span class="nx">message</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="k">typeof</span> <span class="nx">draft</span> <span class="o">==</span> <span class="s1">&#39;undefined&#39;</span> <span class="o">||</span> <span class="nx">draft</span><span class="p">.</span><span class="nx">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      <span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">&#39;message:send&#39;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">message</span><span class="o">:</span> <span class="nx">draft</span><span class="p">.</span><span class="nx">message</span><span class="p">,</span> <span class="nx">name</span><span class="o">:</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">name</span><span class="p">,</span> <span class="nx">channel</span><span class="o">:</span> <span class="nx">$scope</span><span class="p">.</span><span class="nx">activeChannel</span> <span class="p">});</span>
-</span><span class='line'>      <span class="nx">$scope</span><span class="p">.</span><span class="nx">draft</span><span class="p">.</span><span class="nx">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">logout</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">logout</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">Auth</span><span class="p">.</span><span class="nx">logout</span><span class="p">();</span>
-</span><span class='line'>      <span class="nx">$state</span><span class="p">.</span><span class="nx">go</span><span class="p">(</span><span class="s1">&#39;login&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//Auto join the lobby</span>
-</span><span class='line'>  <span class="nx">$scope</span><span class="p">.</span><span class="nx">joinChannel</span><span class="p">(</span><span class="s1">&#39;Lobby&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">})</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>All of the code can be found on <a href="https://github.com/jbavari/ionic-socket.io-redis-chat">github here</a>.</p>
-
-<h3>Things to improve</h3>
-
-<ul>
-<li>Testing &ndash; for sure. I definitely failed in getting tests first</li>
-<li>Removing the inline functions from Socket.io callbacks &ndash; not sure I like how I handled that to be honest</li>
-<li>Improve the UI</li>
-<li>Actually make the channels expire over time &ndash; and alert the user</li>
-<li>Have some kind of location tracking to pull local channels near you</li>
-</ul>
-
-
-<p>Enjoy! Hope this helps any others learn some tips for developing in any of these technologies used!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -2032,6 +1809,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/07/adding-postgresql-geometric-type-support-to-elixir/">Adding PostgreSQL Geometric Type Support to Elixir</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/04/the-scoreboard-project/">The Scoreboard Project</a>
       </li>
     
@@ -2045,10 +1826,6 @@
     
       <li class="post">
         <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/06/ionic-2-dot-0-generators-services/">Ionic 2.0 Generators - Services</a>
       </li>
     
   </ul>
