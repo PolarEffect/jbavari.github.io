@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="In the last week or so, I&rsquo;ve had a blast playing around with basic Postgres geometric types to do basic earth distance queries. From my &hellip;">
+  <meta name="description" content="I just wanted to share a quick little tidbit on how to install older brew versions. I was having some issues with an older version of Elixir failing &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,55 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-12-12T13:50:00-07:00" pubdate data-updated="true">Dec 12<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I just wanted to share a quick little tidbit on how to install older brew versions.</p>
+
+<p>I was having some issues with an older version of Elixir failing tests (1.0.1), and the latest version (1.1.1) is working fine.</p>
+
+<p>Just running <code>brew install elixir</code> gets latest.</p>
+
+<p>To get 1.0.1 installed, I first went to the <a href="https://github.com/Homebrew/homebrew">homebrew github repo</a>, looked at the <code>Library/Formula</code> folder, found the <code>elixir.rb</code> formula to install elixir, looked in the history, found 1.0.1, and then executed the following line:</p>
+
+<p><code>brew install https://raw.githubusercontent.com/Homebrew/homebrew/8506ced146655c24920f3cc5b20e6bc9e6e703cc/Library/Formula/elixir.rb</code></p>
+
+<p>That did it, I easily got 1.0.1 installed, and going back to 1.1.1 was super easy.</p>
+
+<p>Hope this helps, enjoy! Cheers!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1820,310 +1869,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/19/angular-2-injectables/">Angular 2 Injectables</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-10-19T16:34:00-06:00" pubdate data-updated="true">Oct 19<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;ve been fortunate enough to be working on Angular 2 while being on the Ionic team.</p>
-
-<p>I really enjoyed Pascal Precht&rsquo;s post about <a href="http://blog.thoughtram.io/angular/2015/05/18/dependency-injection-in-angular-2.html">Dependency injection in Angular 2</a>. One thing that I want to shed some more light on is how dependency injection works in an Angular 2 application using the <code>@Injectable</code> metadata thats passed for a class that&rsquo;s to be injected.</p>
-
-<p>Quick tip: take a quick look at the <a href="https://angular.io/docs/ts/latest/guide/cheatsheet.html">Angular 2 cheat sheet</a> to see some more of these Angular 2 syntax and API.</p>
-
-<h2>The basics of Depdendency injection</h2>
-
-<p>The gist of it we need:</p>
-
-<p>1) A class with <code>@Injectable</code> to tell angular 2 that its to be injected &ndash; DataService<br/>
-2) A class with a constructor that accepts a type to be injected</p>
-
-<p>A solid example, DataService marked as <code>@Injectable</code> that also needs <code>Http</code> to be injected for its use:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Injectable</span><span class="p">,</span> <span class="nx">bind</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;angular2/angular2&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Http</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;angular2/http&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">Injectable</span><span class="p">()</span> <span class="cm">/* This is #1 */</span>
-</span><span class='line'><span class="kr">export</span> <span class="kr">class</span> <span class="nx">DataService</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">http</span><span class="o">:</span> <span class="nx">Http</span> <span class="cm">/* This is #2 */</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">http</span> <span class="o">=</span> <span class="nx">http</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What we have in the example above is a class, DataService, that needs Http to do what it needs to be done.</p>
-
-<h2>An example scenario</h2>
-
-<p>Let&rsquo;s say we have the following scenario, an angular 2 application with an app, a page for sessions, session details, speakers, and a data service that provides the data for those pages.</p>
-
-<p>We&rsquo;d want the app instance to instantiate the data service, then have a component <code>schedule</code> that can use the data service as provided by the app instance. From there, we&rsquo;d have the session detail that also gets the schedule data from the data service.</p>
-
-<p>The hierarchy would look like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>          App
-</span><span class='line'>           |
-</span><span class='line'>  |.............|...............|
-</span><span class='line'>  |             |               |
-</span><span class='line'>   Schedule      Speakers     Session-detail
-</span><span class='line'>  |
-</span><span class='line'>  |
-</span><span class='line'>  Schedule-list
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>All of these components will need the instance of data service.</p>
-
-<p>We&rsquo;ll need:</p>
-
-<ul>
-<li>A data serviced marked with <code>@Injectable</code>.</li>
-<li>A schedule page</li>
-<li>A schedule-list component</li>
-<li>A speakers page</li>
-</ul>
-
-
-<p>Say you have the following:</p>
-
-<p>In <code>www/app/service/data.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Injectable</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;angular2/angular2&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Http</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;angular2/http&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">Injectable</span><span class="p">()</span>
-</span><span class='line'><span class="kr">export</span> <span class="kr">class</span> <span class="nx">DataService</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">http</span><span class="o">:</span> <span class="nx">Http</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">http</span> <span class="o">=</span> <span class="nx">http</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;DataService constructor&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">retrieveData</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">http</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;api/data/data.json&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="nx">res</span> <span class="o">=&gt;</span> <span class="nx">res</span><span class="p">.</span><span class="nx">json</span><span class="p">())</span>
-</span><span class='line'>    <span class="p">.</span><span class="nx">subscribe</span><span class="p">(</span><span class="nx">data</span> <span class="o">=&gt;</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>We&rsquo;d also have our Application object, <code>www/app/app.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">App</span><span class="p">,</span> <span class="nx">Platform</span><span class="p">,</span> <span class="nx">StatusBar</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ionic/ionic&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">DataService</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./service/data&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">AboutPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./about/about&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">MapPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./map/map&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SchedulePage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./schedule/schedule&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SpeakersPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;./speakers/speakers&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">App</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">templateUrl</span><span class="o">:</span> <span class="s1">&#39;app/app.html&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span><span class="nx">DataService</span><span class="p">]</span>
-</span><span class='line'>  <span class="cm">/* </span>
-</span><span class='line'><span class="cm">    Here we&#39;re saying, please include an instance of </span>
-</span><span class='line'><span class="cm">    DataService for all my children components,</span>
-</span><span class='line'><span class="cm">    in this case being sessions, speakers, </span>
-</span><span class='line'><span class="cm">    and session detail.</span>
-</span><span class='line'><span class="cm">  */</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'><span class="kr">class</span> <span class="nx">ConferenceApp</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">platform</span><span class="o">:</span> <span class="nx">Platform</span><span class="p">,</span> <span class="nx">data</span><span class="o">:</span> <span class="nx">DataService</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">data</span><span class="p">.</span><span class="nx">retrieveData</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then we&rsquo;d have our speakers component, <code>www/app/speakers/speakers.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Page</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ionic/ionic&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">DataService</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../service/data&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SpeakerDetailPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../speaker-detail/speaker-detail&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SessionDetailPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../session-detail/session-detail&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">Page</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">templateUrl</span><span class="o">:</span> <span class="s1">&#39;app/speakers/speakers.html&#39;</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'><span class="kr">export</span> <span class="kr">class</span> <span class="nx">SpeakersPage</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">nav</span><span class="o">:</span> <span class="nx">NavController</span><span class="p">,</span> <span class="nx">data</span><span class="o">:</span> <span class="nx">DataService</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">nav</span> <span class="o">=</span> <span class="nx">nav</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">speakers</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">dataService</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">onInit</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">speakers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">dataService</span><span class="p">.</span><span class="nx">getSchedule</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now I want to point something out above. If we had the <code>SpeakersPage</code> to also have a <code>providers: [DataService]</code>, we are telling angular 2 to create an instance of DataService to make it available for <code>SpeakersPage</code>&rsquo;s children, <strong>instead of</strong> using the DataService that <code>ConferenceApp</code> provided.</p>
-
-<p>I repeat, we&rsquo;d have two instances of <code>DataService</code> with this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">Page</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;ionic/ionic&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">DataService</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../service/data&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SpeakerDetailPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../speaker-detail/speaker-detail&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kr">import</span> <span class="p">{</span><span class="nx">SessionDetailPage</span><span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;../session-detail/session-detail&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">@</span><span class="nx">Page</span><span class="p">({</span>
-</span><span class='line'>  <span class="nx">templateUrl</span><span class="o">:</span> <span class="s1">&#39;app/speakers/speakers.html&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">providers</span><span class="o">:</span> <span class="p">[</span><span class="nx">DataService</span><span class="p">]</span>
-</span><span class='line'>  <span class="c1">// This will instantiate a new DataService for its children</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'><span class="kr">export</span> <span class="kr">class</span> <span class="nx">SpeakersPage</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">constructor</span><span class="p">(</span><span class="nx">nav</span><span class="o">:</span> <span class="nx">NavController</span><span class="p">,</span> <span class="nx">data</span><span class="o">:</span> <span class="nx">DataService</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">nav</span> <span class="o">=</span> <span class="nx">nav</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">speakers</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">dataService</span> <span class="o">=</span> <span class="nx">data</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">onInit</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">speakers</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">dataService</span><span class="p">.</span><span class="nx">getSchedule</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>This is very important. If we had a <code>console.log</code> statement in the <code>DataService</code> constructor, we&rsquo;d see it run twice with the <code>providers: [DataService]</code> being specified.</p>
-
-<p>One thing to remember, if at the root application you specify a provider, it will be available to all children components that it contains, unless you specify a <code>providers</code> that then will initialize a new instance of that provided class.</p>
-
-<p>I hope this post helps clear up dependency injection in Angular 2. Now get back to coding!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2139,6 +1884,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/07/adding-postgresql-geometric-type-support-to-elixir/">Adding PostgreSQL Geometric Type Support to Elixir</a>
       </li>
     
@@ -2152,10 +1901,6 @@
     
       <li class="post">
         <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
   </ul>

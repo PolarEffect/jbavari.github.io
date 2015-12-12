@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I wanted a fun challenge to push myself and cross a few things off my ever so growing I want to play with this type of lists. I love learning, and &hellip;">
+  <meta name="description" content="If you&rsquo;ve ever been doing some iOS development in Cordova, you may have used the Safari Web Inspector (SWI) once or twice. You&rsquo;ve also &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,87 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/18/cordova-and-the-safari-web-inspector/">Cordova and the Safari Web Inspector</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-18T00:22:00-06:00" pubdate data-updated="true">Jun 18<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>If you&rsquo;ve ever been doing some iOS development in Cordova, you may have used the Safari Web Inspector (SWI) once or twice. You&rsquo;ve also noticed that SWI closes when the app is put in the background or you switch apps.</p>
+
+<p>I found a sweet hack that allows you to keep your safari web inspector running regardless of whether or not the app is in the foreground or not. I&rsquo;d like to outline that in this post.</p>
+
+<p>I&rsquo;m not sure how I stumbled across this sweet hack, but I have to write it down before I forget how it&rsquo;s done. My system specs at the time of writing this is Mac OSX 10.8.5 (Mountain Lion).</p>
+
+<h2>Whats involved</h2>
+
+<ul>
+<li>Using a simulator or connected device</li>
+<li>Having Safari web inspector (SWI) running</li>
+</ul>
+
+
+<p>What normally happens is, when the app closes, SWI will also close. When you relaunch the app, you will need to put Safari in the foreground, click <code>Develop</code> on the menu bar, then hover <code>iPhone Simulator</code> or <code>iPhone</code>, then click the <code>index.html</code> (or your page) to connect &amp; launch SWI.</p>
+
+<p>This is very frustrating because on the app relaunching you may have a callback happening or other code you want to debug/inspect/log on app start up. This hack lets you keep SWI and running gracefully.</p>
+
+<p>Bare with me now, we&rsquo;re going to get funky.</p>
+
+<h2>Setting up a global hotkey</h2>
+
+<p>The first thing to do is to set a <a href="http://support.apple.com/kb/ph6889">global hotkey</a> &ndash; steps:</p>
+
+<ul>
+<li>Open System Preferences / Keyboard</li>
+<li>On the right panel, select <code>Application Shortcuts</code></li>
+<li>Add a hot key &ndash; use whatever keys you want (I used <code>CMD + ALT + I</code>)</li>
+<li>Have the matching key be <code>index.html</code> or whatever your cordova&rsquo;s main html file is</li>
+</ul>
+
+
+<h2>Steps to keep open SWI</h2>
+
+<ul>
+<li>Launch Cordova App</li>
+<li>Open SWI</li>
+<li>Close SWI</li>
+<li>Launch SWI with quick key as set up in global hotkey <code>Application Shortcuts</code></li>
+<li>Close App</li>
+<li>Reopen app &ndash; notice SWI is still running and continues to give us logging/debugging!</li>
+</ul>
+
+
+<p>Enjoy, friends!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2385,77 +2466,6 @@ Enjoy!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/04/18/enabling-android-remote-debugging-in-phonegap-2-dot-9/">Enabling Android Remote Debugging in Phonegap 2.9</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-04-18T10:13:00-06:00" pubdate data-updated="true">Apr 18<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Recently the Cordova (as well as Phonegap) team has introduced <a href="http://www.raymondcamden.com/index.cfm/2014/1/2/Apache-Cordova-33-and-Remote-Debugging-for-Android">the ability to remote debug Android 4.4+</a> from <a href="https://issues.apache.org/jira/browse/CB-5487">this issue</a>.</p>
-
-<p>If you&rsquo;re like us, you have a lot of invested technology into Phonegap 2.9, and are actively making the move to Cordova 3.4. In the real world, you aren&rsquo;t always granted conveniences to move to the latest and greatest all at one time when you have released products. <a href="http://www.raymondcamden.com/index.cfm/2014/4/11/Results-of-PhoneGap-Survey">Raymond Camden did a survey</a> and apparently there are still some out there utilizing Phonegap/Cordova 2.9.</p>
-
-<p>I wanted to show how easy it was our team to backport some of the changes needed to enable Remote Debugging in Phonegap 2.9.</p>
-
-<p>You&rsquo;ll need to make a few changes to your MainActivity.java file. The first is an import statement, and the second is to make these changes near the bottom of the onCreate method:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>// At the top near your other import statements:
-</span><span class='line'>import android.webkit.WebView;
-</span><span class='line'>// ..snip..!
-</span><span class='line'>
-</span><span class='line'>public void onCreate(Bundle savedInstanceState) {
-</span><span class='line'>    // ..snip..
-</span><span class='line'>    // Enable web debugging
-</span><span class='line'>    if(android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.KITKAT) {
-</span><span class='line'>      WebView.setWebContentsDebuggingEnabled(true);
-</span><span class='line'>    }
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<p>One thing to note, this only works for Android versions 4.4 or greater! If you aren&rsquo;t using Android API 19 or greater, you&rsquo;ll have to keep using Weinre.</p>
-
-<p>Now just start your app, enable USB debugging, open Chrome, go to about:inspect, and enjoy your remote debugging in Phonegap/Cordova 2.9! Cheers!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -2473,6 +2483,10 @@ Enjoy!</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/07/adding-postgresql-geometric-type-support-to-elixir/">Adding PostgreSQL Geometric Type Support to Elixir</a>
       </li>
     
@@ -2486,10 +2500,6 @@ Enjoy!</p>
     
       <li class="post">
         <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
   </ul>

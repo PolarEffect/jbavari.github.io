@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="This year I was fortunate enough to attend ApacheCon 2014 in Denver CO. It was a big adventure for me, partyly due to one of my main goals this year &hellip;">
+  <meta name="description" content="Recently the Cordova (as well as Phonegap) team has introduced the ability to remote debug Android 4.4+ from this issue. If you&rsquo;re like us, you &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,77 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/18/enabling-android-remote-debugging-in-phonegap-2-dot-9/">Enabling Android Remote Debugging in Phonegap 2.9</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-18T10:13:00-06:00" pubdate data-updated="true">Apr 18<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Recently the Cordova (as well as Phonegap) team has introduced <a href="http://www.raymondcamden.com/index.cfm/2014/1/2/Apache-Cordova-33-and-Remote-Debugging-for-Android">the ability to remote debug Android 4.4+</a> from <a href="https://issues.apache.org/jira/browse/CB-5487">this issue</a>.</p>
+
+<p>If you&rsquo;re like us, you have a lot of invested technology into Phonegap 2.9, and are actively making the move to Cordova 3.4. In the real world, you aren&rsquo;t always granted conveniences to move to the latest and greatest all at one time when you have released products. <a href="http://www.raymondcamden.com/index.cfm/2014/4/11/Results-of-PhoneGap-Survey">Raymond Camden did a survey</a> and apparently there are still some out there utilizing Phonegap/Cordova 2.9.</p>
+
+<p>I wanted to show how easy it was our team to backport some of the changes needed to enable Remote Debugging in Phonegap 2.9.</p>
+
+<p>You&rsquo;ll need to make a few changes to your MainActivity.java file. The first is an import statement, and the second is to make these changes near the bottom of the onCreate method:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>// At the top near your other import statements:
+</span><span class='line'>import android.webkit.WebView;
+</span><span class='line'>// ..snip..!
+</span><span class='line'>
+</span><span class='line'>public void onCreate(Bundle savedInstanceState) {
+</span><span class='line'>    // ..snip..
+</span><span class='line'>    // Enable web debugging
+</span><span class='line'>    if(android.os.Build.VERSION.SDK_INT &gt;= android.os.Build.VERSION_CODES.KITKAT) {
+</span><span class='line'>      WebView.setWebContentsDebuggingEnabled(true);
+</span><span class='line'>    }
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+
+<p>One thing to note, this only works for Android versions 4.4 or greater! If you aren&rsquo;t using Android API 19 or greater, you&rsquo;ll have to keep using Weinre.</p>
+
+<p>Now just start your app, enable USB debugging, open Chrome, go to about:inspect, and enjoy your remote debugging in Phonegap/Cordova 2.9! Cheers!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1089,45 +1160,6 @@ You are free to change it!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2013/12/17/dont-be-a-grunt/">Dont Be a Grunt</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2013-12-17T10:18:00-07:00" pubdate data-updated="true">Dec 17<span>th</span>, 2013</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;ve posted some slides I presented at the <a href="http://okcjs.com">OKC Javascript User Group</a> over Grunt.js titled <a href="http://jbavari.github.io/Dont-Be-a-Grunt-Use-Grunt-Slides/">Dont be a grunt, use grunt</a>.</p>
-
-<p>I encourage any and all to take any ideas and information from the slides. I&rsquo;m hoping they provide value to anyone who may want to learn and use Grunt.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/6/">&larr; Older</a>
@@ -1145,6 +1177,10 @@ You are free to change it!</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/07/adding-postgresql-geometric-type-support-to-elixir/">Adding PostgreSQL Geometric Type Support to Elixir</a>
       </li>
     
@@ -1158,10 +1194,6 @@ You are free to change it!</p>
     
       <li class="post">
         <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
   </ul>

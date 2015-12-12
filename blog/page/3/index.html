@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I am not pretending to be an expert about what&rsquo;s in this post, but merely a talking point to learn upon. Problem: I need to reassemble an old C &hellip;">
+  <meta name="description" content="This last weekend I spent a little time on a fun little side project to learn how to use Snap.svg. I was trying to take my friend Rob&rsquo;s &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,222 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/10/23/a-field-guide-to-snap-dot-svg/">A Field Guide to Snap.svg</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-10-23T12:31:00-06:00" pubdate data-updated="true">Oct 23<span>rd</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>This last weekend I spent a little time on a fun little side project to learn how to use <a href="http://snapsvg.io/">Snap.svg</a>. I was trying to take my friend Rob&rsquo;s datachomp character and make it a little interactive.</p>
+
+<p>After trying to do what I thought was a few simple little hacks with his PNG image, it turned out to be a great way to fully learn and understand SVG and the Snap.svg library.</p>
+
+<p>I have to admit I did not fully understand what SVG was and what it was composed of. I wanted to compile a list of thoughts, links, blogs, and tutorials that helped me learn along the way.</p>
+
+<h2>What SVG is and what it isnt</h2>
+
+<p>First of all, I had to learn that there are two image types &ndash; ones that scale (vector), and ones that are defined with strict sizes (bitmaps). For the longest time, I admit I thought they were basically the same.</p>
+
+<p>Vectors are mainly svg, while bitmap types are jpeg, png, gif, to name a few.</p>
+
+<p>You&rsquo;d want to use an svg element when you need an image that can grow without looking skewed. You&rsquo;d want to use a bitmap type when the size can remain the same.</p>
+
+<p>One thing to note is, svg&rsquo;s can contain bitmap images as well, as in this example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;svg</span> <span class="na">id=</span><span class="s">&quot;svg-node&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;circle</span> <span class="na">id=</span><span class="s">&quot;svg-element&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;image</span> <span class="na">id=</span><span class="s">&quot;datachomp-arm&quot;</span> <span class="na">sketch:type=</span><span class="s">&quot;MSBitmapLayer&quot;</span> <span class="na">x=</span><span class="s">&quot;0&quot;</span> <span class="na">y=</span><span class="s">&quot;0&quot;</span> <span class="na">width=</span><span class="s">&quot;269&quot;</span> <span class="na">height=</span><span class="s">&quot;209&quot;</span> <span class="na">xlink:href=</span><span class="s">&quot;img/datachomp/arm.png&quot;</span><span class="nt">&gt;&lt;/image&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/svg&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Svg editors vs bitmap editors</h2>
+
+<p>My undertanding is that most bitmap editors can&rsquo;t do svg. GIMP, photoshop, and other editors like these are bitmap editors. Although they can create paths and export them, for the most part, they cannot do svg type modifications.</p>
+
+<p>Some svg editors are illustrator, inkscape, and fireworks, to name a few.</p>
+
+<p>Most vector editors can import bitmap images and use them as an svg element. My understanding is, they cant really modify them other than stretch/skewing them. However, I could and probably am wrong about this. (I dont pretend to be an expert at this!)</p>
+
+<h2>Svg understanding</h2>
+
+<p>To start, Mozilla Developer Network had a great set of documents to help understand SVG: what it is, what elements it&rsquo;s composed of, and how to define shapes, paths, and transforms.</p>
+
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Introduction">MDN SVG tutorial</a></p>
+
+<p>From the article:
+<code>
+Scalable Vector Graphics (SVG) is an XML markup language for describing two-dimensional vector graphics. SVG is essentially to graphics what XHTML is to text.
+</code></p>
+
+<p>That being said, you&rsquo;d be interested to know that inside of a root <code>svg</code> element, it contains other elements. Here&rsquo;s a <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Element">list of those elements available</a>.</p>
+
+<h2>Using Snap.svg to make svg elements look alive</h2>
+
+<h3>Modifying svg element attributes</h3>
+
+<p>You can access and modify any attribute on any element from Snap.svg. Examples could be the stroke, the width of the stroke, the x/y coordinates of the element, and many other <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute">attributes</a>.</p>
+
+<p>First, select the element (using Snap), then do a call to <code>elem.attr({})</code>:</p>
+
+<p>Html:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;html&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;body&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;svg</span> <span class="na">id=</span><span class="s">&quot;svg-node&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>      <span class="nt">&lt;circle</span> <span class="na">id=</span><span class="s">&quot;svg-element&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;/svg&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/body&gt;</span>
+</span><span class='line'><span class="nt">&lt;/html&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>JavaScript:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">svgNode</span> <span class="o">=</span> <span class="nx">Snap</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">&#39;#svg-node&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">svgElement</span> <span class="o">=</span> <span class="nx">svgNode</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s1">&#39;#svg-element&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">svgElement</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span>
+</span><span class='line'>    <span class="nx">fill</span><span class="o">:</span> <span class="s2">&quot;#bada55&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">stroke</span><span class="o">:</span> <span class="s2">&quot;#000&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">strokeWidth</span><span class="o">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">x</span><span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">y</span><span class="o">:</span> <span class="mi">100</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Transforms</h3>
+
+<p><a href="http://snapsvg.io/docs/#Element.transform">Snap.svg</a> defines some methods to help you transform your svg elements. It looks like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">arm</span> <span class="o">=</span> <span class="nx">datachomp</span> <span class="o">=</span> <span class="nx">Snap</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;#datachomp&quot;</span><span class="p">),</span>
+</span><span class='line'>      <span class="nx">arm</span> <span class="o">=</span> <span class="nx">datachomp</span><span class="p">.</span><span class="nx">select</span><span class="p">(</span><span class="s2">&quot;#datachomp-arm&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">elementTransform</span> <span class="o">=</span> <span class="s2">&quot;t0,-80r360t-30,0r360t-30,30t-10,10&quot;</span><span class="p">;</span>
+</span><span class='line'><span class="nx">arm</span><span class="p">.</span><span class="nx">animate</span><span class="p">({</span><span class="nx">transform</span><span class="o">:</span> <span class="nx">tAmt</span><span class="p">},</span> <span class="mi">500</span><span class="p">,</span> <span class="nx">mina</span><span class="p">.</span><span class="nx">elastic</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>However, I was having some trouble understanding the transform string syntax. The author also created <a href="http://raphaeljs.com/">Raphael.js</a> and provides some additional documentation on how to <a href="http://raphaeljs.com/reference.html#Element.transform">understand transform strings here</a>.</p>
+
+<p>Taken from the Raphael reference:</p>
+
+<p>&#8220;
+Each letter is a command. There are four commands: t is for translate, r is for rotate, s is for scale and m is for matrix.</p>
+
+<p>There are also alternative &lsquo;absolute&rsquo; translation, rotation and scale: T, R and S. They will not take previous transformation into account. For example, &hellip;T100,0 will always move element 100 px horisontally, while &hellip;t100,0 could move it vertically if there is r90 before. Just compare results of r90t100,0 and r90T100,0.</p>
+
+<p>So, the example line above could be read like &lsquo;translate by 100, 100; rotate 30° around 100, 100; scale twice around 100, 100; rotate 45° around centre; scale 1.5 times relative to centre&rsquo;. As you can see rotate and scale commands have origin coordinates as optional parameters, the default is the centre point of the element. Matrix accepts six parameters.
+&#8220;</p>
+
+<h3>Paths</h3>
+
+<p>Again I admit I knew very little about how to define a path. <a href="https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths">This document</a> helped tremendously in the different types of paths and how to define them.</p>
+
+<p>One task I wanted to do was make an svg element follow along a path. <a href="http://codepen.io/mattsince87/pen/snqLy">This CodePen</a> helped tremendously with figuring out how to make an element follow along with a path.</p>
+
+<p>Out of <a href="https://groups.google.com/forum/#!topic/snapsvg/TOYtCQvLNHA">this google group thread</a>, a code snippit comes up that helps:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//Snap.svg helper method to make an element trace a defined path</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">function</span> <span class="nx">animateAlongPath</span><span class="p">(</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">element</span><span class="p">,</span> <span class="nx">start</span><span class="p">,</span> <span class="nx">dur</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">len</span> <span class="o">=</span> <span class="nx">Snap</span><span class="p">.</span><span class="nx">path</span><span class="p">.</span><span class="nx">getTotalLength</span><span class="p">(</span> <span class="nx">path</span> <span class="p">);</span>
+</span><span class='line'>    <span class="nx">Snap</span><span class="p">.</span><span class="nx">animate</span><span class="p">(</span> <span class="nx">start</span><span class="p">,</span> <span class="nx">len</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span> <span class="nx">value</span> <span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="kd">var</span> <span class="nx">movePoint</span> <span class="o">=</span> <span class="nx">Snap</span><span class="p">.</span><span class="nx">path</span><span class="p">.</span><span class="nx">getPointAtLength</span><span class="p">(</span> <span class="nx">path</span><span class="p">,</span> <span class="nx">value</span> <span class="p">);</span>
+</span><span class='line'>            <span class="nx">element</span><span class="p">.</span><span class="nx">attr</span><span class="p">({</span> <span class="nx">x</span><span class="o">:</span> <span class="nx">movePoint</span><span class="p">.</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="o">:</span> <span class="nx">movePoint</span><span class="p">.</span><span class="nx">y</span> <span class="p">});</span>
+</span><span class='line'>    <span class="p">},</span> <span class="nx">dur</span><span class="p">);</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I found a blog post with a demo that helped show some additional paths and how to use tools to create them, <a href="http://dropthebit.com/592/pathanimator-moving-along-an-svg-path/">found here</a>.</p>
+
+<p>I found another little hack on how to create paths using <a href="http://www.gimp.org/">GIMP</a>. First, start to create your path with the path tool. When you&rsquo;re done, select your path you created from the toolbar (under the &lsquo;paths&rsquo; tab), right click it, and select <code>export path</code>. That should give you an svg file with the path inside of it.</p>
+
+<h2>Svg vs Canvas</h2>
+
+<p>A question came up, when would you want to use svg over something like the canvas?</p>
+
+<p>After reading <a href="http://www.htmlgoodies.com/html5/other/html5-canvas-vs.-svg-choose-the-best-tool-for-the-job.html#fbid=9b7MQgV-6i0">this article</a>, the author makes a point for which you&rsquo;d want to use:</p>
+
+<p><code>
+SVG Relies on Files, Canvas Uses Pure Scripting
+SVG images are defined in XML. As a result, every SVG element is appended to the Document Object Model (DOM) and can be manipulated using a combination of JavaScript and CSS. Moreover, you can attach an event handlers to a SVG element or update its properties based on another document event. Canvas, on the other hand, is a simple graphics API. It draws pixels (extremely well I might add) and nothing more. Hence, there's no way to alter existing drawings or react to events. If you want to update the Canvas image, you have to redraw it.
+</code></p>
+
+<p>I&rsquo;ll continue updating this post as I learn more. I hope this helps others learn these svg topics with ease.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1711,87 +1927,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/18/cordova-and-the-safari-web-inspector/">Cordova and the Safari Web Inspector</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-18T00:22:00-06:00" pubdate data-updated="true">Jun 18<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>If you&rsquo;ve ever been doing some iOS development in Cordova, you may have used the Safari Web Inspector (SWI) once or twice. You&rsquo;ve also noticed that SWI closes when the app is put in the background or you switch apps.</p>
-
-<p>I found a sweet hack that allows you to keep your safari web inspector running regardless of whether or not the app is in the foreground or not. I&rsquo;d like to outline that in this post.</p>
-
-<p>I&rsquo;m not sure how I stumbled across this sweet hack, but I have to write it down before I forget how it&rsquo;s done. My system specs at the time of writing this is Mac OSX 10.8.5 (Mountain Lion).</p>
-
-<h2>Whats involved</h2>
-
-<ul>
-<li>Using a simulator or connected device</li>
-<li>Having Safari web inspector (SWI) running</li>
-</ul>
-
-
-<p>What normally happens is, when the app closes, SWI will also close. When you relaunch the app, you will need to put Safari in the foreground, click <code>Develop</code> on the menu bar, then hover <code>iPhone Simulator</code> or <code>iPhone</code>, then click the <code>index.html</code> (or your page) to connect &amp; launch SWI.</p>
-
-<p>This is very frustrating because on the app relaunching you may have a callback happening or other code you want to debug/inspect/log on app start up. This hack lets you keep SWI and running gracefully.</p>
-
-<p>Bare with me now, we&rsquo;re going to get funky.</p>
-
-<h2>Setting up a global hotkey</h2>
-
-<p>The first thing to do is to set a <a href="http://support.apple.com/kb/ph6889">global hotkey</a> &ndash; steps:</p>
-
-<ul>
-<li>Open System Preferences / Keyboard</li>
-<li>On the right panel, select <code>Application Shortcuts</code></li>
-<li>Add a hot key &ndash; use whatever keys you want (I used <code>CMD + ALT + I</code>)</li>
-<li>Have the matching key be <code>index.html</code> or whatever your cordova&rsquo;s main html file is</li>
-</ul>
-
-
-<h2>Steps to keep open SWI</h2>
-
-<ul>
-<li>Launch Cordova App</li>
-<li>Open SWI</li>
-<li>Close SWI</li>
-<li>Launch SWI with quick key as set up in global hotkey <code>Application Shortcuts</code></li>
-<li>Close App</li>
-<li>Reopen app &ndash; notice SWI is still running and continues to give us logging/debugging!</li>
-</ul>
-
-
-<p>Enjoy, friends!</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -1809,6 +1944,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/07/adding-postgresql-geometric-type-support-to-elixir/">Adding PostgreSQL Geometric Type Support to Elixir</a>
       </li>
     
@@ -1822,10 +1961,6 @@
     
       <li class="post">
         <a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a>
       </li>
     
   </ul>
