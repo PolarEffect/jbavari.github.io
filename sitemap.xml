@@ -263,20 +263,26 @@
         <lastmod>2015-12-12T13:56:50-07:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://jbavari.github.io/blog/2015/12/15/scoreboard-forms-in-react-and-angular-2/
+        </loc>
+        <lastmod>2015-12-19T14:50:40-07:00</lastmod>
+    </url>
+    <url>
         <loc>http://jbavari.github.io/about/</loc>
         <lastmod>2015-11-22T16:40:03-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/blog/archives/</loc>
-        <lastmod>2015-12-12T13:56:50-07:00</lastmod>
+        <lastmod>2015-12-19T14:50:40-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/</loc>
-        <lastmod>2015-12-12T13:56:50-07:00</lastmod>
+        <lastmod>2015-12-19T14:50:40-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/knowledge/</loc>
-        <lastmod>2015-12-09T00:20:16-07:00</lastmod>
+        <lastmod>2015-12-19T13:52:50-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/registry/</loc>
