@@ -4,7 +4,7 @@
   <title><![CDATA[Category: angular2 | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/angular2/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2015-12-19T14:51:04-07:00</updated>
+  <updated>2016-01-10T12:18:22-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -613,7 +613,7 @@ if (matched.length &gt; 0) {
 <p>A solid example, DataService marked as <code>@Injectable</code> that also needs <code>Http</code> to be injected for its use:</p>
 
 <p>```js
-import {Injectable, bind} from &lsquo;angular2/angular2&rsquo;;
+import {Injectable, bind} from &lsquo;angular2/core&rsquo;;
 import {Http} from &lsquo;angular2/http&rsquo;;</p>
 
 <p>@Injectable() /<em> This is #1 </em>/
@@ -671,7 +671,7 @@ export class DataService {
 <p>In <code>www/app/service/data.js</code>:</p>
 
 <p>```js
-import {Injectable} from &lsquo;angular2/angular2&rsquo;;
+import {Injectable} from &lsquo;angular2/core&rsquo;;
 import {Http} from &lsquo;angular2/http&rsquo;;</p>
 
 <p>@Injectable()
