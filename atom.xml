@@ -4,7 +4,7 @@
   <title><![CDATA[Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2016-01-14T22:21:22-07:00</updated>
+  <updated>2016-01-16T23:25:46-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,158 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Shipping data with Protocol Buffers in Elixir]]></title>
+    <link href="http://jbavari.github.io/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir/"/>
+    <updated>2016-01-16T22:49:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir</id>
+    <content type="html"><![CDATA[<p>Lately, I&rsquo;ve needed some data shipped across to various nodes to exchange data in a variety of places on a problem I was working on. There were a few ways to get that data shipped across, as the usual suspects are JSON, XML, or Google&rsquo;s <a href="https://developers.google.com/protocol-buffers/?hl=en">Protocol Buffers</a>.</p>
+
+<p>For this specific problem, we were needing to get that data shared from C++ nodes to Elixir/Erlang.</p>
+
+<p>Since the team was using Protocol buffers already, I decided to give them a run in Elixir using <a href="https://github.com/bitwalker/exprotobuf">exprotobuf</a>.</p>
+
+<p>Note: <a href="https://github.com/jbavari/elixir-zeromq-protobuf-uploader">the client for this experiement is on github</a>.</p>
+
+<h2>The idea</h2>
+
+<p>The idea here is &ndash; we&rsquo;ll capture pieces of data from one node and ship it to the server for processing. We define the data structure by a <code>.proto</code> file, then turn our data into binary form by encoding it, and finally shipping it to it&rsquo;s destination. We could do the same thing with JSON, but we want the data as light as possible.</p>
+
+<p>We&rsquo;ll use <a href="http://zeromq.org/">ZeroMQ</a> to ship the data and use the Elixir package <a href="https://github.com/zeromq/exzmq">exzmq</a> to encode in protocol buffers.</p>
+
+<h2>The process</h2>
+
+<p>First we define our protocol buffer format for an image message we want to send with data, its width, height, and bits per pixel:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='protobuf'><span class='line'><span class="kd">message</span> <span class="nc">ImageMsg</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">optional</span> <span class="kt">bytes</span> <span class="na">data</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">optional</span> <span class="kt">int32</span> <span class="na">width</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">optional</span> <span class="kt">int32</span> <span class="na">height</span> <span class="o">=</span> <span class="mi">3</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">optional</span> <span class="kt">int32</span> <span class="na">bpp</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>We set up our application to use <code>exprotobuf</code> in our <code>mix.exs</code> file:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="k">def</span> <span class="n">application</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    </span><span class="p">[</span><span class="ss">applications:</span> <span class="p">[</span><span class="ss">:logger</span><span class="p">,</span> <span class="ss">:exzmq</span><span class="p">,</span> <span class="ss">:exprotobuf</span><span class="p">],</span>
+</span><span class='line'>     <span class="ss">mod:</span> <span class="p">{</span><span class="no">Zmq2</span><span class="p">,</span> <span class="p">[]}]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>as well as including it as a dependency:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="k">defp</span> <span class="n">deps</span> <span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="p">[</span>
+</span><span class='line'>    <span class="p">{</span><span class="ss">:exzmq</span><span class="p">,</span> <span class="ss">git:</span> <span class="s2">&quot;https://github.com/zeromq/exzmq&quot;</span><span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span><span class="ss">:exprotobuf</span><span class="p">,</span> <span class="s2">&quot;1.0.0-rc1&quot;</span><span class="p">}</span>
+</span><span class='line'>  <span class="p">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Finally we create an Elixir struct from this <a href="https://github.com/jbavari/elixir-zeromq-protobuf-uploader/blob/master/lib/proto/imagemsg.proto">proto file</a> as such:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="k">defmodule</span> <span class="no">Zmq2</span><span class="o">.</span><span class="no">Protobuf</span> <span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="kn">use</span> <span class="no">Protobuf</span><span class="p">,</span> <span class="ss">from:</span> <span class="no">Path</span><span class="o">.</span><span class="n">wildcard</span><span class="p">(</span><span class="no">Path</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="s2">&quot;./proto/imagemsg.proto&quot;</span><span class="p">,</span> <span class="n">__DIR__</span><span class="p">))</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now that we have our protobuf file read in, let&rsquo;s get an images binary data, create an elixir structure from our protobuf file, and send that data over a Zero MQ socket (using <code>exzmq</code>):</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="k">def</span> <span class="n">check_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;Sending image from file path: </span><span class="si">#{</span><span class="no">Path</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">__DIR__</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">case</span> <span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">Path</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">file_path</span><span class="p">))</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    </span><span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="ss">:enoent</span><span class="p">}</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;No file at the path: </span><span class="si">#{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">img_data</span><span class="p">}</span> <span class="o">-&gt;</span>
+</span><span class='line'>      <span class="n">send_image_data</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">img_data</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="n">send_image_data</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="n">img_data</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="n">img_message</span> <span class="o">=</span> <span class="no">Zmq2</span><span class="o">.</span><span class="no">Protobuf</span><span class="o">.</span><span class="no">ImageMsg</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">data:</span> <span class="n">img_data</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">encoded_data</span> <span class="o">=</span> <span class="no">Zmq2</span><span class="o">.</span><span class="no">Protobuf</span><span class="o">.</span><span class="no">ImageMsg</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">img_message</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;The encoded data: </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">encoded_data</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">Exzmq</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">socket</span><span class="p">,</span> <span class="p">[</span><span class="n">encoded_data</span><span class="p">])</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">IO</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;Sent request - awaiting reply\n\n&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># {:ok, r} =</span>
+</span><span class='line'>  <span class="k">case</span> <span class="no">Exzmq</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="n">socket</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    </span><span class="p">{</span><span class="ss">:ok</span><span class="p">,</span> <span class="n">r</span><span class="p">}</span> <span class="o">-&gt;</span> <span class="no">IO</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="s2">&quot;Received reply </span><span class="si">#{</span><span class="n">inspect</span> <span class="n">r</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">_</span> <span class="o">-&gt;</span> <span class="p">{</span><span class="ss">:error</span><span class="p">,</span> <span class="s2">&quot;No Reply&quot;</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And there we have it, a message sent serialized with protocol buffers. We can now apply this same strategy over any different protocol buffer messages we define, and ship them over any protocl we&rsquo;d like.</p>
+
+<h3>Some inspiration</h3>
+
+<p>Along the R&amp;D process, I came across <a href="http://dbeck.github.io">David Beck&rsquo;s blog</a>. David has an experiment where he was <a href="http://dbeck.github.io/Wrapping-up-my-Elixir-TCP-experiments/">sending several million messages in TCP</a> where he explores some ultra-efficient methods of sending messages, it&rsquo;s a great read. He also covers <a href="http://dbeck.github.io/5-lessons-learnt-from-choosing-zeromq-and-protobuf/">zeromq and protocol buffers</a> that goes more in depth into Protocol buffers and some lessons learned.</p>
+
+<p>Alas, we move on!</p>
+
+<p>Cheers</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Scoreboard forms in React and Angular 2]]></title>
@@ -3571,310 +3723,6 @@ Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been
 <p>This is just one approach to take to setting up some faking out for node modules using Electron, Angular JS, and Jasmine.</p>
 
 <p>Hope this helps.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Comparisons of nw.js and Electron]]></title>
-    <link href="http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron/"/>
-    <updated>2015-05-08T17:11:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron</id>
-    <content type="html"><![CDATA[<p>In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There are two main tools that come to mind &ndash; nw.js (formerly known as Node Webkit) and Electron (formerly known as Atom Shell).</p>
-
-<p>This post focuses on using both, the differences between the two, and focusing on issues that I&rsquo;ve encountered.</p>
-
-<p>Outline:</p>
-
-<ul>
-<li>Getting started &ndash; package.json</li>
-<li>Native Menus (application menu)</li>
-<li>Shell execution (child processes)</li>
-<li>Packaging / run</li>
-<li>Icons</li>
-<li>Performance</li>
-</ul>
-
-
-<h1>Nw.js</h1>
-
-<h2>Getting started</h2>
-
-<p>Nw.js and Electron share a lot of the same steps for getting started. The only real difference between the two is how they are run, and how they handle the node process internally.</p>
-
-<p>With Nw.js, your app is bundled together. With Electron, the application is set up differently &ndash; with the main node process the handle running the browser process, and the rendering process, which handles all things from the browser (the event loop).</p>
-
-<p>To get running, <a href="">download the nw.js app</a> or the <a href="">electron app</a>. Both of these applications look at your <code>package.json</code> file to get running by looking at the <code>main</code> attribute.</p>
-
-<h2>Bootstrapping</h2>
-
-<p>For nw.js, the <code>main</code> attribute should specify which html file to start loading when your application launched. With Electron, your <code>main</code> attribute should specify a JavaScript file to be run.</p>
-
-<p>You also specify attributes about the nw.js window that runs via the <code>window</code> attribute, things like <code>toolbar</code>, <code>width</code>, and <code>height</code>, notably.</p>
-
-<p>With Electron, the JS file that you specify will launch the browser window and specify other attributes like width, height, and other window attributes.</p>
-
-<p>For convenience sake, I also created a node run script to execute the Nw.js app with my current folder. To run the node-webkit app, you simply type <code>npm run nwjs</code>. I also included a livereload script to watch my <code>www</code> folder to live reload my changes in the nw.js app.</p>
-
-<p>Here&rsquo;s a quick look at the <code>package.json</code> file used to bootstrap nw.js:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nwjs-app&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;www/index.html&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;nwjs&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/nwjs.app/Contents/MacOS/nwjs . &amp; node livereload&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;electron&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/Electron.app/Contents/MacOS/Electron . &amp; node livereload&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;window&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;toolbar&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;width&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">500</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here&rsquo;s a quick look at the <code>package.json</code> file used to bootstrap Electron:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nwjs-app&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;src/main.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;nwjs&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/nwjs.app/Contents/MacOS/nwjs . &amp; node livereload&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;electron&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/Electron.app/Contents/MacOS/Electron . &amp; node livereload&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;window&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;toolbar&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;width&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">500</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Additionally for Electron, my <code>main.js</code> file looks like the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">);</span>  <span class="c1">// Module to control application life.</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">BrowserWindow</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;browser-window&#39;</span><span class="p">);</span>  <span class="c1">// Module to create native browser window.</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">Menu</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;menu&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">ipc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ipc&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// var menu = new Menu();</span>
-</span><span class='line'><span class="c1">// Report crashes to our server.</span>
-</span><span class='line'><span class="c1">// require(&#39;crash-reporter&#39;).start();</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Keep a global reference of the window object, if you don&#39;t, the window will</span>
-</span><span class='line'><span class="c1">// be closed automatically when the javascript object is GCed.</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">mainWindow</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">menu</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">browserOptions</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">height</span><span class="o">:</span> <span class="mi">600</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">title</span><span class="o">:</span> <span class="s1">&#39;Electron App&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">width</span><span class="o">:</span> <span class="mi">800</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Quit when all windows are closed.</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;window-all-closed&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">platform</span> <span class="o">!=</span> <span class="s1">&#39;darwin&#39;</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">quit</span><span class="p">();</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// This method will be called when Electron has done everything</span>
-</span><span class='line'><span class="c1">// initialization and ready for creating browser windows.</span>
-</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;ready&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// Create the browser window.</span>
-</span><span class='line'>  <span class="nx">mainWindow</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BrowserWindow</span><span class="p">(</span><span class="nx">browserOptions</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// and load the index.html of the app.</span>
-</span><span class='line'>  <span class="nx">mainWindow</span><span class="p">.</span><span class="nx">loadUrl</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span> <span class="o">+</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/www/index.html&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// Emitted when the window is closed.</span>
-</span><span class='line'>  <span class="nx">mainWindow</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;closed&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// Dereference the window object, usually you would store windows</span>
-</span><span class='line'>    <span class="c1">// in an array if your app supports multi windows, this is the time</span>
-</span><span class='line'>    <span class="c1">// when you should delete the corresponding element.</span>
-</span><span class='line'>    <span class="nx">mainWindow</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">ipc</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;update-application-menu&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">template</span><span class="p">,</span> <span class="nx">keystrokesByCommand</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">//Go through the templates, wrap their click events back to the browser</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;update-application-menu - template&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">translateTemplate</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">keystrokesByCommand</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">menu</span> <span class="o">=</span> <span class="nx">Menu</span>
-</span><span class='line'>    <span class="nx">Menu</span><span class="p">.</span><span class="nx">setApplicationMenu</span><span class="p">(</span><span class="nx">menu</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Native Menus</h2>
-
-<h3>Electron</h3>
-
-<p>Due to the way electron is split up into two processes, the main process (that handles native menus) and the browser process (mainly your app), menus are mainly available to be set on the main process.</p>
-
-<p>If you want your app to change your application menus, you&rsquo;ll need to use the <a href="https://github.com/atom/electron/blob/master/docs/api/ipc-main-process.md"><code>ipc</code></a> module electron provides to get a message out to the main process to update the menus.</p>
-
-<p>Other than that, the menu system is super easy if you wish to use static menus.</p>
-
-<h3>Nw.js</h3>
-
-<p>It&rsquo;s dead simple. Since it&rsquo;s all one bundled process, just call the set menu, and you&rsquo;re good. It&rsquo;s easy to set short cuts and modify the menus.</p>
-
-<h2>Shell execution</h2>
-
-<p>In nw.js, you&rsquo;re good to go when it comes to making external shell calls.</p>
-
-<p>When it comes to electron, make sure you spawn your child processes with the <code>pipe</code> stdio option. Without that option, you may run into some errors (due to the fact electron doesnt have a stdout it manages easily).</p>
-
-<h2>Packaging / running</h2>
-
-<p>It&rsquo;s really easy on both platforms. Just set up your package.json/index.html/main.js file and run the appropriate command.</p>
-
-<p>I don&rsquo;t have a lot of experience with nw.js, so I cant speak to the packaging process.</p>
-
-<p>For electron, to run I like to use <a href="https://github.com/mafintosh/electron-prebuilt">electron-prebuilt</a> to run my <code>www</code> files as an app, using <a href="https://github.com/maxogden/electron-packager">electron-packager</a> to package into an <code>.app</code> file, and <a href="https://github.com/loopline-systems/electron-builder">electron-builder</a> to create installers (dmg/setup.exe).</p>
-
-<h2>Icons</h2>
-
-<p>To get custom icons for your app files for Mac, you need an <code>.icns</code> file that bundles up all your icons in all the formats/sizes for your dock icon, your cmd+tab icon, and your running icon.</p>
-
-<p>I used this as a <a href="http://stackoverflow.com/questions/12306223/how-to-manually-create-icns-files-using-iconutil">walkthrough</a>.</p>
-
-<p>I first started with a size of 1024x1024 pixels, then used the following commands:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span> <span class="nx">Enter</span> <span class="nx">app</span><span class="p">.</span><span class="nx">iconset</span><span class="p">,</span> <span class="nx">drop</span> <span class="k">in</span> <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="nx">as</span> <span class="nx">a</span> <span class="mi">1024</span> <span class="nx">x</span> <span class="mi">1024</span> <span class="nx">image</span><span class="p">.</span>
-</span><span class='line'><span class="err">#</span> <span class="nx">Run</span> <span class="nx">the</span> <span class="nx">following</span> <span class="nx">commands</span><span class="o">:</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">16</span> <span class="mi">16</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_16x16</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">32</span> <span class="mi">32</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_16x16</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">32</span> <span class="mi">32</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_32x32</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">64</span> <span class="mi">64</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_32x32</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">128</span> <span class="mi">128</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_128x128</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">256</span> <span class="mi">256</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_128x128</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">256</span> <span class="mi">256</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_256x256</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">512</span> <span class="mi">512</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_256x256</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">512</span> <span class="mi">512</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_512x512</span><span class="p">.</span><span class="nx">png</span>
-</span><span class='line'><span class="nx">cp</span> <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="nx">icon_512x512</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Then just run:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">iconutil</span> <span class="o">-</span><span class="nx">c</span> <span class="nx">icns</span> <span class="nx">app</span><span class="p">.</span><span class="nx">iconset</span> <span class="o">-</span><span class="nx">o</span> <span class="p">.</span><span class="o">/</span><span class="nx">app</span><span class="o">-</span><span class="nx">dir</span><span class="o">/</span><span class="nx">YourAppName</span><span class="p">.</span><span class="nx">app</span><span class="o">/</span><span class="nx">Contents</span><span class="o">/</span><span class="nx">Resources</span><span class="o">/</span><span class="nx">app</span><span class="p">.</span><span class="nx">icns</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>You should now have your app with icons ready to go.</p>
-
-<h2>Performance</h2>
-
-<p>I didn&rsquo;t see a lot of major performance bumps from using either platform. It&rsquo;s JavaScript after all.</p>
-
-<h2>Closing words</h2>
-
-<p>Most of all, have fun with developing with these tools! They&rsquo;re open source and free, so when you get a chance, share some knowledge, post an issue, respond to an issue, or even submit a PR.</p>
-
-<p>We&rsquo;re all in this together.</p>
 ]]></content>
   </entry>
   

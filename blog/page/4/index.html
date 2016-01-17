@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="For those of you that don&rsquo;t know, Cordova has hooks that can run on each of the specific build tasks that Cordova goes through. For example the &hellip;">
+  <meta name="description" content="In AngularJS, you can set up HTTP Interceptors (middleware) to inject headers etc. I had a service that I wanted to intercept every http request to &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,282 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/06/20/testing-interceptor-headers-in-angularjs/">Testing Interceptor Headers in AngularJS</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-06-20T21:22:00-06:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In AngularJS, you can set up <a href="https://docs.angularjs.org/api/ng/service/$http">HTTP Interceptors</a> (middleware) to inject headers etc.</p>
+
+<p>I had a service that I wanted to intercept every http request to our API service to attach a token that we consume to verify a user. This would only happen once a token is set.</p>
+
+<p>Today I paired with <a href="https://twitter.com/jeff_french">Jeff French</a>. We figured out how to test the AngularJS interceptors properly.</p>
+
+<p>Things I want to test:</p>
+
+<ul>
+<li>Is the token only being attached when a token is set?</li>
+<li>Are the requests actually being attached via the interceptor</li>
+</ul>
+
+
+<p>The service and interceptor look like this:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">moduler</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">RequestService</span><span class="p">(){</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">setToken</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">setToken</span><span class="p">(</span><span class="nx">someToken</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">token</span> <span class="o">=</span> <span class="nx">someToken</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">getToken</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getToken</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nx">token</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">request</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">request</span><span class="p">(</span><span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="c1">// jqXHR.setRequestHeader(&#39;Authorization&#39;,&#39;Token token=&quot;&#39; + app.user.api_key.access_token + &#39;&quot;&#39;);</span>
+</span><span class='line'>            <span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Token token=&quot;&#39;</span> <span class="o">+</span> <span class="nx">token</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">config</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">setToken</span><span class="o">:</span> <span class="nx">setToken</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">getToken</span><span class="o">:</span> <span class="nx">getToken</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">request</span><span class="o">:</span> <span class="nx">request</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">.</span><span class="nx">config</span><span class="p">([</span><span class="s1">&#39;$httpProvider&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">$httpProvider</span><span class="p">.</span><span class="nx">interceptors</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}]);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>With just a few simple tests, I&rsquo;m asserting a few things:</p>
+
+<ul>
+<li>I have no simple ParseError or ReferenceErrors</li>
+<li>Modules are set up correctly</li>
+<li>Interceptors are set up correctly</li>
+<li>My service is actually setting the token correctly</li>
+<li>The interceptor is attaching the header correctly</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">httpProviderIt</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;Service Unit Tests&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//save our interceptor</span>
+</span><span class='line'>      <span class="nx">httpProviderIt</span> <span class="o">=</span> <span class="nx">$httpProvider</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">inject</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">_AuthService_</span><span class="p">,</span> <span class="nx">_RequestService_</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">RequestService</span> <span class="o">=</span> <span class="nx">_RequestService_</span><span class="p">;</span>
+</span><span class='line'>      <span class="nx">AuthService</span> <span class="o">=</span> <span class="nx">_AuthService_</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">})</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">RequestService</span><span class="p">,</span> <span class="nx">AuthService</span><span class="p">;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">$httpBackend</span><span class="p">;</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="s1">&#39;someToken&#39;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;RequestService Tests&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have RequestService be defined&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">).</span><span class="nx">toBeDefined</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should properly set an api token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">()).</span><span class="nx">toBeNull</span><span class="p">();</span>
+</span><span class='line'>      <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">()).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should save the users api token after saveUser&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">spyOn</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">,</span> <span class="s1">&#39;setToken&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="nx">Auth</span><span class="p">.</span><span class="nx">saveUser</span><span class="p">(</span><span class="nx">apiResponse</span><span class="p">);</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">).</span><span class="nx">toHaveBeenCalled</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have no api token upon start up&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">();</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">token</span><span class="p">).</span><span class="nx">toBeNull</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;HTTP tests&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have the RequestService as an interceptor&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">httpProviderIt</span><span class="p">.</span><span class="nx">interceptors</span><span class="p">).</span><span class="nx">toContain</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should token in the headers after setting&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">headers</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">headers</span><span class="p">.</span><span class="nx">Authorization</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">}).</span><span class="nx">respond</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;example&#39;</span> <span class="p">});</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should not place a token in the http request headers if no token is set&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span><span class="nx">headers</span><span class="o">:</span> <span class="p">{}</span> <span class="p">});</span>
+</span><span class='line'>        <span class="nx">expect</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should place a token in the http request headers after a token is set&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span><span class="nx">headers</span><span class="o">:</span> <span class="p">{}</span> <span class="p">});</span>
+</span><span class='line'>        <span class="nx">expect</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">&#39;Token token=&quot;&#39;</span> <span class="o">+</span> <span class="nx">token</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">});</span>
+</span><span class='line'>    <span class="p">});</span> <span class="c1">//Mocked HTTP Requests</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">});</span> <span class="c1">//RequestService tests</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Simple and sweet.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2391,72 +2667,6 @@ Enjoy!</p>
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/05/07/pow-and-weird-starting-issues/">Pow and Weird Starting Issues</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-05-07T14:56:00-06:00" pubdate data-updated="true">May 7<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Lately I&rsquo;ve been getting this weird error from Pow in Rails 4:</p>
-
-<p><code>Bundler::GemNotFound: Could not find rake-10.3.1 in any of the sources</code></p>
-
-<p>Read more below to see what I did.</p>
-
-<p>In boot.rb:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>require 'rubygems'
-</span><span class='line'># Set up gems listed in the Gemfile.
-</span><span class='line'>ENV['BUNDLE_GEMFILE'] ||= File.expand_path('../../Gemfile', __FILE__)
-</span><span class='line'>
-</span><span class='line'>require 'bundler/setup' if File.exists?(ENV['BUNDLE_GEMFILE'])
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>In config.ru:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>require ::File.expand_path('../config/environment',  __FILE__)
-</span><span class='line'>run Rails.application</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hope this helps.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/5/">&larr; Older</a>
@@ -2474,6 +2684,10 @@ Enjoy!</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir/">Shipping Data With Protocol Buffers in Elixir</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/15/scoreboard-forms-in-react-and-angular-2/">Scoreboard Forms in React and Angular 2</a>
       </li>
     
@@ -2487,10 +2701,6 @@ Enjoy!</p>
     
       <li class="post">
         <a href="/blog/2015/12/04/the-scoreboard-project/">The Scoreboard Project</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
       </li>
     
   </ul>

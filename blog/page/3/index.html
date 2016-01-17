@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="2014 has been an interesting year and I&rsquo;d like to spend a minute to review it for myself as a reminder. January started out, I was working for &hellip;">
+  <meta name="description" content="In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,338 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/05/08/comparisons-of-nw-dot-js-and-electron/">Comparisons of nw.js and Electron</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-05-08T17:11:00-06:00" pubdate data-updated="true">May 8<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>In the last few months, I&rsquo;ve been playing around with two tools to help bridge the gap between the web and native desktop applications. There are two main tools that come to mind &ndash; nw.js (formerly known as Node Webkit) and Electron (formerly known as Atom Shell).</p>
+
+<p>This post focuses on using both, the differences between the two, and focusing on issues that I&rsquo;ve encountered.</p>
+
+<p>Outline:</p>
+
+<ul>
+<li>Getting started &ndash; package.json</li>
+<li>Native Menus (application menu)</li>
+<li>Shell execution (child processes)</li>
+<li>Packaging / run</li>
+<li>Icons</li>
+<li>Performance</li>
+</ul>
+
+
+<h1>Nw.js</h1>
+
+<h2>Getting started</h2>
+
+<p>Nw.js and Electron share a lot of the same steps for getting started. The only real difference between the two is how they are run, and how they handle the node process internally.</p>
+
+<p>With Nw.js, your app is bundled together. With Electron, the application is set up differently &ndash; with the main node process the handle running the browser process, and the rendering process, which handles all things from the browser (the event loop).</p>
+
+<p>To get running, <a href="">download the nw.js app</a> or the <a href="">electron app</a>. Both of these applications look at your <code>package.json</code> file to get running by looking at the <code>main</code> attribute.</p>
+
+<h2>Bootstrapping</h2>
+
+<p>For nw.js, the <code>main</code> attribute should specify which html file to start loading when your application launched. With Electron, your <code>main</code> attribute should specify a JavaScript file to be run.</p>
+
+<p>You also specify attributes about the nw.js window that runs via the <code>window</code> attribute, things like <code>toolbar</code>, <code>width</code>, and <code>height</code>, notably.</p>
+
+<p>With Electron, the JS file that you specify will launch the browser window and specify other attributes like width, height, and other window attributes.</p>
+
+<p>For convenience sake, I also created a node run script to execute the Nw.js app with my current folder. To run the node-webkit app, you simply type <code>npm run nwjs</code>. I also included a livereload script to watch my <code>www</code> folder to live reload my changes in the nw.js app.</p>
+
+<p>Here&rsquo;s a quick look at the <code>package.json</code> file used to bootstrap nw.js:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nwjs-app&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;www/index.html&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;nwjs&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/nwjs.app/Contents/MacOS/nwjs . &amp; node livereload&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;electron&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/Electron.app/Contents/MacOS/Electron . &amp; node livereload&quot;</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;window&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;toolbar&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;width&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">500</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Here&rsquo;s a quick look at the <code>package.json</code> file used to bootstrap Electron:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;nwjs-app&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;src/main.js&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;nwjs&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/nwjs.app/Contents/MacOS/nwjs . &amp; node livereload&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;electron&quot;</span><span class="p">:</span> <span class="s2">&quot;/Applications/Electron.app/Contents/MacOS/Electron . &amp; node livereload&quot;</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nt">&quot;window&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nt">&quot;toolbar&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;width&quot;</span><span class="p">:</span> <span class="mi">800</span><span class="p">,</span>
+</span><span class='line'>    <span class="nt">&quot;height&quot;</span><span class="p">:</span> <span class="mi">500</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Additionally for Electron, my <code>main.js</code> file looks like the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;app&#39;</span><span class="p">);</span>  <span class="c1">// Module to control application life.</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">BrowserWindow</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;browser-window&#39;</span><span class="p">);</span>  <span class="c1">// Module to create native browser window.</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">Menu</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;menu&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">ipc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ipc&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// var menu = new Menu();</span>
+</span><span class='line'><span class="c1">// Report crashes to our server.</span>
+</span><span class='line'><span class="c1">// require(&#39;crash-reporter&#39;).start();</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Keep a global reference of the window object, if you don&#39;t, the window will</span>
+</span><span class='line'><span class="c1">// be closed automatically when the javascript object is GCed.</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">mainWindow</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">menu</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">browserOptions</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">height</span><span class="o">:</span> <span class="mi">600</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">title</span><span class="o">:</span> <span class="s1">&#39;Electron App&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">width</span><span class="o">:</span> <span class="mi">800</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Quit when all windows are closed.</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;window-all-closed&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">platform</span> <span class="o">!=</span> <span class="s1">&#39;darwin&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">app</span><span class="p">.</span><span class="nx">quit</span><span class="p">();</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// This method will be called when Electron has done everything</span>
+</span><span class='line'><span class="c1">// initialization and ready for creating browser windows.</span>
+</span><span class='line'><span class="nx">app</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;ready&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// Create the browser window.</span>
+</span><span class='line'>  <span class="nx">mainWindow</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">BrowserWindow</span><span class="p">(</span><span class="nx">browserOptions</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// and load the index.html of the app.</span>
+</span><span class='line'>  <span class="nx">mainWindow</span><span class="p">.</span><span class="nx">loadUrl</span><span class="p">(</span><span class="s1">&#39;file://&#39;</span> <span class="o">+</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">&#39;/www/index.html&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Emitted when the window is closed.</span>
+</span><span class='line'>  <span class="nx">mainWindow</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;closed&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Dereference the window object, usually you would store windows</span>
+</span><span class='line'>    <span class="c1">// in an array if your app supports multi windows, this is the time</span>
+</span><span class='line'>    <span class="c1">// when you should delete the corresponding element.</span>
+</span><span class='line'>    <span class="nx">mainWindow</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">ipc</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;update-application-menu&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">event</span><span class="p">,</span> <span class="nx">template</span><span class="p">,</span> <span class="nx">keystrokesByCommand</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">//Go through the templates, wrap their click events back to the browser</span>
+</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;update-application-menu - template&#39;</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">template</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">translateTemplate</span><span class="p">(</span><span class="nx">template</span><span class="p">,</span> <span class="nx">keystrokesByCommand</span><span class="p">);</span>
+</span><span class='line'>    <span class="nx">menu</span> <span class="o">=</span> <span class="nx">Menu</span>
+</span><span class='line'>    <span class="nx">Menu</span><span class="p">.</span><span class="nx">setApplicationMenu</span><span class="p">(</span><span class="nx">menu</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Native Menus</h2>
+
+<h3>Electron</h3>
+
+<p>Due to the way electron is split up into two processes, the main process (that handles native menus) and the browser process (mainly your app), menus are mainly available to be set on the main process.</p>
+
+<p>If you want your app to change your application menus, you&rsquo;ll need to use the <a href="https://github.com/atom/electron/blob/master/docs/api/ipc-main-process.md"><code>ipc</code></a> module electron provides to get a message out to the main process to update the menus.</p>
+
+<p>Other than that, the menu system is super easy if you wish to use static menus.</p>
+
+<h3>Nw.js</h3>
+
+<p>It&rsquo;s dead simple. Since it&rsquo;s all one bundled process, just call the set menu, and you&rsquo;re good. It&rsquo;s easy to set short cuts and modify the menus.</p>
+
+<h2>Shell execution</h2>
+
+<p>In nw.js, you&rsquo;re good to go when it comes to making external shell calls.</p>
+
+<p>When it comes to electron, make sure you spawn your child processes with the <code>pipe</code> stdio option. Without that option, you may run into some errors (due to the fact electron doesnt have a stdout it manages easily).</p>
+
+<h2>Packaging / running</h2>
+
+<p>It&rsquo;s really easy on both platforms. Just set up your package.json/index.html/main.js file and run the appropriate command.</p>
+
+<p>I don&rsquo;t have a lot of experience with nw.js, so I cant speak to the packaging process.</p>
+
+<p>For electron, to run I like to use <a href="https://github.com/mafintosh/electron-prebuilt">electron-prebuilt</a> to run my <code>www</code> files as an app, using <a href="https://github.com/maxogden/electron-packager">electron-packager</a> to package into an <code>.app</code> file, and <a href="https://github.com/loopline-systems/electron-builder">electron-builder</a> to create installers (dmg/setup.exe).</p>
+
+<h2>Icons</h2>
+
+<p>To get custom icons for your app files for Mac, you need an <code>.icns</code> file that bundles up all your icons in all the formats/sizes for your dock icon, your cmd+tab icon, and your running icon.</p>
+
+<p>I used this as a <a href="http://stackoverflow.com/questions/12306223/how-to-manually-create-icns-files-using-iconutil">walkthrough</a>.</p>
+
+<p>I first started with a size of 1024x1024 pixels, then used the following commands:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span> <span class="nx">Enter</span> <span class="nx">app</span><span class="p">.</span><span class="nx">iconset</span><span class="p">,</span> <span class="nx">drop</span> <span class="k">in</span> <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="nx">as</span> <span class="nx">a</span> <span class="mi">1024</span> <span class="nx">x</span> <span class="mi">1024</span> <span class="nx">image</span><span class="p">.</span>
+</span><span class='line'><span class="err">#</span> <span class="nx">Run</span> <span class="nx">the</span> <span class="nx">following</span> <span class="nx">commands</span><span class="o">:</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">16</span> <span class="mi">16</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_16x16</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">32</span> <span class="mi">32</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_16x16</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">32</span> <span class="mi">32</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_32x32</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">64</span> <span class="mi">64</span>     <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_32x32</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">128</span> <span class="mi">128</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_128x128</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">256</span> <span class="mi">256</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_128x128</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">256</span> <span class="mi">256</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_256x256</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">512</span> <span class="mi">512</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_256x256</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">sips</span> <span class="o">-</span><span class="nx">z</span> <span class="mi">512</span> <span class="mi">512</span>   <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="o">--</span><span class="nx">out</span> <span class="p">.</span><span class="o">/</span><span class="nx">icon_512x512</span><span class="p">.</span><span class="nx">png</span>
+</span><span class='line'><span class="nx">cp</span> <span class="nx">icon</span><span class="p">.</span><span class="nx">png</span> <span class="nx">icon_512x512</span><span class="err">@</span><span class="mi">2</span><span class="nx">x</span><span class="p">.</span><span class="nx">png</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Then just run:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">iconutil</span> <span class="o">-</span><span class="nx">c</span> <span class="nx">icns</span> <span class="nx">app</span><span class="p">.</span><span class="nx">iconset</span> <span class="o">-</span><span class="nx">o</span> <span class="p">.</span><span class="o">/</span><span class="nx">app</span><span class="o">-</span><span class="nx">dir</span><span class="o">/</span><span class="nx">YourAppName</span><span class="p">.</span><span class="nx">app</span><span class="o">/</span><span class="nx">Contents</span><span class="o">/</span><span class="nx">Resources</span><span class="o">/</span><span class="nx">app</span><span class="p">.</span><span class="nx">icns</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You should now have your app with icons ready to go.</p>
+
+<h2>Performance</h2>
+
+<p>I didn&rsquo;t see a lot of major performance bumps from using either platform. It&rsquo;s JavaScript after all.</p>
+
+<h2>Closing words</h2>
+
+<p>Most of all, have fun with developing with these tools! They&rsquo;re open source and free, so when you get a chance, share some knowledge, post an issue, respond to an issue, or even submit a PR.</p>
+
+<p>We&rsquo;re all in this together.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1460,282 +1792,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/20/testing-interceptor-headers-in-angularjs/">Testing Interceptor Headers in AngularJS</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-20T21:22:00-06:00" pubdate data-updated="true">Jun 20<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In AngularJS, you can set up <a href="https://docs.angularjs.org/api/ng/service/$http">HTTP Interceptors</a> (middleware) to inject headers etc.</p>
-
-<p>I had a service that I wanted to intercept every http request to our API service to attach a token that we consume to verify a user. This would only happen once a token is set.</p>
-
-<p>Today I paired with <a href="https://twitter.com/jeff_french">Jeff French</a>. We figured out how to test the AngularJS interceptors properly.</p>
-
-<p>Things I want to test:</p>
-
-<ul>
-<li>Is the token only being attached when a token is set?</li>
-<li>Are the requests actually being attached via the interceptor</li>
-</ul>
-
-
-<p>The service and interceptor look like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">moduler</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="nx">RequestService</span><span class="p">(){</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">setToken</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">setToken</span><span class="p">(</span><span class="nx">someToken</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">token</span> <span class="o">=</span> <span class="nx">someToken</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">getToken</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">getToken</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">token</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">request</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">request</span><span class="p">(</span><span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="nx">token</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="c1">// jqXHR.setRequestHeader(&#39;Authorization&#39;,&#39;Token token=&quot;&#39; + app.user.api_key.access_token + &#39;&quot;&#39;);</span>
-</span><span class='line'>            <span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Token token=&quot;&#39;</span> <span class="o">+</span> <span class="nx">token</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">config</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">setToken</span><span class="o">:</span> <span class="nx">setToken</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">getToken</span><span class="o">:</span> <span class="nx">getToken</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">request</span><span class="o">:</span> <span class="nx">request</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">.</span><span class="nx">config</span><span class="p">([</span><span class="s1">&#39;$httpProvider&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">$httpProvider</span><span class="p">.</span><span class="nx">interceptors</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">}]);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>With just a few simple tests, I&rsquo;m asserting a few things:</p>
-
-<ul>
-<li>I have no simple ParseError or ReferenceErrors</li>
-<li>Modules are set up correctly</li>
-<li>Interceptors are set up correctly</li>
-<li>My service is actually setting the token correctly</li>
-<li>The interceptor is attaching the header correctly</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="s2">&quot;use strict&quot;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">httpProviderIt</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s2">&quot;Service Unit Tests&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;services&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">$httpProvider</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="c1">//save our interceptor</span>
-</span><span class='line'>      <span class="nx">httpProviderIt</span> <span class="o">=</span> <span class="nx">$httpProvider</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">inject</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">_AuthService_</span><span class="p">,</span> <span class="nx">_RequestService_</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">RequestService</span> <span class="o">=</span> <span class="nx">_RequestService_</span><span class="p">;</span>
-</span><span class='line'>      <span class="nx">AuthService</span> <span class="o">=</span> <span class="nx">_AuthService_</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">})</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">RequestService</span><span class="p">,</span> <span class="nx">AuthService</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">$httpBackend</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="s1">&#39;someToken&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;RequestService Tests&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have RequestService be defined&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">).</span><span class="nx">toBeDefined</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should properly set an api token&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">()).</span><span class="nx">toBeNull</span><span class="p">();</span>
-</span><span class='line'>      <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">()).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should save the users api token after saveUser&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">spyOn</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">,</span> <span class="s1">&#39;setToken&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">Auth</span><span class="p">.</span><span class="nx">saveUser</span><span class="p">(</span><span class="nx">apiResponse</span><span class="p">);</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">).</span><span class="nx">toHaveBeenCalled</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have no api token upon start up&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">token</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">getToken</span><span class="p">();</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">token</span><span class="p">).</span><span class="nx">toBeNull</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;HTTP tests&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have the RequestService as an interceptor&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">httpProviderIt</span><span class="p">.</span><span class="nx">interceptors</span><span class="p">).</span><span class="nx">toContain</span><span class="p">(</span><span class="s1">&#39;RequestService&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should token in the headers after setting&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
-</span><span class='line'>        <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;http://example.com&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">headers</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">headers</span><span class="p">.</span><span class="nx">Authorization</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
-</span><span class='line'>        <span class="p">}).</span><span class="nx">respond</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="p">{</span><span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;example&#39;</span> <span class="p">});</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should not place a token in the http request headers if no token is set&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span><span class="nx">headers</span><span class="o">:</span> <span class="p">{}</span> <span class="p">});</span>
-</span><span class='line'>        <span class="nx">expect</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]).</span><span class="nx">toBe</span><span class="p">(</span><span class="kc">undefined</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should place a token in the http request headers after a token is set&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">RequestService</span><span class="p">.</span><span class="nx">setToken</span><span class="p">(</span><span class="nx">token</span><span class="p">);</span>
-</span><span class='line'>        <span class="kd">var</span> <span class="nx">config</span> <span class="o">=</span> <span class="nx">RequestService</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span><span class="nx">headers</span><span class="o">:</span> <span class="p">{}</span> <span class="p">});</span>
-</span><span class='line'>        <span class="nx">expect</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">headers</span><span class="p">[</span><span class="s1">&#39;Authorization&#39;</span><span class="p">]).</span><span class="nx">toBe</span><span class="p">(</span><span class="s1">&#39;Token token=&quot;&#39;</span> <span class="o">+</span> <span class="nx">token</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">});</span>
-</span><span class='line'>    <span class="p">});</span> <span class="c1">//Mocked HTTP Requests</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="p">});</span> <span class="c1">//RequestService tests</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Simple and sweet.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -1753,6 +1809,10 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir/">Shipping Data With Protocol Buffers in Elixir</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/12/15/scoreboard-forms-in-react-and-angular-2/">Scoreboard Forms in React and Angular 2</a>
       </li>
     
@@ -1766,10 +1826,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
     
       <li class="post">
         <a href="/blog/2015/12/04/the-scoreboard-project/">The Scoreboard Project</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/04/using-json-serializers-in-sinatra/">Using JSON Serializers in Sinatra</a>
       </li>
     
   </ul>
