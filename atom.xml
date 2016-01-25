@@ -4,7 +4,7 @@
   <title><![CDATA[Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2016-01-16T23:25:46-07:00</updated>
+  <updated>2016-01-24T19:41:06-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,111 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Custom JSON encoding in Phoenix]]></title>
+    <link href="http://jbavari.github.io/blog/2016/01/24/custom-json-encoding-in-phoenix/"/>
+    <updated>2016-01-24T19:30:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/01/24/custom-json-encoding-in-phoenix</id>
+    <content type="html"><![CDATA[<p>I recently have been working a lot using Leaflet.js to do some mapping.</p>
+
+<p>In some of my models, I use the lovely <code>Geo</code> package for Elixir point and geospatial usage. I needed to add support for Poison to encode my model.</p>
+
+<p>I&rsquo;ve been serving geo json from my models, and I needed a way to use the JSON encoding way easier. I&rsquo;m sending some data out to a ZeroMQ socket so I need to encode it by transorming my Geo module in a way that I could encode it with Geo JSON.</p>
+
+<p>I modified my model in two ways &ndash; one by putting the <code>@derive</code> directive to tell Poison to encode only certain fields. That is one way.</p>
+
+<p>In another way, I needed to encode it everytime by calling the <code>Geo.JSON.encode</code> method without me having to do it. You can see that in the <code>defimpl</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="k">defmodule</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Point</span> <span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="kn">use</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Web</span><span class="p">,</span> <span class="ss">:model</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># Option 1 - specify exactly which fields to encode</span>
+</span><span class='line'>  <span class="nv">@derive</span> <span class="p">{</span><span class="no">Poison</span><span class="o">.</span><span class="no">Encoder</span><span class="p">,</span> <span class="ss">only:</span> <span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:geo_json</span><span class="p">]}</span>
+</span><span class='line'>  <span class="n">schema</span> <span class="s2">&quot;points&quot;</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    </span><span class="n">field</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:string</span>
+</span><span class='line'>    <span class="n">field</span> <span class="ss">:position</span><span class="p">,</span> <span class="no">Geo</span><span class="o">.</span><span class="no">Point</span>
+</span><span class='line'>    <span class="n">field</span> <span class="ss">:geo_json</span><span class="p">,</span> <span class="ss">:string</span><span class="p">,</span> <span class="ss">virtual:</span> <span class="no">true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">timestamps</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="n">encode_model</span><span class="p">(</span><span class="n">point</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    </span><span class="err">%</span><span class="no">MyApp</span><span class="o">.</span><span class="no">Point</span><span class="p">{</span><span class="n">point</span> <span class="o">|</span> <span class="ss">geo_json:</span> <span class="no">Geo</span><span class="o">.</span><span class="no">JSON</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">point</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">defimpl</span> <span class="no">Poison</span><span class="o">.</span><span class="no">Encoder</span><span class="p">,</span> <span class="ss">for:</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Point</span> <span class="k">do</span>
+</span><span class='line'><span class="k">    def</span> <span class="n">encode</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'><span class="k">      </span><span class="n">point</span> <span class="o">=</span> <span class="no">MyApp</span><span class="o">.</span><span class="no">Point</span><span class="o">.</span><span class="n">encode_model</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+</span><span class='line'>      <span class="no">Poison</span><span class="o">.</span><span class="no">Encoder</span><span class="o">.</span><span class="no">Map</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="no">Map</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="p">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:geo_json</span><span class="p">]),</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Cheers.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Adding Additional static paths in Phoenix]]></title>
+    <link href="http://jbavari.github.io/blog/2016/01/24/adding-additional-static-paths-in-phoenix/"/>
+    <updated>2016-01-24T19:24:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/01/24/adding-additional-static-paths-in-phoenix</id>
+    <content type="html"><![CDATA[<p>Phoenix is awesome.</p>
+
+<p>A problem I ran into lately is how to add additional static paths to be served.</p>
+
+<p>If you take a look in your <code>lib/endpoint.ex</code> file, you&rsquo;ll see the plug used for adding static paths:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Static</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">at:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="ss">from:</span> <span class="ss">:electronify</span><span class="p">,</span> <span class="ss">gzip:</span> <span class="no">false</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">only:</span> <span class="err">~</span><span class="n">w</span><span class="p">(</span><span class="n">css</span> <span class="n">fonts</span> <span class="n">images</span> <span class="n">js</span> <span class="n">favicon</span><span class="o">.</span><span class="n">ico</span> <span class="n">robots</span><span class="o">.</span><span class="n">txt</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>I wanted to add another folder to be served, &lsquo;zips&rsquo;, that I had to edit the <code>only:</code> line in the plug specification as such:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='elixir'><span class='line'><span class="n">plug</span> <span class="no">Plug</span><span class="o">.</span><span class="no">Static</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">at:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="ss">from:</span> <span class="ss">:electronify</span><span class="p">,</span> <span class="ss">gzip:</span> <span class="no">false</span><span class="p">,</span>
+</span><span class='line'>  <span class="ss">only:</span> <span class="err">~</span><span class="n">w</span><span class="p">(</span><span class="n">css</span> <span class="n">fonts</span> <span class="n">images</span> <span class="n">js</span> <span class="n">favicon</span><span class="o">.</span><span class="n">ico</span> <span class="n">robots</span><span class="o">.</span><span class="n">txt</span> <span class="n">zips</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>There you have it, now I can access the files in the <code>zips</code> folder in <code>priv/static/zips</code> through the URL. Cheers!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Shipping data with Protocol Buffers in Elixir]]></title>
@@ -3316,413 +3421,6 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <p></p>
 
 <p>Enjoy!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codesigning Electron Applications]]></title>
-    <link href="http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications/"/>
-    <updated>2015-08-14T11:30:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2015/08/14/codesigning-electron-applications</id>
-    <content type="html"><![CDATA[<p>Lately I&rsquo;ve been busy at work creating and maintaining <a href="http://lab.ionic.io">Ionic Lab</a>. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to create native OSX/Windows applications.</p>
-
-<p>I&rsquo;m going to admit &ndash; I&rsquo;ve gotten a few hybrid projects on the App store. Honestly though I had a lot of help.</p>
-
-<p>This time I was mostly on my own.</p>
-
-<p>I&rsquo;m not great at the native dev and half the problems I occur are with the platform I am dealing with. In this I mean &ndash; Android I deal with how Google does signing and releasing and how Apple does signing and releasing.</p>
-
-<p>I&rsquo;m going to cover mainly Apple policies to release an app on your own with or without the App store. With Electron, we&rsquo;re going to make a native build, so we&rsquo;ll need to know how to do this.</p>
-
-<h2>Mac&rsquo;s Gatekeeper</h2>
-
-<p>On Mac OSX, there&rsquo;s an application that checks all the applications you download and run to see if they are valid and trusted.</p>
-
-<p>Certainly you&rsquo;ve seen the message from an app you&rsquo;ve downloaded: <code>"App can't be opened because it is from an unidentified developer."</code></p>
-
-<p>If you create and app and do not codesign it with a valid Apple dev account, your users will see this. It&rsquo;s not a good thing.</p>
-
-<h2>How to codesign</h2>
-
-<p>The main tool of codesigning is the CLI tool <code>codesign</code>.</p>
-
-<p>I really found a lot of help from <a href="https://developer.apple.com/library/mac/technotes/tn2206/_index.html#//apple_ref/doc/uid/DTS40007919-CH1-TNTAG400">OSX Code Signing in Depth</a>.</p>
-
-<p>It&rsquo;s pretty clear right away what you need to run and how to verify what you need to run. I&rsquo;d like to go over how to do it with Electron, specifically.</p>
-
-<p>I posted the script below. I want to highlight the issues I ran into as a result of my ignorance.</p>
-
-<p>One issue I ran into &ndash; I was using the &ldquo;Mac Development&rdquo; certificate to sign &ndash; and when I ran the verify command (<code>codesign -vvvv -d "/path/to/MyApp.app"</code>) it gave me a good to go signal. When I ran the security CLI command (<code>spctl --assess -vvvv "/path/to/MyApp.app"</code>), it was rejected.</p>
-
-<p>My error: I thought &ldquo;Mac Development&rdquo; was a &ldquo;Developer-ID application&rdquo;.</p>
-
-<p>It&rsquo;s not. I was an account admin. In the Apple Member Center for Certificate Administration, I could only set up a &ldquo;Mac Development&rdquo; type certificate. Apple member center would not let met set up a &ldquo;Developer ID Application&rdquo; certificate. You need a &lsquo;team agent&rsquo; to set one up for you. (That or become a team agent)</p>
-
-<p>That being said &ndash; ensure you sign with a certificate type of &ldquo;Developer ID Application&rdquo; to sign with, and you&rsquo;re good to go.</p>
-
-<p>I set up my codesign script like <a href="https://github.com/nwjs/nw.js/issues/616#issuecomment-30844482">the following</a>. There&rsquo;s comments to help understand:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="c"># Invoke this script with a relative `.app` path</span>
-</span><span class='line'><span class="c"># EX:</span>
-</span><span class='line'><span class="c"># codesign.sh &quot;dist/osx/MyApp-darwin-x64/MyApp.app&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># I had better luck using the iPhoneOS codesign_allocate</span>
-</span><span class='line'><span class="nb">export </span><span class="nv">CODESIGN_ALLOCATE</span><span class="o">=</span><span class="s2">&quot;/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># Next two are specified in Apple docs:</span>
-</span><span class='line'><span class="c"># export CODESIGN_ALLOCATE=&quot;/Applications/Xcode.app/Contents/Developer/usr/bin/codesign_allocate&quot;</span>
-</span><span class='line'><span class="c"># export CODESIGN_ALLOCATE=&quot;/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/codesign_allocate&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c"># However, neither worked, and gave error:</span>
-</span><span class='line'><span class="c"># /Users/JoshBavari/Development/ionic-gui/dist/osx/MyApp-darwin-x64/MyApp.app/Contents/Frameworks/Electron Framework.framework/Electron Framework: cannot find code object on disk</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">#Run the following to get a list of certs</span>
-</span><span class='line'><span class="c"># security find-identity</span>
-</span><span class='line'><span class="nv">app</span><span class="o">=</span><span class="s2">&quot;$PWD/$1&quot;</span>
-</span><span class='line'><span class="nv">identity</span><span class="o">=</span><span class="s2">&quot;&lt;ENTER_ID_OF_RESULT_FROM_SECURITY_FIND_IDENTITY_COMMAND&gt;&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;### signing frameworks&quot;</span>
-</span><span class='line'>codesign --deep --force --verify --verbose --sign <span class="s2">&quot;$identity&quot;</span> <span class="s2">&quot;$app/Contents/Frameworks/Electron Framework.framework/Electron Framework&quot;</span>
-</span><span class='line'>codesign --deep --force --verify --verbose --sign <span class="s2">&quot;$identity&quot;</span> <span class="s2">&quot;$app/Contents/Frameworks/Electron Framework.framework/&quot;</span>
-</span><span class='line'>/Versions/A<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Electron Framework.framework/Versions/Current/Electron Framework<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Electron Helper EH.app/Contents/MacOS/Electron Helper EH<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Electron Helper NP.app/Contents/MacOS/Electron Helper NP<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Electron Helper NP.app/Contents/MacOS/Electron Helper NP<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/MyApp Helper.app/Contents/MacOS/MyApp Helper<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Mantle.framework/Mantle<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Mantle.framework/Versions/A<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/ReactiveCocoa.framework/ReactiveCocoa<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/ReactiveCocoa.framework/Versions/A<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Squirrel.framework/Squirrel<span class="s2">&quot;</span>
-</span><span class='line'><span class="s2">codesign --deep --force --verify --verbose --sign &quot;</span><span class="nv">$identity</span><span class="s2">&quot; &quot;</span><span class="nv">$app</span>/Contents/Frameworks/Squirrel.framework/Versions/A<span class="s2">&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">echo &quot;</span><span class="c">### signing app&quot;</span>
-</span><span class='line'>codesign --deep --force --verify --verbose --sign <span class="s2">&quot;$identity&quot;</span> <span class="s2">&quot;$app&quot;</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;### Zipping app&quot;</span>
-</span><span class='line'>ditto -c -k --sequesterRsrc --keepParent dist/osx/MyApp-darwin-x64/MyApp.app/ dist/osx/MyApp-Mac.zip
-</span><span class='line'>
-</span><span class='line'><span class="nb">echo</span> <span class="s2">&quot;### verifying signature&quot;</span>,
-</span><span class='line'>codesign -vvvv -d <span class="s2">&quot;$app&quot;</span>
-</span><span class='line'>sudo spctl -a -vvvv <span class="s2">&quot;$app&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Pitfalls</h2>
-
-<p>Since I wasn&rsquo;t very familiar with the Apple specifics I&rsquo;d like to high light a few pitfalls I ran into with my ignorance.</p>
-
-<p>A &lsquo;Developer-ID signed app&rsquo; means setting up a certificate (private key + cert) with &ldquo;type&rdquo; as &ldquo;Developer ID Application&rdquo;. This does <em>NOT</em> mean a &ldquo;Mac Development&rdquo; certificate. From the OSX Codesigning guide:</p>
-
-<blockquote><p>Like Gatekeeper, spctl will only accept Developer ID-signed apps and apps downloaded from the Mac App Store by default. It will reject apps signed with Mac App Store development or distribution certificates.</p></blockquote>
-
-<h1>Issues</h1>
-
-<p>Most users say to specify this environment variable:</p>
-
-<p><code>export CODESIGN_ALLOCATE="/Applications/Xcode.app/Contents/Developer/usr/bin/codesign_allocate"</code></p>
-
-<p>For some reason, I couldn&rsquo;t use the default codesign allocate as specified in the Github issue above. Instead, I had to go with this Environment variable for CODESIGN_ALLOCATE for <code>iPhoneOS.platform</code>:</p>
-
-<p><code>export CODESIGN_ALLOCATE="/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/codesign_allocate"</code></p>
-
-<h1>Hints</h1>
-
-<p>Only include signed code in directories that should contain signed code.
-Only include resources in directories that should contain
-resources.
-Do not use the &mdash;resource-rules flag or ResourceRules.plist. They have been obsoleted and will be rejected.</p>
-
-<h2>A little note on signing frameworks [5]:</h2>
-
-<h3>Signing Frameworks</h3>
-
-<p>When you sign frameworks, you have to sign a specific version. So, let’s say your framework is called CSMail, you’d sign CSMail.framework/Versions/A. If you try and just sign the top level folder it will silently fail, as will CSMail.framework/Versions/Current (see “Symbolic Links” below).</p>
-
-<h3>Symbolic Links</h3>
-
-<p>Any symbolic links will be silently ignored and this extends to the path you give to the codesign command line utility. I think there’s actually a problem with symbolic links: you can add them to a Resources folder and it won’t invalidate the signature (whereas you cannot add normal files). I’ve reported this to Apple (rdar://problem/6050445).</p>
-
-<h1>Helpful links</h1>
-
-<ol>
-<li><a href="https://developer.apple.com/library/mac/documentation/Security/Conceptual/CodeSigningGuide/AboutCS/AboutCS.html">Apple Code Signing Overview</a></li>
-<li><a href="https://developer.apple.com/library/mac/technotes/tn2206/_index.html#//apple_ref/doc/uid/DTS40007919-CH1-TNTAG205">Apple OS X Code Signing In Depth</a></li>
-<li><a href="https://developer.apple.com/library/mac/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html">Apple Anatomy of Framework Bundles</a></li>
-<li><a href="https://developer.apple.com/library/mac/documentation/Darwin/Reference/ManPages/man1/codesign.1.html#//apple_ref/doc/man/1/codesign">Apple codesign Man Page</a></li>
-<li><a href="http://sutes.co.uk/2008/07/code-signing.html">Chris Suter&rsquo;s Blog &ndash; Code signing</a></li>
-<li><a href="http://stackoverflow.com/questions/27871099/creating-symlinks-in-osx-frameworks-inside-app-bundle">Stackoverflow &ndash; Creating Symlinks in OSX Frameworks</a></li>
-<li><a href="http://successfulsoftware.net/2012/08/30/how-to-sign-your-mac-os-x-app-for-gatekeeper/">How to sign your Mac OSX app for Gatekeeper</a></li>
-<li><a href="http://furbo.org/2013/10/17/code-signing-and-mavericks/">Codesigning and Mavericks</a>
-9 <a href="http://www.pracucci.com/atom-electron-signing-mac-app.html">Atom Electron &ndash; Signing Mac App</a></li>
-<li><a href="http://blog.hoachuck.biz/blog/2013/10/29/codesign-useful-info-in-xcode-5-dot-0-1/">Codesign &ndash; useful info in Xcode > 5.0</a></li>
-<li><a href="http://www.saschawise.com/blog/2015/08/12/electron-for-the-mac-app-store.html">Electron for the Mac App Store</a></li>
-<li><a href="https://github.com/nwjs/nw.js/issues/616#issuecomment-30844482">nw.js issue about code signing</a>.</li>
-</ol>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Writing Unit Tests for Electron and AngularJS]]></title>
-    <link href="http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs/"/>
-    <updated>2015-08-12T19:53:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2015/08/12/writing-unit-tests-for-electron-and-angularjs</id>
-    <content type="html"><![CDATA[<p>Unit testing is something most of us dev&rsquo;s don&rsquo;t think much of. Until we encounter some simple to solve bugs or have regressions in code that drives us crazy.</p>
-
-<p>JavaScript testing itself is hard with no clear cut path to take. Most times, you&rsquo;ll have to decide important things for yourself as far as which testing framework to use and the tools to do them.</p>
-
-<p>I enjoy Jasmine testing framework right now. For my node projects, I like to use the node package <a href="https://github.com/mhevery/jasmine-node">jasmine-node</a>. However, Electron is basically a web browser with node conveniences, so we want to test browser related things.</p>
-
-<p>Since Electron applications take a unique approach to combining elements from the browser with conveniences from node, such as <code>require</code>, <code>__dirname</code>, <code>global</code> and other keywords specific to node, testing gets a little more complicated.</p>
-
-<p>I&rsquo;m going to outline a few of the approaches I took. I&rsquo;m sure they are not perfect, I&rsquo;m still learning and I&rsquo;m outlining that here.</p>
-
-<h2>Tools of the trade</h2>
-
-<p>I outlined <a href="http://jbavari.github.io/blog/2014/06/11/unit-testing-angularjs-services/">some things I did to test AngularJS</a> in a previous post. I pretty much use the same tools and set up:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>npm install -g karma karma-jasmine karma-phantomjs-launcher karma-spec-reporter phantomjs
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now I&rsquo;ve got my <code>karma.config.js</code> file:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//..snip..</span>
-</span><span class='line'><span class="c1">// list of files / patterns to load in the browser</span>
-</span><span class='line'><span class="nx">files</span><span class="o">:</span> <span class="p">[</span>
-</span><span class='line'>  <span class="s1">&#39;www/lib/angular/angular.min.js&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;node_modules/angular-mocks/angular-mocks.js&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;www/js/**/*.js&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s1">&#39;spec/**/*.js&#39;</span>
-</span><span class='line'><span class="p">]</span>
-</span><span class='line'><span class="c1">//..snip..</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now we&rsquo;re set up to do some testing!</p>
-
-<h2>Exposing <code>require</code> to AngularJS service</h2>
-
-<p>I first wanted a one stop shop for all my node conveniences in one angular js service to contain what Electron provides.</p>
-
-<p>Here&rsquo;s my service:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">angular</span><span class="p">.</span><span class="nx">module</span><span class="p">(</span><span class="s1">&#39;app.services&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="p">.</span><span class="nx">factory</span><span class="p">(</span><span class="s1">&#39;NodeService&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">fixPath</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fix-path&#39;</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">ipc</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ipc&#39;</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">opn</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;opn&#39;</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">shell</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;shell&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//Fixes the path issue with node being run outside of this GUI  </span>
-</span><span class='line'>  <span class="nx">fixPath</span><span class="p">();</span>
-</span><span class='line'>  <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PATH</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PATH</span> <span class="o">+</span> <span class="s1">&#39;:/usr/local/bin&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">//Path from root -&gt; &#39;www&#39;</span>
-</span><span class='line'>  <span class="c1">//__dirname == &#39;www&#39; dir</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">appJsonPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">appJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">appJsonPath</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">appJson</span><span class="o">:</span> <span class="nx">appJson</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">fixPath</span><span class="o">:</span> <span class="nx">fixPath</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">fs</span><span class="o">:</span> <span class="nx">fs</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">ipc</span><span class="o">:</span> <span class="nx">ipc</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">opn</span><span class="o">:</span> <span class="nx">opn</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">path</span><span class="o">:</span> <span class="nx">path</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Test set up for Service</h2>
-
-<p>Now, hopefully I have all my node conveniences in one place (<code>require</code>, <code>__dirname</code>, etc).</p>
-
-<p>Let&rsquo;s get a simple test up:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;#NodeService&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">NodeService</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">beforeEach</span><span class="p">(</span><span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="c1">//Ensure angular modules available</span>
-</span><span class='line'>    <span class="nx">module</span><span class="p">(</span><span class="s1">&#39;app.services&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">beforeEach</span><span class="p">(</span><span class="nx">inject</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">_NodeService_</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">NodeService</span> <span class="o">=</span> <span class="nx">_NodeService_</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}));</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have node service defined&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">NodeService</span><span class="p">).</span><span class="nx">toBeDefined</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If we run this test without anything else, we&rsquo;ll see immediately a problem:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>ReferenceError: Can<span class="err">&#39;</span>t find variable: require
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>My approach to this is simple &ndash; create a faked out global variable that represents <code>require</code> and does what you want, such as:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">fakePackageJson</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">name</span><span class="o">:</span> <span class="s2">&quot;Fake package.json name&quot;</span> <span class="p">};</span>
-</span><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nx">require</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">requirePath</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Requiring:&#39;</span><span class="p">,</span> <span class="nx">requirePath</span><span class="p">);</span>
-</span><span class='line'>  <span class="k">switch</span><span class="p">(</span><span class="nx">requirePath</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">case</span> <span class="s1">&#39;ipc&#39;</span><span class="o">:</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">ipcSpy</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">case</span> <span class="s1">&#39;fs&#39;</span><span class="o">:</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">fsSpy</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">case</span> <span class="s1">&#39;/spec/package.json&#39;</span><span class="o">:</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">fakePackageJson</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nx">__dirname</span> <span class="o">=</span> <span class="s1">&#39;/some/fake/path&#39;</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Package.json test setup</h2>
-
-<p>Let&rsquo;s define some quick <code>scripts</code> to run from our package.json to help others run our tests:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="err">//..snip..</span>
-</span><span class='line'>  <span class="s2">&quot;scripts&quot;</span><span class="err">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;karma start&quot;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="err">//..snip</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Now when we run our tests, we&rsquo;ll have the faked out node modules passed back.</p>
-
-<p>This is just one approach to take to setting up some faking out for node modules using Electron, Angular JS, and Jasmine.</p>
-
-<p>Hope this helps.</p>
 ]]></content>
   </entry>
   

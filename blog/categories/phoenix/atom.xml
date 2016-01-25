@@ -4,7 +4,7 @@
   <title><![CDATA[Category: phoenix | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/phoenix/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2016-01-16T23:25:46-07:00</updated>
+  <updated>2016-01-24T19:41:06-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,90 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Custom JSON encoding in Phoenix]]></title>
+    <link href="http://jbavari.github.io/blog/2016/01/24/custom-json-encoding-in-phoenix/"/>
+    <updated>2016-01-24T19:30:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/01/24/custom-json-encoding-in-phoenix</id>
+    <content type="html"><![CDATA[<p>I recently have been working a lot using Leaflet.js to do some mapping.</p>
+
+<p>In some of my models, I use the lovely <code>Geo</code> package for Elixir point and geospatial usage. I needed to add support for Poison to encode my model.</p>
+
+<p>I&rsquo;ve been serving geo json from my models, and I needed a way to use the JSON encoding way easier. I&rsquo;m sending some data out to a ZeroMQ socket so I need to encode it by transorming my Geo module in a way that I could encode it with Geo JSON.</p>
+
+<p>I modified my model in two ways &ndash; one by putting the <code>@derive</code> directive to tell Poison to encode only certain fields. That is one way.</p>
+
+<p>In another way, I needed to encode it everytime by calling the <code>Geo.JSON.encode</code> method without me having to do it. You can see that in the <code>defimpl</code>.</p>
+
+<p>``` elixir
+defmodule MyApp.Point do
+  use MyApp.Web, :model</p>
+
+<p>  # Option 1 &ndash; specify exactly which fields to encode
+  @derive {Poison.Encoder, only: [:id, :name, :geo_json]}
+  schema &ldquo;points&rdquo; do</p>
+
+<pre><code>field :name, :string
+field :position, Geo.Point
+field :geo_json, :string, virtual: true
+
+timestamps
+</code></pre>
+
+<p>  end</p>
+
+<p>  def encode_model(point) do</p>
+
+<pre><code>%MyApp.Point{point | geo_json: Geo.JSON.encode(point.position) }
+</code></pre>
+
+<p>  end</p>
+
+<p>  defimpl Poison.Encoder, for: MyApp.Point do</p>
+
+<pre><code>def encode(point, options) do
+  point = MyApp.Point.encode_model(point)
+  Poison.Encoder.Map.encode(Map.take(point, [:id, :name, :geo_json]), options)
+end
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>Cheers.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Adding Additional static paths in Phoenix]]></title>
+    <link href="http://jbavari.github.io/blog/2016/01/24/adding-additional-static-paths-in-phoenix/"/>
+    <updated>2016-01-24T19:24:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/01/24/adding-additional-static-paths-in-phoenix</id>
+    <content type="html"><![CDATA[<p>Phoenix is awesome.</p>
+
+<p>A problem I ran into lately is how to add additional static paths to be served.</p>
+
+<p>If you take a look in your <code>lib/endpoint.ex</code> file, you&rsquo;ll see the plug used for adding static paths:</p>
+
+<p><code>elixir
+plug Plug.Static,
+  at: "/", from: :electronify, gzip: false,
+  only: ~w(css fonts images js favicon.ico robots.txt)
+</code></p>
+
+<p>I wanted to add another folder to be served, &lsquo;zips&rsquo;, that I had to edit the <code>only:</code> line in the plug specification as such:</p>
+
+<p><code>elixir
+plug Plug.Static,
+  at: "/", from: :electronify, gzip: false,
+  only: ~w(css fonts images js favicon.ico robots.txt zips)
+</code></p>
+
+<p>There you have it, now I can access the files in the <code>zips</code> folder in <code>priv/static/zips</code> through the URL. Cheers!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Adding PostgreSQL geometric type support to Elixir]]></title>

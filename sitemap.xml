@@ -275,16 +275,26 @@
         <lastmod>2016-01-16T23:24:31-07:00</lastmod>
     </url>
     <url>
+        <loc>
+            http://jbavari.github.io/blog/2016/01/24/adding-additional-static-paths-in-phoenix/
+        </loc>
+        <lastmod>2016-01-24T19:27:43-07:00</lastmod>
+    </url>
+    <url>
+        <loc>http://jbavari.github.io/blog/2016/01/24/custom-json-encoding-in-phoenix/</loc>
+        <lastmod>2016-01-24T19:37:04-07:00</lastmod>
+    </url>
+    <url>
         <loc>http://jbavari.github.io/about/</loc>
         <lastmod>2016-01-14T22:22:01-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/blog/archives/</loc>
-        <lastmod>2016-01-16T23:24:31-07:00</lastmod>
+        <lastmod>2016-01-24T19:37:04-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/</loc>
-        <lastmod>2016-01-16T23:24:31-07:00</lastmod>
+        <lastmod>2016-01-24T19:37:04-07:00</lastmod>
     </url>
     <url>
         <loc>http://jbavari.github.io/knowledge/</loc>
