@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="Lately I&rsquo;ve been busy at work creating and maintaining Ionic Lab. It&rsquo;s been a fun and challenging problem using HTML/CSS/JavaScript to &hellip;">
+  <meta name="description" content="Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,575 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/09/09/releasing-electron-for-windows/">Releasing Electron for Windows</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-09-09T18:50:00-06:00" pubdate data-updated="true">Sep 9<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
+
+<p>Thankfully, there&rsquo;s a great tool called Squirrel made by <a href="https://twitter.com/paulcbetts">Paul Betts</a> that does a ton of the heavy lifting for you. Codesigning and all.</p>
+
+<p>I really got a ton of knowledge from the blog post, <a href="http://www.mylifeforthecode.com/creating-a-windows-distribution-of-an-electron-app-using-squirrel/">Creating a Windows Distribution of an Electron App using Squirrel</a> and <a href="http://www.mylifeforthecode.com/using-electron-packager-to-package-an-electron-app/">Using Electron Packager to Package an Electron App</a>.</p>
+
+<p>I wanted to curate a ton of knowledge in one place, so here we go.</p>
+
+<p>I use a few tools to get this done on my Mac:</p>
+
+<ul>
+<li><a href="https://github.com/maxogden/electron-packager">Electron Packager</a></li>
+<li><a href="https://www.winehq.org/">Wine</a></li>
+<li><a href="http://wiki.winehq.org/winetricks">Winetricks</a></li>
+<li><a href="http://www.nuget.org/nuget.exe">nuget cli</a></li>
+<li><a href="https://github.com/Squirrel/Squirrel.Windows/releases">Squirrel.Windows</a></li>
+</ul>
+
+
+<p>First, let&rsquo;s look at the project layout:</p>
+
+<h2>Project Layout</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>/build <span class="c"># Installers go here</span>
+</span><span class='line'>  /osx
+</span><span class='line'>  /resources <span class="c"># Icons, iconset, images, etc</span>
+</span><span class='line'>  /win <span class="c"># Binaries to build, Package.nuspec file to specify configurations</span>
+</span><span class='line'>  packager.json <span class="c"># File used by electron-builder to build OSX DMG file.</span>
+</span><span class='line'>/dist <span class="c"># Distributions go here (.app, .exe, .dmg)</span>
+</span><span class='line'>  /osx
+</span><span class='line'>  /win
+</span><span class='line'>/docs <span class="c"># Docs about project.</span>
+</span><span class='line'>/node_modules <span class="c"># Modules used for building/packaging/testing</span>
+</span><span class='line'>/scss <span class="c"># Sass for CSS compilation in www</span>
+</span><span class='line'>/spec <span class="c"># Tests</span>
+</span><span class='line'>  AppCtrl.spec.js
+</span><span class='line'>www <span class="c"># Source code for the application</span>
+</span><span class='line'>  /css
+</span><span class='line'>  /data
+</span><span class='line'>  /img
+</span><span class='line'>  /js
+</span><span class='line'>  /lib
+</span><span class='line'>  /node_modules <span class="c"># Modules here used by the application itself.</span>
+</span><span class='line'>  /templates
+</span><span class='line'>
+</span><span class='line'>karma.conf.js <span class="c"># Configuration for tests.</span>
+</span><span class='line'>livereload.js <span class="c"># Dev script to set up live reload in Electron</span>
+</span><span class='line'>package.json <span class="c"># Main package.json with scripts/dependencies to package/build.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Process</h2>
+
+<p>First we&rsquo;ll need to make the exe and associated files to a <code>dist</code> folder. From there, we take the win <code>dist</code> files and pack them into the <code>Setup.exe</code> file, where Squirrel will do the heavy lifting to pack all this into a one step process.</p>
+
+<h2>npm Scripts</h2>
+
+<p>We&rsquo;ll use the npm script <code>pack:win</code> task to put all our <code>www</code> files into a nice package (resources, exe, etc) and output to the <code>dist</code> folder.</p>
+
+<p><code>pack:win</code> step will just execute <code>electron-packager</code> with some relevant information. Please note the <code>asar=true</code>, this is recommended because sometimes <code>node_modules</code> can get nested a few times and the file paths will be too long for certain Windows platforms.</p>
+
+<p>Script:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;pack:win&quot;</span><span class="o">:</span> <span class="s2">&quot;electron-packager ./www \&quot;Project\&quot; --out=dist/win --platform=win32 --arch=ia32 --version=0.29.1 --icon=build/resources/icon.ico --version-string.CompanyName=\&quot;My Company\&quot; --version-string.ProductName=\&quot;Project\&quot; --version-string.FileDescription=\&quot;Project\&quot; --asar=true&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Electron Build script</h2>
+
+<p>I used a simple build script in node to assist in some of the heavy lifting. I recommend getting an Extended Validation certificate from <a href="http://blogs.msdn.com/b/ie/archive/2012/08/14/microsoft-smartscreen-amp-extended-validation-ev-code-signing-certificates.aspx">this blog post</a>.</p>
+
+<p>This will take the windows package in <code>dist/win</code> and create <code>dist/win/Setup.exe</code>.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
+</span><span class='line'><span class="c1">// File is in root/build/win/build.js</span>
+</span><span class='line'><span class="c1">// First call nuget pack Package.nuspec</span>
+</span><span class='line'><span class="c1">// Then you&#39;ll have Project.&lt;version&gt;.nupkg</span>
+</span><span class='line'><span class="c1">// Run Squirrel.exe --releaseify Project.&lt;version&gt;.nupkg --icon iconPath --loadingGif loadingGifPath</span>
+</span><span class='line'><span class="c1">// resources in build/resources/</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//Need to get around weird command line passes with windows paths</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">childProcess</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">packageJsonPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;package.json&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">packageJsonPath</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">loadingGifPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;windows-loader.png&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageSpecPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Package.nuspec&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageOutputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetPackageName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="s1">&#39;.1.0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;.nupkg&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="c1">// nugetPackageName = [&#39;Project&#39;, packageJson.version, &#39;.nupkg&#39;].join(&#39;&#39;),</span>
+</span><span class='line'>  <span class="nx">nugetPackagePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">,</span> <span class="nx">nugetPackageName</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">nugetExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;nuget.exe&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">setupIconPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;icon.ico&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">setupReleasePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span> <span class="s1">&#39;win&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">signatureCertificatePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Certificate.pfx&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">signParams</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&quot;/a /f &quot;&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">signatureCertificatePath</span><span class="p">),</span> <span class="s1">&#39;&quot; /p &#39;</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRIVATE_CERT_PASSWORD</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
+</span><span class='line'>  <span class="nx">squirrelExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Squirrel.exe&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;sign params&#39;</span><span class="p">,</span> <span class="nx">signParams</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">createNugetPackageCommand</span> <span class="o">=</span> <span class="p">[</span><span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetExePath</span><span class="p">),</span> <span class="s1">&#39;pack&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageSpecPath</span><span class="p">),</span> <span class="s1">&#39;-OutputDirectory&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">)].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">createSetupCommand</span> <span class="o">=</span> <span class="p">[</span>
+</span><span class='line'>              <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">squirrelExePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--releasify&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackagePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--loadingGif&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">loadingGifPath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--icon&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupIconPath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--releaseDir&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupReleasePath</span><span class="p">),</span>
+</span><span class='line'>              <span class="s1">&#39;--signWithParams&#39;</span><span class="p">,</span> <span class="nx">signParams</span>
+</span><span class='line'>            <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Creating nuget package from nuget spec file:&#39;</span><span class="p">,</span> <span class="nx">nugetPackageSpecPath</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// console.log(createNugetPackageCommand);</span>
+</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createNugetPackageCommand</span><span class="p">);</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Created nuget package&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Building Setup.exe&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// console.log(createSetupCommand);</span>
+</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createSetupCommand</span><span class="p">);</span>
+</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Built Setup.exe&#39;</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Hope this helps!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/08/25/lazy-loading-your-node-modules/">Lazy Loading Your Node Modules</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-08-25T15:29:00-06:00" pubdate data-updated="true">Aug 25<span>th</span>, 2015</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
+
+<p>My first big refactor of the CLI was pulling out most of the 21 commands it offers into an external library (<a href="http://github.com/driftyco/ionic-app-lib">ionic-app-lib</a>) that could be consumed by both the Ionic CLI and our GUI &ndash; <a href="http://lab.ionic.io">Ionic Lab</a>.</p>
+
+<p>The refactor went rather smoothly.</p>
+
+<p>However, one thing happened that was not expected &ndash; now that the ionic-app-lib bundled all the commands together, whenever you required the app-lib module, it was rather slower than expected.</p>
+
+<p>For example, whenever you ran: <code>var IonicAppLib = require('ionic-app-lib');</code> &ndash; it would take a wee bit longer.</p>
+
+<p>Here&rsquo;s the code for the included moduled <code>ionic-app-lib</code>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">browser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/browser&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">configXml</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/config-xml&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">cordova</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/cordova&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">events</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/events&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/hooks&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">info</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/info&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">ioConfig</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/io-config&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">login</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/login&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">logging</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/logging&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">multibar</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/multibar&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">opbeat</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/opbeat&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">project</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/project&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">share</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/share&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">semver</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">serve</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/serve&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">settings</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/settings&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">setup</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/setup&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">start</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/start&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">state</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/state&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">upload</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/upload&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">utils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/utils&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">browser</span><span class="o">:</span> <span class="nx">browser</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">configXml</span><span class="o">:</span> <span class="nx">configXml</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">cordova</span><span class="o">:</span> <span class="nx">cordova</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">events</span><span class="o">:</span> <span class="nx">events</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">hooks</span><span class="o">:</span> <span class="nx">hooks</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">info</span><span class="o">:</span> <span class="nx">info</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">ioConfig</span><span class="o">:</span> <span class="nx">ioConfig</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">login</span><span class="o">:</span> <span class="nx">login</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">logging</span><span class="o">:</span> <span class="nx">logging</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">multibar</span><span class="o">:</span> <span class="nx">multibar</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">opbeat</span><span class="o">:</span> <span class="nx">opbeat</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">project</span><span class="o">:</span> <span class="nx">project</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">share</span><span class="o">:</span> <span class="nx">share</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">semver</span><span class="o">:</span> <span class="nx">semver</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">serve</span><span class="o">:</span> <span class="nx">serve</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">settings</span><span class="o">:</span> <span class="nx">settings</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">setup</span><span class="o">:</span> <span class="nx">setup</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">start</span><span class="o">:</span> <span class="nx">start</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">state</span><span class="o">:</span> <span class="nx">state</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">upload</span><span class="o">:</span> <span class="nx">upload</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">utils</span><span class="o">:</span> <span class="nx">utils</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>As you can see, whenever this module is <code>require</code>&rsquo;d in, it <code>require</code>&rsquo;s even more modules. This means, more file read requests and fulfilling those just to get this module working.</p>
+
+<p>Also to note &ndash; anytime a new command was added in, it must be exported by adding in another annoying <code>require</code> statement.</p>
+
+<h2>Lazy loading via JavaScript getters</h2>
+
+<p>While looking through other open source projects, I came across the idea of lazy loading your modules on demand.</p>
+
+<p>One way to do this is with JavaScript getters being defined. We wont <code>require</code> the module until it is requested.</p>
+
+<p>For example, the code snippet:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">IonicAppLib</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ionic-app-lib&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">port</span><span class="o">:</span> <span class="mi">8100</span><span class="p">,</span> <span class="nx">liveReloadPort</span><span class="o">:</span> <span class="mi">35729</span> <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//Do not load the serve command until it is requested as below:</span>
+</span><span class='line'><span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">serve</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="nx">options</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>What&rsquo;s happening above &ndash; <code>require('ionic-app-lib')</code> is called, which sets up the <code>getters</code> for start, serve, run, etc. Then, when the command is called, the <code>require</code> for the module then happens, thereby getting the module loaded, and returning it to the caller.</p>
+
+<p>Here&rsquo;s that code to enforce the lazy loading of modules:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
+</span><span class='line'>    <span class="nx">IonicAppLib</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">camelCase</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">camelCase</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">input</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">().</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/-(.)/g</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">group1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">group1</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="c1">// Setup all modules as lazy-loaded getters.</span>
+</span><span class='line'><span class="c1">//</span>
+</span><span class='line'><span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">)).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">file</span> <span class="o">=</span> <span class="nx">file</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">&#39;.js&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">command</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">file</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// console.log(&#39;file&#39;, file);</span>
+</span><span class='line'>    <span class="nx">command</span> <span class="o">=</span> <span class="nx">camelCase</span><span class="p">(</span><span class="nx">file</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">command</span> <span class="o">=</span> <span class="nx">file</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/&#39;</span> <span class="o">+</span> <span class="nx">file</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'><span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Testing</h3>
+
+<p>I threw together a quick test to ensure that all of the modules were still correctly being accessible:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have index defined&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">index</span><span class="p">).</span><span class="nx">toBeDefined</span><span class="p">();</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">function</span> <span class="nx">testForProperty</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have &#39;</span> <span class="o">+</span> <span class="nx">input</span> <span class="o">+</span> <span class="s1">&#39; available&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">index</span><span class="p">[</span><span class="nx">input</span><span class="p">]).</span><span class="nx">toBeDefined</span><span class="p">();</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">objs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;browser&#39;</span><span class="p">,</span> <span class="s1">&#39;configXml&#39;</span><span class="p">,</span> <span class="s1">&#39;cordova&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;hooks&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;ioConfig&#39;</span><span class="p">,</span> <span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;logging&#39;</span><span class="p">,</span> <span class="s1">&#39;multibar&#39;</span><span class="p">,</span> <span class="s1">&#39;opbeat&#39;</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;share&#39;</span><span class="p">,</span> <span class="s1">&#39;semver&#39;</span><span class="p">,</span> <span class="s1">&#39;serve&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="s1">&#39;setup&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="s1">&#39;stats&#39;</span><span class="p">,</span> <span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="s1">&#39;utils&#39;</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Doing it this way to give better failure messages. </span>
+</span><span class='line'>  <span class="c1">// Ensures all commands are available currently from</span>
+</span><span class='line'>  <span class="nx">objs</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// expect(index[obj], obj).toBeDefined();</span>
+</span><span class='line'>    <span class="nx">testForProperty</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">});</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Gotchas</h2>
+
+<p>For one &ndash; you&rsquo;ll need to ensure your files adhere to some naming conventions. For our commands, we had some with hyphens (<code>-</code>) that we had to account for, as you can see above <code>if (file.indexOf('-') &gt; 0)</code>.</p>
+
+<p>Also &ndash; if you want to export other modules you can set up other getters, as I did with <code>semver</code> above.</p>
+
+<p>If you want to short circuit lazy loading, go ahead and just export them as normal.</p>
+
+<h2>Performance</h2>
+
+<p>We say about a 8x performance increase by lazy loading the modules.</p>
+
+<p>CLI run times:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">Not</span> <span class="nx">lazy</span> <span class="nx">loading</span> <span class="nx">modules</span><span class="o">:</span>   <span class="mi">830</span><span class="nx">ms</span>
+</span><span class='line'><span class="nx">Lazy</span> <span class="nx">loading</span> <span class="nx">modules</span><span class="o">:</span>       <span class="mi">200</span><span class="nx">ms</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>Enjoy!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1622,478 +2191,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/24/managing-cordova-plugins-with-package-dot-json-and-hooks/">Managing Cordova Plugins With package.json and Hooks</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-24T17:52:00-06:00" pubdate data-updated="true">Jun 24<span>th</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>In a previous post, I blogged about <a href="http://jbavari.github.io/blog/2014/03/29/how-i-use-plugins-with-variables-in-phonegap-slash-cordova-applications/">how to manage plugins with variables</a>. I wanted to expand on that some more, and this time, talk about how to use your package.json to manage your plugins with versions as well as a way to reset your cordova set up.</p>
-
-<h2>The problem</h2>
-
-<p>Whenever I start a new Cordova project, I start by adding in all my plugins. Then once they are added, I&rsquo;ll then commit them all and push the repository with all the plugins.</p>
-
-<p>My workflow is usually like this:</p>
-
-<ul>
-<li>cordova create new ProjectApp</li>
-<li>cd ProjectApp</li>
-<li>cordova platform add ios</li>
-<li>cordova plugin add org.apache.cordova.camera</li>
-<li>cordova plugin add org.apache.cordova.contacts</li>
-<li>insert more plugin statements for every plugin we want</li>
-<li>cordova run ios</li>
-<li>cordova run android</li>
-</ul>
-
-
-<p>Occassionaly, I run into this issue when I&rsquo;m using plugins that require native variable hooks when installing. The prime example is the facebook plugin, it requires the <code>APP_ID</code> to be passed in with the <code>cordova plugin add</code> command with the options of <code>--variable APP_ID="some_id"</code>.</p>
-
-<h2>What I&rsquo;d rather do</h2>
-
-<p>It&rsquo;d be nice to have these plugins being saved with their version, so when the next user needs to pull the plugins, or modify the installation, they can just modify the package.json and run a command to install them all. That way, we can get some kind of versioning on our plugins.</p>
-
-<p>Ideally, I want to just type <code>cordova setup</code> &ndash; have it look at my package.json file, and just begin installing what&rsquo;s listed there.</p>
-
-<h3>Making the dream come true</h3>
-
-<p>First, lets start by putting our platforms and plugins in our package.json like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-</pre></td><td class='code'><pre><code class='json'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;SampleApp&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0.0.0&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Sample App&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;echo \&quot;Error: no test specified\&quot; &amp;&amp; exit 1&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;ISC&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nt">&quot;platforms&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;ios&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;android&quot;</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;plugins&quot;</span><span class="p">:</span> <span class="p">[</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.camera&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.console&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.contacts&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.device&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.dialogs&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.file-transfer&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.geolocation&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.inappbrowser&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.media-capture&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.network-information&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s2">&quot;org.apache.cordova.splashscreen&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="p">{</span>
-</span><span class='line'>      <span class="nt">&quot;locator&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/jbavari/cordova-facebook-connect.git&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="nt">&quot;variables&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nt">&quot;APP_ID&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
-</span><span class='line'>          <span class="nt">&quot;APP_NAME&quot;</span><span class="p">:</span> <span class="s2">&quot;some_name&quot;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="p">],</span>
-</span><span class='line'>  <span class="nt">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nt">&quot;load-grunt-tasks&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.0&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;time-grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.3.1&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.4.4&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="nt">&quot;grunt-shell&quot;</span><span class="p">:</span> <span class="s2">&quot;~0.6.4&quot;</span>
-</span><span class='line'>  <span class="p">},</span>
-</span><span class='line'>  <span class="nt">&quot;dependencies&quot;</span><span class="p">:</span> <span class="p">{}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Platforms</h3>
-
-<p>Now, we&rsquo;ll need a script that will look at our <code>package.json</code> and begin installing our platforms and plugins.</p>
-
-<p>My platform installation script is located in the <code>tasks</code> directory named <code>platforms.js</code>, and looks like so:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'><span class="c1">//usage: node platforms.js [add | remove]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">packageJson</span><span class="p">.</span><span class="nx">platforms</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">platform</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">platformCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova platform &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nx">platform</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">platformCmd</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Automating Plugins</h3>
-
-<p>My plugin installation script is also in my <code>tasks</code> directory, and named <code>plugins.js</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//This script will add or remove all plugins listed in package.json</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//usage: node plugins.js [ add | remove ]</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">command</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">||</span> <span class="s1">&#39;add&#39;</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../package.json&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">sys</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;sys&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">exec</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">).</span><span class="nx">exec</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCmd</span> <span class="o">=</span> <span class="s1">&#39;cordova plugin &#39;</span> <span class="o">+</span> <span class="nx">command</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="k">typeof</span> <span class="nx">plugin</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="nx">command</span> <span class="o">===</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">locator</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">;</span>
-</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">variable</span><span class="p">){</span>
-</span><span class='line'>                    <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="s1">&#39;--variable &#39;</span> <span class="o">+</span> <span class="nx">variable</span> <span class="o">+</span> <span class="s1">&#39;=&quot;&#39;</span> <span class="o">+</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">variables</span><span class="p">[</span><span class="nx">variable</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot; &#39;</span><span class="p">;</span>
-</span><span class='line'>                <span class="p">});</span>
-</span><span class='line'>            <span class="p">}</span>
-</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>            <span class="nx">pluginCmd</span> <span class="o">+=</span> <span class="nx">plugin</span><span class="p">.</span><span class="nx">id</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">pluginCmd</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">if</span><span class="p">(</span><span class="nx">index</span> <span class="o">&gt;=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
-</span><span class='line'>        <span class="k">return</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">plugin</span> <span class="o">=</span> <span class="nx">packageJson</span><span class="p">.</span><span class="nx">plugins</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">pluginCommand</span> <span class="o">=</span> <span class="nx">createAddRemoveStatement</span><span class="p">(</span><span class="nx">plugin</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">);</span>
-</span><span class='line'>    <span class="nx">exec</span><span class="p">(</span><span class="nx">pluginCommand</span><span class="p">,</span> <span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>        <span class="nx">processPlugin</span><span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">processPlugin</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Great. Now I don&rsquo;t really need to add all the plugins, remove them, or worry about platforms. I can just run my scripts by doing <code>node tasks/platforms.js</code> or <code>node tasks/plugins.js</code> to have it set up my project as stated in my <code>package.json</code> file.</p>
-
-<p>Easier management for teams, I&rsquo;d like to think.</p>
-
-<p>Hope this helps others.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2014/06/23/angularjs-testing-http-post-data/">AngularJS - Testing HTTP Post Data</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2014-06-23T13:37:00-06:00" pubdate data-updated="true">Jun 23<span>rd</span>, 2014</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;ve been doing a lot of testing lately in AngularJS, as I&rsquo;m sure you can tell from my many posts as of late.</p>
-
-<p>One thing I&rsquo;m always curious about is whether or not I&rsquo;m doing things correctly. Testing always helps reinforce this, as does publishing blogs and getting feedback from my peers.</p>
-
-<h2>Problem</h2>
-
-<p>Many times I&rsquo;ll have my AngularJS service fire off an HTTP post request to the server for a message. I can&rsquo;t even begin to tell you how much I sometimes butcher my POST request data.</p>
-
-<p>I wrote a test to verify my post data was correct for the following function:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">sendPost</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">sendPost</span><span class="p">(</span><span class="nx">post</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">deferred</span> <span class="o">=</span> <span class="nx">$q</span><span class="p">.</span><span class="nx">defer</span><span class="p">();</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">publishPostPath</span> <span class="o">=</span> <span class="s1">&#39;http://example.com/post&#39;</span><span class="p">;</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">postData</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">event_user_id</span><span class="o">:</span> <span class="nx">Auth</span><span class="p">.</span><span class="nx">currentUser</span><span class="p">().</span><span class="nx">id</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">lat</span><span class="o">:</span> <span class="nx">location</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">post</span><span class="p">.</span><span class="nx">lat</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">lon</span><span class="o">:</span> <span class="nx">location</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="nx">post</span><span class="p">.</span><span class="nx">lon</span> <span class="o">:</span> <span class="mi">0</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">message</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">storyMessage</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_fb</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToFB</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_twitter</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToTwitter</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">post_team</span><span class="o">:</span> <span class="nx">post</span><span class="p">.</span><span class="nx">postToTeam</span><span class="p">,</span>
-</span><span class='line'>      <span class="nx">tag</span><span class="o">:</span> <span class="nx">selectedTagId</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">?</span> <span class="mi">0</span> <span class="o">:</span> <span class="nx">selectedTagId</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$http</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span><span class="nx">publishPostPath</span><span class="p">,</span> <span class="nx">postData</span><span class="p">).</span><span class="nx">success</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span><span class="p">(</span><span class="nx">data</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">deferred</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">deferred</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}).</span><span class="nx">error</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">error</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">deferred</span><span class="p">.</span><span class="nx">reject</span><span class="p">(</span><span class="nx">error</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">deferred</span><span class="p">.</span><span class="nx">promise</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Pretty simple, nothing too fancy.</p>
-
-<p>I want to test this bad boy and make sure its passing the correct post data parameters. Luckily for us, AngularJS gives us our friendly <code>$httpBackend</code> tool to do things like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// Method declaration</span>
-</span><span class='line'><span class="nx">expect</span><span class="p">(</span><span class="nx">method</span><span class="p">,</span> <span class="nx">url</span><span class="p">,</span> <span class="p">[</span><span class="nx">data</span><span class="p">],</span> <span class="p">[</span><span class="nx">headers</span><span class="p">]);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>One thing to note, is the function for <code>[data]</code> is a version of the POST data object after its been run through something like <code>JSON.stringify</code>.</p>
-
-<p>A full test looks like this:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have true returned for proper sendPost&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">post</span> <span class="o">=</span> <span class="p">{</span><span class="nx">storyMessage</span><span class="o">:</span> <span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="nx">postToFB</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">postToTwitter</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span> <span class="nx">postToTeam</span><span class="o">:</span> <span class="kc">false</span><span class="p">};</span>
-</span><span class='line'>  <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">when</span><span class="p">(</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;http://example.com/post&#39;</span><span class="p">,</span>
-</span><span class='line'>      <span class="kd">function</span><span class="p">(</span><span class="nx">postData</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">jsonData</span> <span class="o">=</span> <span class="nx">JSON</span><span class="p">.</span><span class="nx">parse</span><span class="p">(</span><span class="nx">postData</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">message</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">storyMessage</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_fb</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToFB</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_twitter</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToTwitter</span><span class="p">);</span>
-</span><span class='line'>          <span class="nx">expect</span><span class="p">(</span><span class="nx">jsonData</span><span class="p">.</span><span class="nx">post_team</span><span class="p">).</span><span class="nx">toBe</span><span class="p">(</span><span class="nx">post</span><span class="p">.</span><span class="nx">postToTeam</span><span class="p">);</span>
-</span><span class='line'>          <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">).</span><span class="nx">respond</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="kc">true</span> <span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">Feed</span><span class="p">.</span><span class="nx">sendPost</span><span class="p">(</span><span class="nx">post</span><span class="p">).</span><span class="nx">then</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">d</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">d</span><span class="p">).</span><span class="nx">toBeTruthy</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">$httpBackend</span><span class="p">.</span><span class="nx">flush</span><span class="p">();</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Going forward, there should be no excuses as to why my HTTP post requests fail due to parameters being passed or set incorrectly.</p>
-
-<p>I hope this helps any others looking to test their post data parameters.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/4/">&larr; Older</a>
@@ -2111,6 +2208,14 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/12/29/multicast-service-discovery-in-electron/">Multicast Service Discovery in Electron</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server/">Using Erlang Observer on a Remote Elixir Server</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/24/custom-json-encoding-in-phoenix/">Custom JSON Encoding in Phoenix</a>
       </li>
     
@@ -2120,14 +2225,6 @@ SVG images are defined in XML. As a result, every SVG element is appended to the
     
       <li class="post">
         <a href="/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir/">Shipping Data With Protocol Buffers in Elixir</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/15/scoreboard-forms-in-react-and-angular-2/">Scoreboard Forms in React and Angular 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
       </li>
     
   </ul>

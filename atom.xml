@@ -4,7 +4,7 @@
   <title><![CDATA[Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2016-01-24T19:41:06-07:00</updated>
+  <updated>2016-12-29T18:32:06-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,154 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Multicast service discovery in Electron]]></title>
+    <link href="http://jbavari.github.io/blog/2016/12/29/multicast-service-discovery-in-electron/"/>
+    <updated>2016-12-29T18:09:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/12/29/multicast-service-discovery-in-electron</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been playing around with mDNS lately for broadcasting some services for applications to auto-connect with.</p>
+
+<p>The first experiment I had was setting up a server that broadcasts a TCP endpoint for an Electron application to discover and connect for the application data.</p>
+
+<p>This was so easily done that I challenged myself to see how fast I can whip out a blog post.</p>
+
+<p>First, get an Ubuntu server up (I used a Vagrant VM).</p>
+
+<p>Run the commands:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo apt-get install avahi-utils
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From here, the service for avahi (mdns) should be auto-started. Edit the configuration to enable broadcasting:</p>
+
+<p><code>vim /etc/avahi/avahi-daemon.conf</code> &ndash; here&rsquo;s a config that&rsquo;s minimally broadcasting only the IPv4 address:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">[</span>server<span class="o">]</span>
+</span><span class='line'>host-name<span class="o">=</span>webserver
+</span><span class='line'>domain-name<span class="o">=</span><span class="nb">local</span>
+</span><span class='line'>use-ipv4<span class="o">=</span>yes
+</span><span class='line'>use-ipv6<span class="o">=</span>no
+</span><span class='line'>allow-interfaces<span class="o">=</span>eth1
+</span><span class='line'>deny-interfaces<span class="o">=</span>eth0
+</span><span class='line'>ratelimit-interval-usec<span class="o">=</span>1000000
+</span><span class='line'>ratelimit-burst<span class="o">=</span>1000
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span>wide-area<span class="o">]</span>
+</span><span class='line'><span class="nb">enable</span>-wide-area<span class="o">=</span>yes
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span>publish<span class="o">]</span>
+</span><span class='line'>publish-addresses<span class="o">=</span>yes
+</span><span class='line'>publish-hinfo<span class="o">=</span>yes
+</span><span class='line'>publish-workstation<span class="o">=</span>no
+</span><span class='line'>publish-domain<span class="o">=</span>yes
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, create a service configuration: <code>vim /etc/avahi/services/mywebserver.service</code>, with this contents:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;service-group&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;name&gt;</span>Webserver<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;service&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;type&gt;</span>_http._tcp<span class="nt">&lt;/type&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;port&gt;</span>80<span class="nt">&lt;/port&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/service&gt;</span>
+</span><span class='line'><span class="nt">&lt;/service-group&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Simple as that. Just restart the avahi-daemon &ndash; <code>sudo service avahi-daemon restart</code>.</p>
+
+<p>This should now have your server broadcasting that it has a webserver running at port 80, named <code>Webserver</code>.</p>
+
+<p>To check the service is broadcasting, run <code>avahi-browse _http._tcp -tr</code> &ndash; this should show your server as <code>servername.local</code>, with <code>Webserver</code>, pointing to its IP and port.</p>
+
+<p>Example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>+   eth1 IPv4 webserver                              Web Site             local
+</span><span class='line'>=   eth1 IPv4 webserver                              Web Site             local
+</span><span class='line'>   hostname = [webserver.local]
+</span><span class='line'>   address = [192.168.0.101]
+</span><span class='line'>   port = [80]
+</span><span class='line'>   txt = []
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now for the electron portion, in your application, install the node mdns module: <code>npm install --save mdns</code>.</p>
+
+<p>This will add the node module to your project, but since it has native compilation steps, you must build it with <code>electron-rebuild</code>. Do this: <code>npm install --save-dev electron-rebuild</code>.</p>
+
+<p>Then run: <code>./node_modules/.bin/electron-rebuild</code> &ndash; this will rebuild the mdns module for your electron node version correctly.</p>
+
+<p>To do the DNS lookups, simply run the steps from the node mdns <code>README</code>. Set the discovery type to <code>http</code> and it will find your service. From there, you can grab the address and then get the data from the web server (or html page redirection) as you so wish!</p>
+
+<p>Happy coding!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using Erlang Observer on a remote Elixir Server]]></title>
+    <link href="http://jbavari.github.io/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server/"/>
+    <updated>2016-03-11T09:08:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been using Elixir a ton at work and in some fun side projects and I&rsquo;m absolutely in love with it.</p>
+
+<p>One tool I especially love is the Erlang Observer tool, that shows you IO, memory, and CPU usage used by your app and the Erlang VM.</p>
+
+<p>Once I got some apps deployed, I wanted to observe them remotely. I found a few <a href="https://groups.google.com/forum/#!topic/elixir-lang-talk/312PlJLSgLw">google forum posts</a> and <a href="http://elixir-lang.org/docs/stable/iex/IEx.html">the IEx docs</a>, but i wanted to wrap up this knowledge for when I need it in the future.</p>
+
+<p>I&rsquo;m going to monitor a Phoenix app in this quick blog post.</p>
+
+<p>First, fire up your Phoenix server on say, a VPS, giving it a node name:</p>
+
+<p><code>iex --name server@64.16.134.61 --cookie jbavari -S mix phoenix.server</code></p>
+
+<p>Then on your remote viewing machine, say your Mac, run the following:</p>
+
+<p><code>iex --name josh@192.168.1.1 --cookie jbavari</code></p>
+
+<p>Now we&rsquo;re set up to do some remote observations!</p>
+
+<p>Fire up <code>:observer.start</code> on your local machine, which should open up the Erlang observer.</p>
+
+<p>Now from the menu, select &lsquo;Nodes&rsquo;, then you should see your node there. If not, click the connect to node button, type in your <code>server@64.16.134.61</code> node address and you should be able to view your node via the observer!</p>
+
+<p>Enjoy!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Custom JSON encoding in Phoenix]]></title>
@@ -2908,519 +3056,6 @@ If the &mdash;production flag is specified or the NODE_ENV environment variable 
 <p>When you change versions of node, make sure you do a quick <code>rm -rf node_modules</code> if on mac, or deleting the node_modules folder on windows and doing a fresh <code>npm install</code>.</p>
 
 <p>If you want to read a little more, background information is shared by <a href="http://twitter.com/voodootikigod">Chris Williams</a> about his struggles maintaining the node-serialport module on <a href="http://www.voodootikigod.com/on-maintaining-a-native-node-module/">this post</a>.</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Releasing Electron for Windows]]></title>
-    <link href="http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows/"/>
-    <updated>2015-09-09T18:50:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2015/09/09/releasing-electron-for-windows</id>
-    <content type="html"><![CDATA[<p>Releasing Electron applications on Windows can be a tricky issue. Especially if you mainly use a Mac (like me). And you have to think about that pesky <a href="https://msdn.microsoft.com/en-us/library/ms537361%28v=vs.85%29.aspx">code signing</a> thing you have to do to avoid the annoying &lsquo;SmartScreen&rsquo; filter users may get.</p>
-
-<p>Thankfully, there&rsquo;s a great tool called Squirrel made by <a href="https://twitter.com/paulcbetts">Paul Betts</a> that does a ton of the heavy lifting for you. Codesigning and all.</p>
-
-<p>I really got a ton of knowledge from the blog post, <a href="http://www.mylifeforthecode.com/creating-a-windows-distribution-of-an-electron-app-using-squirrel/">Creating a Windows Distribution of an Electron App using Squirrel</a> and <a href="http://www.mylifeforthecode.com/using-electron-packager-to-package-an-electron-app/">Using Electron Packager to Package an Electron App</a>.</p>
-
-<p>I wanted to curate a ton of knowledge in one place, so here we go.</p>
-
-<p>I use a few tools to get this done on my Mac:</p>
-
-<ul>
-<li><a href="https://github.com/maxogden/electron-packager">Electron Packager</a></li>
-<li><a href="https://www.winehq.org/">Wine</a></li>
-<li><a href="http://wiki.winehq.org/winetricks">Winetricks</a></li>
-<li><a href="http://www.nuget.org/nuget.exe">nuget cli</a></li>
-<li><a href="https://github.com/Squirrel/Squirrel.Windows/releases">Squirrel.Windows</a></li>
-</ul>
-
-
-<p>First, let&rsquo;s look at the project layout:</p>
-
-<h2>Project Layout</h2>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>/build <span class="c"># Installers go here</span>
-</span><span class='line'>  /osx
-</span><span class='line'>  /resources <span class="c"># Icons, iconset, images, etc</span>
-</span><span class='line'>  /win <span class="c"># Binaries to build, Package.nuspec file to specify configurations</span>
-</span><span class='line'>  packager.json <span class="c"># File used by electron-builder to build OSX DMG file.</span>
-</span><span class='line'>/dist <span class="c"># Distributions go here (.app, .exe, .dmg)</span>
-</span><span class='line'>  /osx
-</span><span class='line'>  /win
-</span><span class='line'>/docs <span class="c"># Docs about project.</span>
-</span><span class='line'>/node_modules <span class="c"># Modules used for building/packaging/testing</span>
-</span><span class='line'>/scss <span class="c"># Sass for CSS compilation in www</span>
-</span><span class='line'>/spec <span class="c"># Tests</span>
-</span><span class='line'>  AppCtrl.spec.js
-</span><span class='line'>www <span class="c"># Source code for the application</span>
-</span><span class='line'>  /css
-</span><span class='line'>  /data
-</span><span class='line'>  /img
-</span><span class='line'>  /js
-</span><span class='line'>  /lib
-</span><span class='line'>  /node_modules <span class="c"># Modules here used by the application itself.</span>
-</span><span class='line'>  /templates
-</span><span class='line'>
-</span><span class='line'>karma.conf.js <span class="c"># Configuration for tests.</span>
-</span><span class='line'>livereload.js <span class="c"># Dev script to set up live reload in Electron</span>
-</span><span class='line'>package.json <span class="c"># Main package.json with scripts/dependencies to package/build.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Process</h2>
-
-<p>First we&rsquo;ll need to make the exe and associated files to a <code>dist</code> folder. From there, we take the win <code>dist</code> files and pack them into the <code>Setup.exe</code> file, where Squirrel will do the heavy lifting to pack all this into a one step process.</p>
-
-<h2>npm Scripts</h2>
-
-<p>We&rsquo;ll use the npm script <code>pack:win</code> task to put all our <code>www</code> files into a nice package (resources, exe, etc) and output to the <code>dist</code> folder.</p>
-
-<p><code>pack:win</code> step will just execute <code>electron-packager</code> with some relevant information. Please note the <code>asar=true</code>, this is recommended because sometimes <code>node_modules</code> can get nested a few times and the file paths will be too long for certain Windows platforms.</p>
-
-<p>Script:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="s2">&quot;scripts&quot;</span><span class="o">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s2">&quot;pack:win&quot;</span><span class="o">:</span> <span class="s2">&quot;electron-packager ./www \&quot;Project\&quot; --out=dist/win --platform=win32 --arch=ia32 --version=0.29.1 --icon=build/resources/icon.ico --version-string.CompanyName=\&quot;My Company\&quot; --version-string.ProductName=\&quot;Project\&quot; --version-string.FileDescription=\&quot;Project\&quot; --asar=true&quot;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Electron Build script</h2>
-
-<p>I used a simple build script in node to assist in some of the heavy lifting. I recommend getting an Extended Validation certificate from <a href="http://blogs.msdn.com/b/ie/archive/2012/08/14/microsoft-smartscreen-amp-extended-validation-ev-code-signing-certificates.aspx">this blog post</a>.</p>
-
-<p>This will take the windows package in <code>dist/win</code> and create <code>dist/win/Setup.exe</code>.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">#</span><span class="o">!</span><span class="err">/usr/bin/env node</span>
-</span><span class='line'><span class="c1">// File is in root/build/win/build.js</span>
-</span><span class='line'><span class="c1">// First call nuget pack Package.nuspec</span>
-</span><span class='line'><span class="c1">// Then you&#39;ll have Project.&lt;version&gt;.nupkg</span>
-</span><span class='line'><span class="c1">// Run Squirrel.exe --releaseify Project.&lt;version&gt;.nupkg --icon iconPath --loadingGif loadingGifPath</span>
-</span><span class='line'><span class="c1">// resources in build/resources/</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//Need to get around weird command line passes with windows paths</span>
-</span><span class='line'><span class="kd">function</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">path</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="nx">path</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">childProcess</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;child_process&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">packageJsonPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;package.json&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">packageJson</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="nx">packageJsonPath</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">loadingGifPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;windows-loader.png&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageSpecPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Package.nuspec&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageOutputPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetPackageName</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="s1">&#39;.1.0.0&#39;</span><span class="p">,</span> <span class="s1">&#39;.nupkg&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="c1">// nugetPackageName = [&#39;Project&#39;, packageJson.version, &#39;.nupkg&#39;].join(&#39;&#39;),</span>
-</span><span class='line'>  <span class="nx">nugetPackagePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">,</span> <span class="nx">nugetPackageName</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">nugetExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;nuget.exe&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">setupIconPath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;resources&#39;</span><span class="p">,</span> <span class="s1">&#39;icon.ico&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">setupReleasePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;dist&#39;</span><span class="p">,</span> <span class="s1">&#39;win&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">signatureCertificatePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Certificate.pfx&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">signParams</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&quot;/a /f &quot;&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">signatureCertificatePath</span><span class="p">),</span> <span class="s1">&#39;&quot; /p &#39;</span><span class="p">,</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PRIVATE_CERT_PASSWORD</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span>
-</span><span class='line'>  <span class="nx">squirrelExePath</span> <span class="o">=</span> <span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;Squirrel.exe&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;sign params&#39;</span><span class="p">,</span> <span class="nx">signParams</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">createNugetPackageCommand</span> <span class="o">=</span> <span class="p">[</span><span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetExePath</span><span class="p">),</span> <span class="s1">&#39;pack&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageSpecPath</span><span class="p">),</span> <span class="s1">&#39;-OutputDirectory&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackageOutputPath</span><span class="p">)].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">createSetupCommand</span> <span class="o">=</span> <span class="p">[</span>
-</span><span class='line'>              <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">squirrelExePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--releasify&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">nugetPackagePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--loadingGif&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">loadingGifPath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--icon&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupIconPath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--releaseDir&#39;</span><span class="p">,</span> <span class="nx">addWindowsPathFix</span><span class="p">(</span><span class="nx">setupReleasePath</span><span class="p">),</span>
-</span><span class='line'>              <span class="s1">&#39;--signWithParams&#39;</span><span class="p">,</span> <span class="nx">signParams</span>
-</span><span class='line'>            <span class="p">].</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Creating nuget package from nuget spec file:&#39;</span><span class="p">,</span> <span class="nx">nugetPackageSpecPath</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// console.log(createNugetPackageCommand);</span>
-</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createNugetPackageCommand</span><span class="p">);</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Created nuget package&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Building Setup.exe&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="c1">// console.log(createSetupCommand);</span>
-</span><span class='line'><span class="nx">childProcess</span><span class="p">.</span><span class="nx">execSync</span><span class="p">(</span><span class="nx">createSetupCommand</span><span class="p">);</span>
-</span><span class='line'><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Built Setup.exe&#39;</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Hope this helps!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Lazy loading your node modules]]></title>
-    <link href="http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules/"/>
-    <updated>2015-08-25T15:29:00-06:00</updated>
-    <id>http://jbavari.github.io/blog/2015/08/25/lazy-loading-your-node-modules</id>
-    <content type="html"><![CDATA[<p>While working at <a href="http://ionicframework.com">Ionic</a> I&rsquo;ve been focused on the <a href="http://npmjs.org/package/ionic">Ionic CLI</a>.</p>
-
-<p>My first big refactor of the CLI was pulling out most of the 21 commands it offers into an external library (<a href="http://github.com/driftyco/ionic-app-lib">ionic-app-lib</a>) that could be consumed by both the Ionic CLI and our GUI &ndash; <a href="http://lab.ionic.io">Ionic Lab</a>.</p>
-
-<p>The refactor went rather smoothly.</p>
-
-<p>However, one thing happened that was not expected &ndash; now that the ionic-app-lib bundled all the commands together, whenever you required the app-lib module, it was rather slower than expected.</p>
-
-<p>For example, whenever you ran: <code>var IonicAppLib = require('ionic-app-lib');</code> &ndash; it would take a wee bit longer.</p>
-
-<p>Here&rsquo;s the code for the included moduled <code>ionic-app-lib</code>:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">browser</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/browser&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">configXml</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/config-xml&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">cordova</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/cordova&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">events</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/events&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">hooks</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/hooks&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">info</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/info&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">ioConfig</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/io-config&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">login</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/login&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">logging</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/logging&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">multibar</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/multibar&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">opbeat</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/opbeat&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">project</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/project&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">share</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/share&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">semver</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">serve</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/serve&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">settings</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/settings&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">setup</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/setup&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">start</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/start&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">state</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/state&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">upload</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/upload&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">utils</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/utils&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">browser</span><span class="o">:</span> <span class="nx">browser</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">configXml</span><span class="o">:</span> <span class="nx">configXml</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">cordova</span><span class="o">:</span> <span class="nx">cordova</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">events</span><span class="o">:</span> <span class="nx">events</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">hooks</span><span class="o">:</span> <span class="nx">hooks</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">info</span><span class="o">:</span> <span class="nx">info</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">ioConfig</span><span class="o">:</span> <span class="nx">ioConfig</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">login</span><span class="o">:</span> <span class="nx">login</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">logging</span><span class="o">:</span> <span class="nx">logging</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">multibar</span><span class="o">:</span> <span class="nx">multibar</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">opbeat</span><span class="o">:</span> <span class="nx">opbeat</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">project</span><span class="o">:</span> <span class="nx">project</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">share</span><span class="o">:</span> <span class="nx">share</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">semver</span><span class="o">:</span> <span class="nx">semver</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">serve</span><span class="o">:</span> <span class="nx">serve</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">settings</span><span class="o">:</span> <span class="nx">settings</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">setup</span><span class="o">:</span> <span class="nx">setup</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">start</span><span class="o">:</span> <span class="nx">start</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">state</span><span class="o">:</span> <span class="nx">state</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">upload</span><span class="o">:</span> <span class="nx">upload</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">utils</span><span class="o">:</span> <span class="nx">utils</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>As you can see, whenever this module is <code>require</code>&rsquo;d in, it <code>require</code>&rsquo;s even more modules. This means, more file read requests and fulfilling those just to get this module working.</p>
-
-<p>Also to note &ndash; anytime a new command was added in, it must be exported by adding in another annoying <code>require</code> statement.</p>
-
-<h2>Lazy loading via JavaScript getters</h2>
-
-<p>While looking through other open source projects, I came across the idea of lazy loading your modules on demand.</p>
-
-<p>One way to do this is with JavaScript getters being defined. We wont <code>require</code> the module until it is requested.</p>
-
-<p>For example, the code snippet:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">IonicAppLib</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;ionic-app-lib&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">options</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">port</span><span class="o">:</span> <span class="mi">8100</span><span class="p">,</span> <span class="nx">liveReloadPort</span><span class="o">:</span> <span class="mi">35729</span> <span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//Do not load the serve command until it is requested as below:</span>
-</span><span class='line'><span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">serve</span><span class="p">.</span><span class="nx">start</span><span class="p">(</span><span class="nx">options</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>What&rsquo;s happening above &ndash; <code>require('ionic-app-lib')</code> is called, which sets up the <code>getters</code> for start, serve, run, etc. Then, when the command is called, the <code>require</code> for the module then happens, thereby getting the module loaded, and returning it to the caller.</p>
-
-<p>Here&rsquo;s that code to enforce the lazy loading of modules:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">fs</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;fs&#39;</span><span class="p">),</span>
-</span><span class='line'>    <span class="nx">IonicAppLib</span> <span class="o">=</span> <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">,</span>
-</span><span class='line'>    <span class="nx">path</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">camelCase</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">camelCase</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">input</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">().</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/-(.)/g</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">match</span><span class="p">,</span> <span class="nx">group1</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">group1</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="c1">// Setup all modules as lazy-loaded getters.</span>
-</span><span class='line'><span class="c1">//</span>
-</span><span class='line'><span class="nx">fs</span><span class="p">.</span><span class="nx">readdirSync</span><span class="p">(</span><span class="nx">path</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="s1">&#39;lib&#39;</span><span class="p">)).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">file</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">file</span> <span class="o">=</span> <span class="nx">file</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="s1">&#39;.js&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">);</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">command</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">file</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// console.log(&#39;file&#39;, file);</span>
-</span><span class='line'>    <span class="nx">command</span> <span class="o">=</span> <span class="nx">camelCase</span><span class="p">(</span><span class="nx">file</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">command</span> <span class="o">=</span> <span class="nx">file</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="nx">command</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;./lib/&#39;</span> <span class="o">+</span> <span class="nx">file</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'><span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">IonicAppLib</span><span class="p">.</span><span class="nx">__defineGetter__</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">,</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;semver&#39;</span><span class="p">);</span>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Testing</h3>
-
-<p>I threw together a quick test to ensure that all of the modules were still correctly being accessible:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;../index&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have index defined&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">expect</span><span class="p">(</span><span class="nx">index</span><span class="p">).</span><span class="nx">toBeDefined</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">testForProperty</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">it</span><span class="p">(</span><span class="s1">&#39;should have &#39;</span> <span class="o">+</span> <span class="nx">input</span> <span class="o">+</span> <span class="s1">&#39; available&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">expect</span><span class="p">(</span><span class="nx">index</span><span class="p">[</span><span class="nx">input</span><span class="p">]).</span><span class="nx">toBeDefined</span><span class="p">();</span>
-</span><span class='line'>    <span class="p">});</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">objs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;browser&#39;</span><span class="p">,</span> <span class="s1">&#39;configXml&#39;</span><span class="p">,</span> <span class="s1">&#39;cordova&#39;</span><span class="p">,</span> <span class="s1">&#39;events&#39;</span><span class="p">,</span> <span class="s1">&#39;hooks&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span>
-</span><span class='line'>              <span class="s1">&#39;ioConfig&#39;</span><span class="p">,</span> <span class="s1">&#39;login&#39;</span><span class="p">,</span> <span class="s1">&#39;logging&#39;</span><span class="p">,</span> <span class="s1">&#39;multibar&#39;</span><span class="p">,</span> <span class="s1">&#39;opbeat&#39;</span><span class="p">,</span> <span class="s1">&#39;project&#39;</span><span class="p">,</span>
-</span><span class='line'>              <span class="s1">&#39;share&#39;</span><span class="p">,</span> <span class="s1">&#39;semver&#39;</span><span class="p">,</span> <span class="s1">&#39;serve&#39;</span><span class="p">,</span> <span class="s1">&#39;settings&#39;</span><span class="p">,</span> <span class="s1">&#39;setup&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;state&#39;</span><span class="p">,</span>
-</span><span class='line'>              <span class="s1">&#39;stats&#39;</span><span class="p">,</span> <span class="s1">&#39;upload&#39;</span><span class="p">,</span> <span class="s1">&#39;utils&#39;</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// Doing it this way to give better failure messages. </span>
-</span><span class='line'>  <span class="c1">// Ensures all commands are available currently from</span>
-</span><span class='line'>  <span class="nx">objs</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">obj</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="c1">// expect(index[obj], obj).toBeDefined();</span>
-</span><span class='line'>    <span class="nx">testForProperty</span><span class="p">(</span><span class="nx">obj</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">});</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>Gotchas</h2>
-
-<p>For one &ndash; you&rsquo;ll need to ensure your files adhere to some naming conventions. For our commands, we had some with hyphens (<code>-</code>) that we had to account for, as you can see above <code>if (file.indexOf('-') &gt; 0)</code>.</p>
-
-<p>Also &ndash; if you want to export other modules you can set up other getters, as I did with <code>semver</code> above.</p>
-
-<p>If you want to short circuit lazy loading, go ahead and just export them as normal.</p>
-
-<h2>Performance</h2>
-
-<p>We say about a 8x performance increase by lazy loading the modules.</p>
-
-<p>CLI run times:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">Not</span> <span class="nx">lazy</span> <span class="nx">loading</span> <span class="nx">modules</span><span class="o">:</span>   <span class="mi">830</span><span class="nx">ms</span>
-</span><span class='line'><span class="nx">Lazy</span> <span class="nx">loading</span> <span class="nx">modules</span><span class="o">:</span>       <span class="mi">200</span><span class="nx">ms</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>Enjoy!</p>
 ]]></content>
   </entry>
   

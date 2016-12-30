@@ -9,7 +9,7 @@
   <meta name="author" content="Josh Bavari">
 
   
-  <meta name="description" content="I recently have been working a lot using Leaflet.js to do some mapping. In some of my models, I use the lovely Geo package for Elixir point and &hellip;">
+  <meta name="description" content="I&rsquo;ve been playing around with mDNS lately for broadcasting some services for applications to auto-connect with. The first experiment I had was &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -70,6 +70,210 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/12/29/multicast-service-discovery-in-electron/">Multicast Service Discovery in Electron</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-12-29T18:09:00-07:00" pubdate data-updated="true">Dec 29<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;ve been playing around with mDNS lately for broadcasting some services for applications to auto-connect with.</p>
+
+<p>The first experiment I had was setting up a server that broadcasts a TCP endpoint for an Electron application to discover and connect for the application data.</p>
+
+<p>This was so easily done that I challenged myself to see how fast I can whip out a blog post.</p>
+
+<p>First, get an Ubuntu server up (I used a Vagrant VM).</p>
+
+<p>Run the commands:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'>sudo apt-get install avahi-utils
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>From here, the service for avahi (mdns) should be auto-started. Edit the configuration to enable broadcasting:</p>
+
+<p><code>vim /etc/avahi/avahi-daemon.conf</code> &ndash; here&rsquo;s a config that&rsquo;s minimally broadcasting only the IPv4 address:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">[</span>server<span class="o">]</span>
+</span><span class='line'>host-name<span class="o">=</span>webserver
+</span><span class='line'>domain-name<span class="o">=</span><span class="nb">local</span>
+</span><span class='line'>use-ipv4<span class="o">=</span>yes
+</span><span class='line'>use-ipv6<span class="o">=</span>no
+</span><span class='line'>allow-interfaces<span class="o">=</span>eth1
+</span><span class='line'>deny-interfaces<span class="o">=</span>eth0
+</span><span class='line'>ratelimit-interval-usec<span class="o">=</span>1000000
+</span><span class='line'>ratelimit-burst<span class="o">=</span>1000
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span>wide-area<span class="o">]</span>
+</span><span class='line'><span class="nb">enable</span>-wide-area<span class="o">=</span>yes
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span>publish<span class="o">]</span>
+</span><span class='line'>publish-addresses<span class="o">=</span>yes
+</span><span class='line'>publish-hinfo<span class="o">=</span>yes
+</span><span class='line'>publish-workstation<span class="o">=</span>no
+</span><span class='line'>publish-domain<span class="o">=</span>yes
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now, create a service configuration: <code>vim /etc/avahi/services/mywebserver.service</code>, with this contents:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'><span class="nt">&lt;service-group&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;name&gt;</span>Webserver<span class="nt">&lt;/name&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;service&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;type&gt;</span>_http._tcp<span class="nt">&lt;/type&gt;</span>
+</span><span class='line'>    <span class="nt">&lt;port&gt;</span>80<span class="nt">&lt;/port&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;/service&gt;</span>
+</span><span class='line'><span class="nt">&lt;/service-group&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Simple as that. Just restart the avahi-daemon &ndash; <code>sudo service avahi-daemon restart</code>.</p>
+
+<p>This should now have your server broadcasting that it has a webserver running at port 80, named <code>Webserver</code>.</p>
+
+<p>To check the service is broadcasting, run <code>avahi-browse _http._tcp -tr</code> &ndash; this should show your server as <code>servername.local</code>, with <code>Webserver</code>, pointing to its IP and port.</p>
+
+<p>Example:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'>+   eth1 IPv4 webserver                              Web Site             local
+</span><span class='line'>=   eth1 IPv4 webserver                              Web Site             local
+</span><span class='line'>   hostname = [webserver.local]
+</span><span class='line'>   address = [192.168.0.101]
+</span><span class='line'>   port = [80]
+</span><span class='line'>   txt = []
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Now for the electron portion, in your application, install the node mdns module: <code>npm install --save mdns</code>.</p>
+
+<p>This will add the node module to your project, but since it has native compilation steps, you must build it with <code>electron-rebuild</code>. Do this: <code>npm install --save-dev electron-rebuild</code>.</p>
+
+<p>Then run: <code>./node_modules/.bin/electron-rebuild</code> &ndash; this will rebuild the mdns module for your electron node version correctly.</p>
+
+<p>To do the DNS lookups, simply run the steps from the node mdns <code>README</code>. Set the discovery type to <code>http</code> and it will find your service. From there, you can grab the address and then get the data from the web server (or html page redirection) as you so wish!</p>
+
+<p>Happy coding!</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server/">Using Erlang Observer on a Remote Elixir Server</a></h1>
+    
+    
+      <p class="meta">
+        <span class="reading-time">less than a 1 minute read</span>
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2016-03-11T09:08:00-07:00" pubdate data-updated="true">Mar 11<span>th</span>, 2016</time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>I&rsquo;ve been using Elixir a ton at work and in some fun side projects and I&rsquo;m absolutely in love with it.</p>
+
+<p>One tool I especially love is the Erlang Observer tool, that shows you IO, memory, and CPU usage used by your app and the Erlang VM.</p>
+
+<p>Once I got some apps deployed, I wanted to observe them remotely. I found a few <a href="https://groups.google.com/forum/#!topic/elixir-lang-talk/312PlJLSgLw">google forum posts</a> and <a href="http://elixir-lang.org/docs/stable/iex/IEx.html">the IEx docs</a>, but i wanted to wrap up this knowledge for when I need it in the future.</p>
+
+<p>I&rsquo;m going to monitor a Phoenix app in this quick blog post.</p>
+
+<p>First, fire up your Phoenix server on say, a VPS, giving it a node name:</p>
+
+<p><code>iex --name server@64.16.134.61 --cookie jbavari -S mix phoenix.server</code></p>
+
+<p>Then on your remote viewing machine, say your Mac, run the following:</p>
+
+<p><code>iex --name josh@192.168.1.1 --cookie jbavari</code></p>
+
+<p>Now we&rsquo;re set up to do some remote observations!</p>
+
+<p>Fire up <code>:observer.start</code> on your local machine, which should open up the Erlang observer.</p>
+
+<p>Now from the menu, select &lsquo;Nodes&rsquo;, then you should see your node there. If not, click the connect to node button, type in your <code>server@64.16.134.61</code> node address and you should be able to view your node via the observer!</p>
+
+<p>Enjoy!</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1959,194 +2163,6 @@ Figuring how to plug in rendering steps between state changes. <code>this.setSta
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/12/03/playing-with-safari-9-force-touch-api/">Playing With Safari 9 Force Touch API</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-12-03T10:46:00-07:00" pubdate data-updated="true">Dec 3<span>rd</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I just got the new Macbook Pro not too long ago and noticed they had this intimately named featured called Force Touch.</p>
-
-<p>Force touch, as it sounds, lets you touch things more <em>intimately</em>. The gist is this &ndash; there are sensors on the new touch pad that let you determine how hard the touch pad is touched, and has some API into that.</p>
-
-<p>I admit, the API is kinda just for fun since only Safari 9 and new Macbooks have the feature. Still, I wanted to play more with ES6 and create a little API wrapper to make it easier and let this feature name to be a little less creepy.</p>
-
-<p>After a little googling, I found an awesome <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html">blog post by Joshua Kehn</a> that detailed more about using Force touch. I wanted to make a quick wrapper around it to do some fun effects and animations.</p>
-
-<p>The idea is &ndash; we&rsquo;ll have an API called <code>TheForce</code> that we can attach handlers to for fun visual effects.</p>
-
-<p>Joshua&rsquo;s demo had a box that when tapped and applying pressure, padding would be increased. I took <a href="https://gist.github.com/joshkehn/3ed6b535408162fe94ae">his gist</a> and turned it into an ES6 module. (See the <a href="http://www.joshuakehn.com/2015/10/22/using-new-force-touch-apis-in-javascript.html#demo">demo</a>)</p>
-
-<h2>The API</h2>
-
-<p>I wrote it up last night in a quick hurry. The gist is this:</p>
-
-<ul>
-<li>Attach to a DOM element</li>
-<li>Apply a glow to the element based applied pressure to touchpad</li>
-</ul>
-
-
-<p>Code to attach a button named <code>you</code>, and trigger it automatically:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">luke</span> <span class="o">=</span> <span class="nx">TheForce</span><span class="p">.</span><span class="nx">beWith</span><span class="p">(</span><span class="s1">&#39;you&#39;</span><span class="p">).</span><span class="nx">alter</span><span class="p">({</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span>
-</span><span class='line'>
-</span><span class='line'><span class="c">&lt;!--</span> <span class="nx">luke</span><span class="p">.</span><span class="nx">alter</span><span class="p">(</span><span class="s1">&#39;boxShadow&#39;</span><span class="p">);</span> <span class="o">--&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/11/27/respect-yourself/">Respect Yourself</a></h1>
-    
-    
-      <p class="meta">
-        <span class="reading-time">less than a 1 minute read</span>
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-11-27T21:58:00-07:00" pubdate data-updated="true">Nov 27<span>th</span>, 2015</time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>I&rsquo;m writing this post as a memoir for myself, a retrospect of sorts. I read <a href="http://sethgodin.typepad.com/seths_blog/2015/11/unconscious-consumption.html">Seth Godins blog about Unconscious consumption</a> and that post inspired me to write this post.</p>
-
-<p>In the last 3 years, amazing events have unfolded. I helped create a start up, <a href="http://raisemore.com">RaiseMore</a>. I moved to Boulder, Colorado. I got a job at Ionic. I met a strong, amazing, beautiful woman who is my girlfriend.</p>
-
-<p>I trained jiu-jitsu 4-5 times a week, I kept working on my strength, and trying to inspire others to do the same. I was striving to always read self-help books, watching informational videos, TED talks, ignite talks, challenging and pushing myself, and helping others grow.</p>
-
-<p>All these new and exciting things kept happening to me. Many times before, I&rsquo;ve asked myself, &lsquo;how did I get so lucky?&rsquo;. Things just had a snowball effect and kept getting better and better!</p>
-
-<p>I&rsquo;d like to think what attracted all these amazing things into my life was from these advancements.</p>
-
-<p>However, something happened during these last 4 months that really threw me in a rut. I developed a poor attitude. I started thinking I was a victim. I no longer work for the company that I had looked up to for so long.</p>
-
-<p>As I sit here now and reflect on the last few months, I know I&rsquo;ve made my fair share of mistakes. I take full responsibility for that. And due to some of those mistakes, I&rsquo;m unemployed (and looking for opportunities!) and I know it&rsquo;s my own fault.</p>
-
-<p>I&rsquo;d like to stop and take a minute to deep dive and retrospect on what happened. I know, deep in my heart, that it all changed when <em>I stopped respecting myself and making my personal growth a priority</em>.</p>
-
-<p>I&rsquo;m realizing that while all these good things were occurring, one thing remained constant &ndash; <em>I put myself and my personal growth first</em>.</p>
-
-<p>I&rsquo;d like to deep dive into what really happened, and discover the why.</p>
-
-<h2>Deep diving</h2>
-
-<p>Questions to ask:</p>
-
-<ul>
-<li>What did you do right?</li>
-<li>What did you do wrong?</li>
-<li>What can you do better?</li>
-</ul>
-
-
-<h3>What did I do right?</h3>
-
-<p>In January, I was jumping head first into the Ionic CLI. I was familiar with Node.js, but wasn&rsquo;t nearly at the level I wanted to be at. So I jumped head first into blogs, training courses, books, and more.</p>
-
-<p>I learned a ton by failing forward, bouncing ideas off of others, and most importantly, <em>maintaining a healthy work life balance</em>.</p>
-
-<p>In March, I came up with the crazy idea to make the Ionic CLI easier to consume by almost any user by just point/clicking. In my free time after working on the Ionic CLI, I started cranking out <a href="http://lab.ionic.io">Ionic Lab</a> &ndash; that would do just that.</p>
-
-<p>It was so freeing to use my creative side and use my intuition, listening to myself as I craved to learn more about Node.js and <a href="http://electron.github.io">Electron</a>!</p>
-
-<p>After demoing Ionic Lab to the Ionic team, they were convinced this was a tool that could open the door to more developers and really improve the tooling. Thus, I was instructed to work on it full time. Such a joy!</p>
-
-<p>Then it hit, this thing had to ship. I had to really buckle down and work out the final kinks in integrating Cordova fully into Ionic Lab, which took me down rabbit holes into discovering more about Electron than I wanted to know, fixing stdio errors and things that occurred deep in Cordova library code.</p>
-
-<p>Once we shipped out Ionic Lab in July, I was told to focus on Ionic 2. The rest of the team had been heads down working on the codebase since March, I was the new guy, so I had to really step it up and put in the time to learn Angular 2, TypeScript, ES6, Webpack, and all the other new ground to cover.</p>
-
-<p>It was exciting once again to jump head first into learning and exploration. But something happened that I did not expect.. I became a cynic.</p>
-
-<h4>What did I do wrong?</h4>
-
-<p>I think it wasn&rsquo;t until after July that things started to slow down and my personal happiness started to decline. I started working more hours (60 hours was the minimum). I stayed up late working most every night. I slept less. I started working out less (I gained 10-20 lbs). I started putting myself <em>and my personal growth</em> last.</p>
-
-<p>I stopped calling my friends. I stopped reaching out to my support group as much. I wasn&rsquo;t maintaining my happy upbeat attitude I&rsquo;ve been told has been so inspiring.</p>
-
-<p>I started putting work first. I started accepting others views of myself. I stopped valuing my work, my time, and my efforts to put that towards a company that at the end of the day, only wanted more and more. We all know what this leads to, <em>burn out</em>.</p>
-
-<p>This all was boiling down to the AngularConnect conference, where we planned to unveil Ionic 2 to the European crowds. I was given a hefty task of learning all that was Ionic 2, adding cross platform functionality in Ionic 2, adjusting the Ionic CLI for v2, helping curate content for a workshop at the conference, as well as building the first Ionic v2 app, <a href="http://github.com/driftyco/ionic-conference-app">the Ionic conference app</a>.</p>
-
-<p>All this was going down and other life issues arise, as they do. My older (15y old) dog was getting worse by the day. My girlfriend was not happy that I was putting her second to work. My friends stopped calling me. My shoulder got injured. I lost confidence in my work because I was burning out.</p>
-
-<p>Then, a personal goal I had set didn&rsquo;t get delivered to a group of users I was really wanted to, the Windows Ionic CLI users.</p>
-
-<p>This hurt. Failure when placed heavy, can hurt. It hurt even more when I was putting work first, and myself last.</p>
-
-<p>Looking more hopefully at the situation..</p>
-
-<h4>What can I do better?</h4>
-
-<p>First off &ndash; be honest with myself. Tell others I need a helping hand when needed. Going forward, I will look out for myself better (we all know employers want employees that can look out for themselves).</p>
-
-<p>Don&rsquo;t accept others views of myself unless I first believe them!</p>
-
-<p>Most importantly, respecting myself. I should always take the time to have a 1 on 1 with myself and really get a sense of where I&rsquo;m at. If I need a break, use that vacation that we are so lucky to have!</p>
-
-<p>We tend to forget that if we dont build ourselves up, the world surely wont. (Unless you are lucky enough to have awesome friends that stick through it thick and thin). Burnout happens when you don&rsquo;t let your support structure help put out of the flame before you become a pile of ash.</p>
-
-<p>So please, take this time to evaluate yourself and your needs. Be honest with yourself. Focus on caring for yourself. Be compassionate to yourself. Let yourself make mistakes, but learn from them.</p>
-
-<p>Focus on the positive. Surround yourself with upbeat people, ditch the negativity, and remind yourself that your future is in your hands. Take it.</p>
-
-<p>Don&rsquo;t forget that the only difference between a victor and a victim, is their mindset.</p>
-
-<p>Remember, there is no luck, only the work you put in and the effect you see afterwards.</p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/blog/page/2/">&larr; Older</a>
@@ -2162,6 +2178,14 @@ Figuring how to plug in rendering steps between state changes. <code>this.setSta
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2016/12/29/multicast-service-discovery-in-electron/">Multicast Service Discovery in Electron</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server/">Using Erlang Observer on a Remote Elixir Server</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2016/01/24/custom-json-encoding-in-phoenix/">Custom JSON Encoding in Phoenix</a>
       </li>
     
@@ -2171,14 +2195,6 @@ Figuring how to plug in rendering steps between state changes. <code>this.setSta
     
       <li class="post">
         <a href="/blog/2016/01/16/shipping-data-with-protocol-buffers-in-elixir/">Shipping Data With Protocol Buffers in Elixir</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/15/scoreboard-forms-in-react-and-angular-2/">Scoreboard Forms in React and Angular 2</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/12/12/using-brew-to-install-old-versions/">Using Brew to Install Old Versions</a>
       </li>
     
   </ul>

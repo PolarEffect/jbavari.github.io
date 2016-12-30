@@ -4,7 +4,7 @@
   <title><![CDATA[Category: elixir | Josh Bavari's Ramblings]]></title>
   <link href="http://jbavari.github.io/blog/categories/elixir/atom.xml" rel="self"/>
   <link href="http://jbavari.github.io/"/>
-  <updated>2016-01-24T19:41:06-07:00</updated>
+  <updated>2016-12-29T18:32:06-07:00</updated>
   <id>http://jbavari.github.io/</id>
   <author>
     <name><![CDATA[Josh Bavari]]></name>
@@ -12,6 +12,37 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Using Erlang Observer on a remote Elixir Server]]></title>
+    <link href="http://jbavari.github.io/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server/"/>
+    <updated>2016-03-11T09:08:00-07:00</updated>
+    <id>http://jbavari.github.io/blog/2016/03/11/using-erlang-observer-on-a-remote-elixir-server</id>
+    <content type="html"><![CDATA[<p>I&rsquo;ve been using Elixir a ton at work and in some fun side projects and I&rsquo;m absolutely in love with it.</p>
+
+<p>One tool I especially love is the Erlang Observer tool, that shows you IO, memory, and CPU usage used by your app and the Erlang VM.</p>
+
+<p>Once I got some apps deployed, I wanted to observe them remotely. I found a few <a href="https://groups.google.com/forum/#!topic/elixir-lang-talk/312PlJLSgLw">google forum posts</a> and <a href="http://elixir-lang.org/docs/stable/iex/IEx.html">the IEx docs</a>, but i wanted to wrap up this knowledge for when I need it in the future.</p>
+
+<p>I&rsquo;m going to monitor a Phoenix app in this quick blog post.</p>
+
+<p>First, fire up your Phoenix server on say, a VPS, giving it a node name:</p>
+
+<p><code>iex --name server@64.16.134.61 --cookie jbavari -S mix phoenix.server</code></p>
+
+<p>Then on your remote viewing machine, say your Mac, run the following:</p>
+
+<p><code>iex --name josh@192.168.1.1 --cookie jbavari</code></p>
+
+<p>Now we&rsquo;re set up to do some remote observations!</p>
+
+<p>Fire up <code>:observer.start</code> on your local machine, which should open up the Erlang observer.</p>
+
+<p>Now from the menu, select &lsquo;Nodes&rsquo;, then you should see your node there. If not, click the connect to node button, type in your <code>server@64.16.134.61</code> node address and you should be able to view your node via the observer!</p>
+
+<p>Enjoy!</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Custom JSON encoding in Phoenix]]></title>
